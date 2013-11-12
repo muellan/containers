@@ -237,42 +237,6 @@ public:
 
 
 	//---------------------------------------------------------------
-	class memento {
-		friend class pairmap;
-	public:
-		//-----------------------------------------------------
-		memento() = default;
-
-		//-----------------------------------------------------
-		memento(const pairmap& source, size_type index):
-			vals_{}
-		{
-			for(size_type i = 0; i < index; ++i) {
-				vals_[i] = source.vals_(i,index);
-			}
-			for(size_type i = index+1; i < numElems; ++i) {
-				vals_[i-1] = source.vals_(index,i);
-			}
-		}
-
-		//-----------------------------------------------------
-		void
-		backup(const pairmap& source, size_type index)
-		{
-			for(size_type i = 0; i < index; ++i) {
-				vals_[i] = source.vals_(i,index);
-			}
-			for(size_type i = index+1; i < numElems; ++i) {
-				vals_[i-1] = source.vals_(index,i);
-			}
-		}
-
-	private:
-		std::array<value_type,numElems-1> vals_;
-	};
-
-
-	//---------------------------------------------------------------
 	// CONSTRUCTION
 	//---------------------------------------------------------------
 	pairmap() = default;
@@ -310,16 +274,6 @@ public:
 		}
 		for(size_type i = index+1; i < numElems; ++i) {
 			vals_(index,i) = value;
-		}
-	}
-	//-----------------------------------------------------
-	void
-	assign(size_type index, const memento& mem) {
-		for(size_type i = 0; i < index; ++i) {
-			vals_(i,index) = mem.vals_[i];
-		}
-		for(size_type i = index+1; i < numElems; ++i) {
-			vals_(index,i) = mem.vals_[i-1];
 		}
 	}
 

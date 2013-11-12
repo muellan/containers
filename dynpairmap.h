@@ -234,45 +234,6 @@ public:
 
 
 	//---------------------------------------------------------------
-	class memento {
-		friend class dynpairmap;
-	public:
-		//-----------------------------------------------------
-		memento() = default;
-
-		//-----------------------------------------------------
-		memento(const dynpairmap& source, size_type index):
-			vals_(source.vals_.rows())
-		{
-			for(size_type i = 0; i < index; ++i) {
-				vals_[i] = source.vals_(i,index);
-			}
-			for(size_type i = index+1; i < source.vals_.cols(); ++i) {
-				vals_[i-1] = source.vals_(index,i);
-			}
-		}
-
-		//-----------------------------------------------------
-		void
-		backup(const dynpairmap& source, size_type index)
-		{
-			if(vals_.size() < source.vals_.rows()) {
-				vals_.resize(source.vals_.rows());
-			}
-			for(size_type i = 0; i < index; ++i) {
-				vals_[i] = source.vals_(i,index);
-			}
-			for(size_type i = index+1; i < source.vals_.cols(); ++i) {
-				vals_[i-1] = source.vals_(index,i);
-			}
-		}
-
-	private:
-		std::vector<value_type> vals_;
-	};
-
-
-	//---------------------------------------------------------------
 	// CONSTRUCTION
 	//---------------------------------------------------------------
 	dynpairmap():
@@ -319,16 +280,6 @@ public:
 		}
 		for(size_type i = index+1; i < vals_.cols(); ++i) {
 			vals_(index,i) = value;
-		}
-	}
-	//-----------------------------------------------------
-	void
-	assign(size_type index, const memento& mem) {
-		for(size_type i = 0; i < index; ++i) {
-			vals_(i,index) = mem.vals_[i];
-		}
-		for(size_type i = index+1; i < vals_.cols(); ++i) {
-			vals_(index,i) = mem.vals_[i-1];
 		}
 	}
 
@@ -420,12 +371,6 @@ public:
 		for(size_type i = index+1; i < vals_.cols(); ++i) {
 			vals_(index,i) = value;
 		}
-	}
-	//-----------------------------------------------------
-	void
-	insert(size_type index, const memento& mem) {
-		insert(index);
-		assign(index,mem);
 	}
 
 
