@@ -302,16 +302,12 @@ public:
 	matrix& operator = (const matrix&) = default;
 	matrix& operator = (matrix&&) = default;
 
-	//-----------------------------------------------------
-	matrix&
-	operator = (const value_type& value)
-	{
-		std::fill(begin(), end(), value);
-		return *this;
-	}
-
-
 	//---------------------------------------------------------------
+	void
+	fill(const value_type& value) {
+		std::fill(begin(), end(), value);
+	}
+	//-----------------------------------------------------
 	template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
 	void fill_diag(const value_type& value) {
 		std::fill(diag_begin(), diag_end(), value);

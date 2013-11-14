@@ -406,15 +406,13 @@ public:
 		return *this;
 	}
 
-	//-----------------------------------------------------
-	dynmatrix&
-	operator = (const value_type& value) {
-		std::fill(begin(), end(), value);
-		return *this;
-	}
-
-
 	//---------------------------------------------------------------
+	void
+	fill(const value_type& value)
+	{
+		std::fill(begin(), end(), value);
+	}
+	//-----------------------------------------------------
 	void
 	fill_row(size_type index, const value_type& value)
 	{
