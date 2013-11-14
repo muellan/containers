@@ -309,16 +309,19 @@ public:
 	}
 	//-----------------------------------------------------
 	template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
-	void fill_diag(const value_type& value) {
+	void
+	fill_diag(const value_type& value) {
 		std::fill(diag_begin(), diag_end(), value);
 	}
 	//-----------------------------------------------------
-	void fill_row(size_type index, const value_type& value)
+	void
+	fill_row(size_type index, const value_type& value)
 	{
 		std::fill(row_begin(index), row_end(index), value);
 	}
 	//-----------------------------------------------------
-	void fill_col(size_type index, const value_type& value)
+	void
+	fill_col(size_type index, const value_type& value)
 	{
 		std::fill(col_begin(index), col_end(index), value);
 	}
@@ -327,11 +330,13 @@ public:
 	//---------------------------------------------------------------
 	// ALTER DATA
 	//---------------------------------------------------------------
-	void swap_rows(size_type r1, size_type r2) {
+	void
+	swap_rows(size_type r1, size_type r2) {
 		std::swap_ranges(row_begin(r1), row_end(r1), row_begin(r2));
 	}
 	//-----------------------------------------------------
-	void swap_cols(size_type c1, size_type c2) {
+	void
+	swap_cols(size_type c1, size_type c2) {
 		std::swap_ranges(col_begin(c1), col_end(c1), col_begin(c2));
 	}
 
