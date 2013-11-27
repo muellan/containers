@@ -387,46 +387,14 @@ public:
 	}
 	//-----------------------------------------------------
 	void
-	push_back_index() {
-		vals_.cols(vals_.cols()+1);
-		vals_.rows(vals_.rows()+1);
-	}
-	//-----------------------------------------------------
-	void
-	push_back_index(const value_type& value) {
-		push_back_index();
-
-		size_type n = vals_.rows();
-
-		for(size_type i = 0; i < n; ++i) {
-			vals_(i,n) = value;
-		}
-	}
-	//-----------------------------------------------------
-	void
 	insert_index(size_type index) {
-
 		vals_.insert_row(index);
 		vals_.insert_col(index);
-
-//		push_back();
-//
-//		for(size_type r = 0; r < index; ++r) {
-//			for(size_type c = vals_.rows(); c > index; --c) {
-//				vals_(r,c) = vals_(r,c-1);
-//			}
-//		}
-//
-//		for(size_type r = vals_.rows(); r > index; --r) {
-//			for(size_type c = vals_.cols(); c > r; --c) {
-//				vals_(r,c) = vals_(r-1,c-1);
-//			}
-//		}
 	}
 	//-----------------------------------------------------
 	void
 	insert_index(size_type index, const value_type& value) {
-		insert(index);
+		insert_index(index);
 
 		for(size_type i = 0; i < index; ++i) {
 			vals_(i,index) = value;
@@ -465,12 +433,6 @@ public:
 
 	//---------------------------------------------------------------
 	void
-	pop_back_index() {
-		vals_.erase_row(vals_.rows()-1);
-		vals_.erase_col(vals_.cols()-1);
-	}
-	//-----------------------------------------------------
-	void
 	erase_index(size_type index)
 	{
 		for(size_type r = 0; r < index; ++r) {
@@ -485,7 +447,8 @@ public:
 			}
 		}
 
-		pop_back_index();
+		vals_.erase_row(vals_.rows()-1);
+		vals_.erase_col(vals_.cols()-1);
 	}
 	//-----------------------------------------------------
 	void
