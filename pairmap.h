@@ -59,7 +59,7 @@ class pairmap
 		//---------------------------------------------------------------
 		constexpr
 		iter__():
-			p_{nullptr}, mark_{nullptr}, end_{nullptr}, stride_{0}
+			p_{nullptr}, mark_{nullptr}, end_{nullptr}, stride_(0)
 		{}
 		//-----------------------------------------------------
 		explicit constexpr
@@ -135,7 +135,7 @@ class pairmap
 	//
 	//-------------------------------------------------------------------
 	template<class T>
-	class pair_iter__ :
+	class local_iter__ :
 		public std::iterator<std::forward_iterator_tag, T>
 	{
 		using base_t = std::iterator<std::forward_iterator_tag, T>;
@@ -151,18 +151,23 @@ class pairmap
 
 		//---------------------------------------------------------------
 		constexpr
-		pair_iter__() :
-			p_{nullptr}, mark_{nullptr}, end_{nullptr}, stride_{0}
+		local_iter__() :
+			p_{nullptr}, mark_{nullptr}, end_{nullptr}, stride_(0)
 		{}
 		//-----------------------------------------------------
 		explicit constexpr
-		pair_iter__(iterator_type start, difference_type index):
+		local_iter__(iterator_type start):
+			p_(start), mark_(nullptr), end_(start), stride_(0)
+		{}
+		//-----------------------------------------------------
+		explicit constexpr
+		local_iter__(iterator_type start, difference_type index):
 			p_(start+((index<1)?1:index)), mark_(p_+index*numElems),
 			end_(start+(index+1)*numElems), stride_((index<1)?1:numElems)
 		{}
 
 		//---------------------------------------------------------------
-		pair_iter__&
+		local_iter__&
 		operator ++ () {
 			p_ += stride_;
 			if(p_ == mark_) {
@@ -172,9 +177,9 @@ class pairmap
 			return *this;
 		}
 		//-----------------------------------------------------
-		pair_iter__
+		local_iter__
 		operator ++ (int) {
-			pair_iter__ old(*this);
+			local_iter__ old(*this);
 			++*this;
 			return old;
 		}
@@ -199,16 +204,16 @@ class pairmap
 		}
 
 		//-----------------------------------------------------
-		constexpr pair_iter__
+		constexpr local_iter__
 		end() const {
-			return pair_iter__{end_};
+			return local_iter__{end_};
 		}
 
 		//---------------------------------------------------------------
-		bool operator == (const pair_iter__& other) const {
+		bool operator == (const local_iter__& other) const {
 			return (p_ == other.p_);
 		}
-		bool operator != (const pair_iter__& other) const {
+		bool operator != (const local_iter__& other) const {
 			return (p_ != other.p_);
 		}
 
@@ -232,8 +237,44 @@ public:
 	using       iterator = iter__<storage_iter__>;
 	using const_iterator = iter__<storage_citer__>;
 	//-----------------------------------------------------
-	using       pair_iterator = pair_iter__<storage_iter__>;
-	using const_pair_iterator = pair_iter__<storage_citer__>;
+	using       local_iterator = local_iter__<storage_iter__>;
+	using const_local_iterator = local_iter__<storage_citer__>;
+
+
+	//---------------------------------------------------------------
+	class memento {
+		friend class pairmap;
+	public:
+		//-----------------------------------------------------
+		memento() = default;
+
+		//-----------------------------------------------------
+		memento(const pairmap& source, size_type index):
+			vals_{}
+		{
+			for(size_type i = 0; i < index; ++i) {
+				vals_[i] = source.vals_(i,index);
+			}
+			for(size_type i = index+1; i < numElems; ++i) {
+				vals_[i-1] = source.vals_(index,i);
+			}
+		}
+
+		//-----------------------------------------------------
+		void
+		backup(const pairmap& source, size_type index)
+		{
+			for(size_type i = 0; i < index; ++i) {
+				vals_[i] = source.vals_(i,index);
+			}
+			for(size_type i = index+1; i < numElems; ++i) {
+				vals_[i-1] = source.vals_(index,i);
+			}
+		}
+
+	private:
+		std::array<value_type,numElems-1> vals_;
+	};
 
 
 	//---------------------------------------------------------------
@@ -267,13 +308,23 @@ public:
 
 	//-----------------------------------------------------
 	void
-	assign(size_type index, const value_type& value)
+	assign_index(size_type index, const value_type& value)
 	{
 		for(size_type i = 0; i < index; ++i){
 			vals_(i,index) = value;
 		}
 		for(size_type i = index+1; i < numElems; ++i) {
 			vals_(index,i) = value;
+		}
+	}
+	//-----------------------------------------------------
+	void
+	assign_index(size_type index, const memento& mem) {
+		for(size_type i = 0; i < index; ++i) {
+			vals_(i,index) = mem.vals_[i];
+		}
+		for(size_type i = index+1; i < numElems; ++i) {
+			vals_(index,i) = mem.vals_[i-1];
 		}
 	}
 
@@ -288,12 +339,12 @@ public:
 	// GETTERS
 	//---------------------------------------------------------------
 	static constexpr size_type
-	size() noexcept {
+	index_count() noexcept {
 		return numElems;
 	}
 	//-----------------------------------------------------
 	static constexpr size_type
-	num_values() noexcept {
+	size() noexcept {
 		return (numElems * (numElems-1)) / size_type(2);
 	}
 	//-----------------------------------------------------
@@ -310,7 +361,7 @@ public:
 
 	//---------------------------------------------------------------
 	void
-	swap(size_type idx1, size_type idx2) {
+	swap_indices(size_type idx1, size_type idx2) {
 		using std::swap;
 
 		if(idx1 == idx2) return;
@@ -362,17 +413,31 @@ public:
 	}
 
 	//-----------------------------------------------------
-	pair_iterator
-	pair_iter(size_type index) {
-		return pair_iterator(vals_.begin(), index);
+	local_iterator
+	begin(size_type index) {
+		return local_iterator(vals_.begin(), index);
 	}
-	const_pair_iterator
-	pair_iter(size_type index) const {
-		return const_pair_iterator(vals_.begin(), index);
+	const_local_iterator
+	begin(size_type index) const {
+		return const_local_iterator(vals_.begin(), index);
 	}
-	const_pair_iterator
-	pair_citer(size_type index) const {
-		return const_pair_iterator(vals_.begin(), index);
+	const_local_iterator
+	cbegin(size_type index) const {
+		return const_local_iterator(vals_.begin(), index);
+	}
+
+	//-----------------------------------------------------
+	local_iterator
+	end(size_type) {
+		return local_iterator(vals_.end());
+	}
+	const_local_iterator
+	end(size_type) const {
+		return const_local_iterator(vals_.end());
+	}
+	const_local_iterator
+	cend(size_type) const {
+		return const_local_iterator(vals_.end());
 	}
 
 	//---------------------------------------------------------------

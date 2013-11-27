@@ -133,7 +133,7 @@ class dynpairmap
 	//
 	//-------------------------------------------------------------------
 	template<class T>
-	class pair_iter__
+	class local_iter__
 	{
 	public:
 		//---------------------------------------------------------------
@@ -147,12 +147,17 @@ class dynpairmap
 
 		//---------------------------------------------------------------
 		constexpr
-		pair_iter__() :
-			p_{nullptr}, mark_{nullptr}, end_{nullptr}, stride_{0}
+		local_iter__() :
+			p_{nullptr}, mark_{nullptr}, end_{nullptr}, stride_(0)
 		{}
 		//-----------------------------------------------------
 		constexpr explicit
-		pair_iter__(
+		local_iter__(iterator_type start) :
+			p_(start), mark_(nullptr), end_(start), stride_(0)
+		{}
+		//-----------------------------------------------------
+		constexpr explicit
+		local_iter__(
 			iterator_type start, difference_type num, difference_type index)
 		:
 			p_(start+((index<1)?1:index)), mark_(p_+index*num),
@@ -160,7 +165,7 @@ class dynpairmap
 		{}
 
 		//---------------------------------------------------------------
-		pair_iter__&
+		local_iter__&
 		operator ++ () {
 			p_ += stride_;
 			if(p_ == mark_) {
@@ -170,9 +175,9 @@ class dynpairmap
 			return *this;
 		}
 		//-----------------------------------------------------
-		pair_iter__
+		local_iter__
 		operator ++ (int) {
-			pair_iter__ old(*this);
+			local_iter__ old(*this);
 			++*this;
 			return old;
 		}
@@ -197,16 +202,16 @@ class dynpairmap
 		}
 
 		//-----------------------------------------------------
-		constexpr pair_iter__
+		constexpr local_iter__
 		end() const {
-			return pair_iter__{end_};
+			return local_iter__{end_};
 		}
 
 		//---------------------------------------------------------------
-		bool operator == (const pair_iter__& other) const {
+		bool operator == (const local_iter__& other) const {
 			return (p_ == other.p_);
 		}
-		bool operator != (const pair_iter__& other) const {
+		bool operator != (const local_iter__& other) const {
 			return (p_ != other.p_);
 		}
 
@@ -229,8 +234,47 @@ public:
 	using       iterator = iter__<storage_iter__>;
 	using const_iterator = iter__<storage_citer__>;
 	//-----------------------------------------------------
-	using       pair_iterator = pair_iter__<storage_iter__>;
-	using const_pair_iterator = pair_iter__<storage_citer__>;
+	using       local_iterator = local_iter__<storage_iter__>;
+	using const_local_iterator = local_iter__<storage_citer__>;
+
+
+	//---------------------------------------------------------------
+	class memento {
+		friend class dynpairmap;
+	public:
+		//-----------------------------------------------------
+		memento() = default;
+
+		//-----------------------------------------------------
+		memento(const dynpairmap& source, size_type index):
+			vals_(source.vals_.rows())
+		{
+			for(size_type i = 0; i < index; ++i) {
+				vals_[i] = source.vals_(i,index);
+			}
+			for(size_type i = index+1; i < source.vals_.cols(); ++i) {
+				vals_[i-1] = source.vals_(index,i);
+			}
+		}
+
+		//-----------------------------------------------------
+		void
+		backup(const dynpairmap& source, size_type index)
+		{
+			if(vals_.size() < source.vals_.rows()) {
+				vals_.resize(source.vals_.rows());
+			}
+			for(size_type i = 0; i < index; ++i) {
+				vals_[i] = source.vals_(i,index);
+			}
+			for(size_type i = index+1; i < source.vals_.cols(); ++i) {
+				vals_[i-1] = source.vals_(index,i);
+			}
+		}
+
+	private:
+		std::vector<value_type> vals_;
+	};
 
 
 	//---------------------------------------------------------------
@@ -273,13 +317,23 @@ public:
 
 	//-----------------------------------------------------
 	void
-	assign(size_type index, const value_type& value)
+	assign_index(size_type index, const value_type& value)
 	{
 		for(size_type i = 0; i < index; ++i){
 			vals_(i,index) = value;
 		}
 		for(size_type i = index+1; i < vals_.cols(); ++i) {
 			vals_(index,i) = value;
+		}
+	}
+	//-----------------------------------------------------
+	void
+	assign_index(size_type index, const memento& mem) {
+		for(size_type i = 0; i < index; ++i) {
+			vals_(i,index) = mem.vals_[i];
+		}
+		for(size_type i = index+1; i < vals_.cols(); ++i) {
+			vals_(index,i) = mem.vals_[i-1];
 		}
 	}
 
@@ -294,12 +348,12 @@ public:
 	// GETTERS
 	//---------------------------------------------------------------
 	size_type
-	size() const {
+	index_count() const {
 		return vals_.cols();
 	}
 	//-----------------------------------------------------
 	size_type
-	num_values() const {
+	size() const {
 		return (vals_.cols() * vals_.rows()) / size_type(2);
 	}
 	//-----------------------------------------------------
@@ -318,24 +372,29 @@ public:
 	// CHANGE n
 	//---------------------------------------------------------------
 	void
-	resize(size_type size) {
+	reserve_indices(size_type size) {
+		vals_.reserve(size-1, size);
+	}
+	//-----------------------------------------------------
+	void
+	resize_indices(size_type size) {
 		vals_.resize(size-1, size);
 	}
 	//-----------------------------------------------------
 	void
-	resize(size_type size, const value_type& value) {
+	resize_indices(size_type size, const value_type& value) {
 		vals_.resize(size-1, size, value);
 	}
 	//-----------------------------------------------------
 	void
-	push_back() {
+	push_back_index() {
 		vals_.cols(vals_.cols()+1);
 		vals_.rows(vals_.rows()+1);
 	}
 	//-----------------------------------------------------
 	void
-	push_back(const value_type& value) {
-		push_back();
+	push_back_index(const value_type& value) {
+		push_back_index();
 
 		size_type n = vals_.rows();
 
@@ -345,24 +404,28 @@ public:
 	}
 	//-----------------------------------------------------
 	void
-	insert(size_type index) {
-		push_back();
+	insert_index(size_type index) {
 
-		for(size_type r = 0; r < index; ++r) {
-			for(size_type c = vals_.rows(); c > index; --c) {
-				vals_(r,c) = vals_(r,c-1);
-			}
-		}
+		vals_.insert_row(index);
+		vals_.insert_col(index);
 
-		for(size_type r = vals_.rows(); r > index; --r) {
-			for(size_type c = vals_.cols(); c > r; --c) {
-				vals_(r,c) = vals_(r-1,c-1);
-			}
-		}
+//		push_back();
+//
+//		for(size_type r = 0; r < index; ++r) {
+//			for(size_type c = vals_.rows(); c > index; --c) {
+//				vals_(r,c) = vals_(r,c-1);
+//			}
+//		}
+//
+//		for(size_type r = vals_.rows(); r > index; --r) {
+//			for(size_type c = vals_.cols(); c > r; --c) {
+//				vals_(r,c) = vals_(r-1,c-1);
+//			}
+//		}
 	}
 	//-----------------------------------------------------
 	void
-	insert(size_type index, const value_type& value) {
+	insert_index(size_type index, const value_type& value) {
 		insert(index);
 
 		for(size_type i = 0; i < index; ++i) {
@@ -372,17 +435,43 @@ public:
 			vals_(index,i) = value;
 		}
 	}
+	//-----------------------------------------------------
+	void
+	insert_indices(size_type index, size_type n) {
+		vals_.insert_rows(index, n);
+		vals_.insert_cols(index, n);
+	}
+	//-----------------------------------------------------
+	void
+	insert_indices(size_type index, size_type n, const value_type& value) {
+		insert_indices(index,n);
+
+		for(size_type j = index; j < index+n; ++j) {
+			for(size_type i = 0; i < j; ++i) {
+				vals_(i,j) = value;
+			}
+			for(size_type i = j+1; i < vals_.cols(); ++i) {
+				vals_(j,i) = value;
+			}
+		}
+	}
+	//-----------------------------------------------------
+	void
+	insert_index(size_type index, const memento& mem) {
+		insert_index(index);
+		assign_index(index,mem);
+	}
 
 
 	//---------------------------------------------------------------
 	void
-	pop_back() {
+	pop_back_index() {
 		vals_.erase_row(vals_.rows()-1);
 		vals_.erase_col(vals_.cols()-1);
 	}
 	//-----------------------------------------------------
 	void
-	erase(size_type index)
+	erase_index(size_type index)
 	{
 		for(size_type r = 0; r < index; ++r) {
 			for(size_type c = index; c < vals_.rows(); ++c) {
@@ -396,12 +485,26 @@ public:
 			}
 		}
 
-		pop_back();
+		pop_back_index();
+	}
+	//-----------------------------------------------------
+	void
+	erase_indices(size_type firstIndex, size_type lastIndex)
+	{
+		using std::min;
+
+		vals_.erase_rows(
+			min(firstIndex,vals_.rows()-1),
+			min(lastIndex,vals_.rows()-1));
+
+		vals_.erase_cols(
+			min(firstIndex,vals_.cols()-1),
+			min(lastIndex,vals_.cols()-1));
 	}
 
 	//-----------------------------------------------------
 	void
-	swap(size_type idx1, size_type idx2) {
+	swap_indices(size_type idx1, size_type idx2) {
 		using std::swap;
 
 		if(idx1 == idx2) return;
@@ -453,17 +556,31 @@ public:
 	}
 
 	//-----------------------------------------------------
-	pair_iterator
-	pair_iter(size_type index) {
-		return pair_iterator(vals_.begin(), vals_.cols(), index);
+	local_iterator
+	begin(size_type index) {
+		return local_iterator(vals_.begin(), vals_.cols(), index);
 	}
-	const_pair_iterator
-	pair_iter(size_type index) const {
-		return const_pair_iterator(vals_.begin(), vals_.cols(), index);
+	const_local_iterator
+	begin(size_type index) const {
+		return const_local_iterator(vals_.begin(), vals_.cols(), index);
 	}
-	const_pair_iterator
-	pair_citer(size_type index) const {
-		return const_pair_iterator(vals_.begin(), vals_.cols(), index);
+	const_local_iterator
+	cbegin(size_type index) const {
+		return const_local_iterator(vals_.begin(), vals_.cols(), index);
+	}
+
+	//-----------------------------------------------------
+	local_iterator
+	end(size_type) {
+		return local_iterator(vals_.end());
+	}
+	const_local_iterator
+	end(size_type) const {
+		return const_local_iterator(vals_.end());
+	}
+	const_local_iterator
+	cend(size_type) const {
+		return const_local_iterator(vals_.end());
 	}
 
 
@@ -513,7 +630,7 @@ begin(const dynpairmap<T>& m) -> decltype(m.begin())
 //---------------------------------------------------------
 template<class T>
 inline auto
-cbegin(const dynpairmap<T>& m) -> decltype(m.begin())
+cbegin(const dynpairmap<T>& m) -> decltype(m.cbegin())
 {
 	return m.cbegin();
 }
@@ -539,7 +656,7 @@ end(const dynpairmap<T>& m) -> decltype(m.end())
 //---------------------------------------------------------
 template<class T>
 inline auto
-cend(const dynpairmap<T>& m) -> decltype(m.end())
+cend(const dynpairmap<T>& m) -> decltype(m.cend())
 {
 	return m.cend();
 }

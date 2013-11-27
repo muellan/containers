@@ -50,20 +50,20 @@ bool matrix_iterators_correct()
 	long long int sum = 0;
 
 	for(std::size_t j = 0; j < m.rows(); ++j) {
-		for(auto i = m.row_begin(j), e = m.row_end(j); i != e; ++i) {
+		for(auto i = m.begin_row(j), e = m.end_row(j); i != e; ++i) {
 			sum += *i;
 		}
 	}
 	sum *= 100;
 
 	for(std::size_t j = 0; j < m.cols(); ++j) {
-		for(auto i = m.col_begin(j), e = m.col_end(j); i != e; ++i) {
+		for(auto i = m.begin_col(j), e = m.end_col(j); i != e; ++i) {
 			sum += *i;
 		}
 	}
 	sum *= 100;
 
-	auto i = m.block_iter(0,0, m.rows()-1, m.cols()-1);
+	auto i = m.traverse_block(0,0, m.rows()-1, m.cols()-1);
 	while(i) {
 		sum += *i;
 		++i;
@@ -72,7 +72,7 @@ bool matrix_iterators_correct()
 
 	for(std::size_t r = 0; r < m.rows(); ++r) {
 		for(std::size_t c = 0; c < m.cols(); ++c) {
-			i = m.block_iter(0,0, r,c);
+			i = m.traverse_block(0,0, r,c);
 			while(i) {
 				sum += *i;
 				++i;
@@ -82,7 +82,7 @@ bool matrix_iterators_correct()
 
 	for(int r =  m.rows()-1; r >= 0; --r) {
 		for(int c = m.cols()-1; c >= 0; --c) {
-			i = m.block_iter(r,c, m.rows()-1, m.cols()-1);
+			i = m.traverse_block(r,c, m.rows()-1, m.cols()-1);
 			while(i) {
 				sum += *i;
 				++i;
@@ -94,8 +94,8 @@ bool matrix_iterators_correct()
 	{
 		matrix<int,10,10> md;
 		std::fill(begin(md), end(md), 0);
-		std::fill(md.diag_begin(), md.diag_end(), 1);
-		sum += std::accumulate(md.diag_begin(), md.diag_end(),0);
+		std::fill(md.begin_diag(), md.end_diag(), 1);
+		sum += std::accumulate(md.begin_diag(), md.end_diag(),0);
 	}
 
 	return (sum == 3217308650);

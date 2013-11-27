@@ -42,11 +42,11 @@ class matrix
 	 *
 	 *************************************************************************/
 	template<class T, std::size_t stride>
-	class stride_iter_t :
+	class stride_iter__ :
 		public std::iterator<std::random_access_iterator_tag,T>
 	{
 		using base_t = std::iterator<std::random_access_iterator_tag,T> ;
-		using this_t = stride_iter_t<T,stride>;
+		using this_t = stride_iter__<T,stride>;
 
 	public:
 		//---------------------------------------------------------------
@@ -57,7 +57,7 @@ class matrix
 
 		//---------------------------------------------------------------
 		explicit constexpr
-		stride_iter_t(pointer p = nullptr):
+		stride_iter__(pointer p = nullptr):
 			base_t{}, p_(p)
 		{}
 
@@ -149,11 +149,11 @@ class matrix
 	 *
 	 *************************************************************************/
 	template<class T>
-	class block_iter_t :
+	class block_traverser__ :
 		public std::iterator<std::forward_iterator_tag,T>
 	{
 		using base_t = std::iterator<std::forward_iterator_tag,T> ;
-		using this_t = block_iter_t<T> ;
+		using this_t = block_traverser__<T> ;
 
 	public:
 
@@ -165,7 +165,7 @@ class matrix
 
 		//---------------------------------------------------------------
 		explicit constexpr
-		block_iter_t(
+		block_traverser__(
 			pointer p = nullptr, pointer pend = nullptr,
 			difference_type length = 0, difference_type stride = 0)
 		:
@@ -206,9 +206,9 @@ class matrix
 
 
 		//---------------------------------------------------------------
-		constexpr block_iter_t
+		constexpr block_traverser__
 		end() const {
-			return block_iter_t(pend_);
+			return block_traverser__(pend_);
 		}
 
 
@@ -248,14 +248,14 @@ public:
 	using row_iterator         = pointer;
 	using const_row_iterator   = const_pointer;
 	//-----------------------------------------------------
-	using col_iterator         = stride_iter_t<value_type,ncols>;
-	using const_col_iterator   = stride_iter_t<const value_type,ncols>;
+	using col_iterator         = stride_iter__<value_type,ncols>;
+	using const_col_iterator   = stride_iter__<const value_type,ncols>;
 	//-----------------------------------------------------
-	using diag_iterator        = stride_iter_t<value_type,ncols+1>;
-	using const_diag_iterator  = stride_iter_t<const value_type,ncols+1>;
+	using diag_iterator        = stride_iter__<value_type,ncols+1>;
+	using const_diag_iterator  = stride_iter__<const value_type,ncols+1>;
 	//-----------------------------------------------------
-	using block_iterator       = block_iter_t<value_type>;
-	using const_block_iterator = block_iter_t<const value_type>;
+	using block_traverser       = block_traverser__<value_type>;
+	using const_block_traverser = block_traverser__<const value_type>;
 	//-----------------------------------------------------
 	using size_type       = std::size_t;
 	using difference_type = std::ptrdiff_t;
@@ -311,19 +311,19 @@ public:
 	template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
 	void
 	fill_diag(const value_type& value) {
-		std::fill(diag_begin(), diag_end(), value);
+		std::fill(begin_diag(), end_diag(), value);
 	}
 	//-----------------------------------------------------
 	void
 	fill_row(size_type index, const value_type& value)
 	{
-		std::fill(row_begin(index), row_end(index), value);
+		std::fill(begin_row(index), end_row(index), value);
 	}
 	//-----------------------------------------------------
 	void
 	fill_col(size_type index, const value_type& value)
 	{
-		std::fill(col_begin(index), col_end(index), value);
+		std::fill(begin_col(index), end_col(index), value);
 	}
 
 
@@ -332,12 +332,12 @@ public:
 	//---------------------------------------------------------------
 	void
 	swap_rows(size_type r1, size_type r2) {
-		std::swap_ranges(row_begin(r1), row_end(r1), row_begin(r2));
+		std::swap_ranges(begin_row(r1), end_row(r1), begin_row(r2));
 	}
 	//-----------------------------------------------------
 	void
 	swap_cols(size_type c1, size_type c2) {
-		std::swap_ranges(col_begin(c1), col_end(c1), col_begin(c2));
+		std::swap_ranges(begin_col(c1), end_col(c1), begin_col(c2));
 	}
 
 
@@ -362,6 +362,19 @@ public:
 	const_reference
 	operator () (size_type row, size_type col) const {
 		return m_[row][col];
+	}
+
+	//-----------------------------------------------------
+	size_type
+	row(const_iterator it) const {
+		using std::distance;
+		return static_cast<size_type>(distance(begin(), it) / ncols);
+	}
+	//-----------------------------------------------------
+	size_type
+	col(const_iterator it) const {
+		using std::distance;
+		return static_cast<size_type>(distance(begin(), it) % ncols);
 	}
 
 
@@ -527,28 +540,28 @@ public:
 	// ROW ITERATORS
 	//---------------------------------------------------------------
 	row_iterator
-	row_begin(size_type row) {
+	begin_row(size_type row) {
 		return row_iterator{std::addressof(m_[row][0])};
 	}
 	//-----------------------------------------------------
 	const_row_iterator
-	row_begin(size_type row) const {
+	begin_row(size_type row) const {
 		return const_row_iterator{std::addressof(m_[row][0])};
 	}
 	//-----------------------------------------------------
 	const_row_iterator
-	row_cbegin(size_type row) const {
+	cbegin_row(size_type row) const {
 		return const_row_iterator{std::addressof(m_[row][0])};
 	}
 
 	//-----------------------------------------------------
 	row_iterator
-	row_end(size_type row) {
+	end_row(size_type row) {
 		return row_iterator{std::addressof(m_[row][ncols])};
 	}
 	//-----------------------------------------------------
 	const_row_iterator
-	row_end(size_type row) const {
+	end_row(size_type row) const {
 		return const_row_iterator{std::addressof(m_[row][ncols])};
 	}
 	//-----------------------------------------------------
@@ -562,33 +575,33 @@ public:
 	// COLUMN ITERATORS
 	//---------------------------------------------------------------
 	col_iterator
-	col_begin(size_type col) {
+	begin_col(size_type col) {
 		return col_iterator{std::addressof(m_[0][col])};
 	}
 	//-----------------------------------------------------
 	const_col_iterator
-	col_begin(size_type col) const {
+	begin_col(size_type col) const {
 		return const_col_iterator{std::addressof(m_[0][col])};
 	}
 	//-----------------------------------------------------
 	const_col_iterator
-	col_cbegin(size_type col) const {
+	cbegin_col(size_type col) const {
 		return const_col_iterator{std::addressof(m_[0][col])};
 	}
 
 	//-----------------------------------------------------
 	col_iterator
-	col_end(size_type col) {
+	end_col(size_type col) {
 		return col_iterator{std::addressof(m_[nrows][col])};
 	}
 	//-----------------------------------------------------
 	const_col_iterator
-	col_end(size_type col) const {
+	end_col(size_type col) const {
 		return const_col_iterator{std::addressof(m_[nrows][col])};
 	}
 	//-----------------------------------------------------
 	const_col_iterator
-	col_cend(size_type col) const {
+	cend_col(size_type col) const {
 		return const_col_iterator{std::addressof(m_[nrows][col])};
 	}
 
@@ -598,38 +611,38 @@ public:
 	//---------------------------------------------------------------
 	template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
 	diag_iterator
-	diag_begin() {
+	begin_diag() {
 		return diag_iterator{std::addressof(m_[0][0])};
 	}
 	//-----------------------------------------------------
 	template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
 	const_diag_iterator
-	diag_begin() const {
+	begin_diag() const {
 		return const_diag_iterator{std::addressof(m_[0][0])};
 	}
 	//-----------------------------------------------------
 	template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
 	const_diag_iterator
-	cdiag_begin() const {
+	begin_cdiag() const {
 		return const_diag_iterator{std::addressof(m_[0][0])};
 	}
 
 	//-----------------------------------------------------
 	template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
 	diag_iterator
-	diag_end() {
+	end_diag() {
 		return diag_iterator{std::addressof(m_[nrows][ncols])};
 	}
 	//-----------------------------------------------------
 	template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
 	const_diag_iterator
-	diag_end() const {
+	end_diag() const {
 		return const_diag_iterator{std::addressof(m_[nrows][ncols])};
 	}
 	//-----------------------------------------------------
 	template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
 	const_diag_iterator
-	cdiag_end() const {
+	end_cdiag() const {
 		return const_diag_iterator{std::addressof(m_[nrows][ncols])};
 	}
 
@@ -637,42 +650,42 @@ public:
 	//---------------------------------------------------------------
 	// BLOCK ITERATORS
 	//---------------------------------------------------------------
-	block_iterator
-	block_iter(
+	block_traverser
+	traverse_block(
 		size_type firstRow, size_type firstCol,
 		size_type lastRow,  size_type lastCol)
 	{
 		difference_type stride = ncols -  lastCol - 1 + firstCol;
 
-		return block_iterator{
+		return block_traverser{
 			std::addressof(m_[firstRow][firstCol]),
 			std::addressof(m_[lastRow][lastCol]) + stride + 1,
 			static_cast<difference_type>(lastCol - firstCol + 1),
 			stride };
 	}
 	//-----------------------------------------------------
-	const_block_iterator
-	block_iter(
+	const_block_traverser
+	traverse_block(
 		size_type firstRow, size_type firstCol,
 		size_type lastRow,  size_type lastCol) const
 	{
 		difference_type stride = ncols -  lastCol - 1 + firstCol;
 
-		return const_block_iterator{
+		return const_block_traverser{
 			std::addressof(m_[firstRow][firstCol]),
 			std::addressof(m_[lastRow][lastCol]) + stride + 1,
 			static_cast<difference_type>(lastCol - firstCol + 1),
 			stride };
 	}
 	//-----------------------------------------------------
-	const_block_iterator
-	block_citer(
+	const_block_traverser
+	ctraverse_block(
 		size_type firstRow, size_type firstCol,
 		size_type lastRow,  size_type lastCol) const
 	{
 		difference_type stride = ncols -  lastCol - 1 + firstCol;
 
-		return const_block_iterator{
+		return const_block_traverser{
 			std::addressof(m_[firstRow][firstCol]),
 			std::addressof(m_[lastRow][lastCol]) + stride + 1,
 			static_cast<difference_type>(lastCol - firstCol + 1),

@@ -24,7 +24,7 @@ namespace test {
 //-------------------------------------------------------------------
 template<class PairIter>
 auto
-pair_iter_sum(PairIter i) -> typename std::decay<decltype(*i)>::type
+pair_sum(PairIter i) -> typename std::decay<decltype(*i)>::type
 {
 	auto s = typename std::decay<decltype(*i)>::type(0);
 	while(i) {
@@ -40,17 +40,17 @@ bool dynpairmap_correct()
 {
 	dynpairmap<int> pm;
 
-	pm.resize(9);
+	pm.resize_indices(9);
 	pm = 0;
 
-	for(size_t i = 0; i < pm.size(); ++i) {
-		for(size_t j = i+1; j < pm.size(); ++j) {
+	for(size_t i = 0; i < pm.index_count(); ++i) {
+		for(size_t j = i+1; j < pm.index_count(); ++j) {
 			pm(i,j) = 10*(i+1) + j+1;
 		}
 	}
 
 	dynpairmap<int> pm3;
-	pm3.resize(7);
+	pm3.resize_indices(7);
 	for(auto& x : pm3) {x = 11; }
 	auto pm3sum = std::accumulate(begin(pm3), end(pm3), 0);
 
@@ -62,16 +62,16 @@ bool dynpairmap_correct()
 //	std::cout << pm2 << std::endl;
 
 	return (true
-		&& (pair_iter_sum(pm1.pair_iter(0)) == 124)
-		&& (pair_iter_sum(pm1.pair_iter(1)) == 194)
-		&& (pair_iter_sum(pm1.pair_iter(2)) == 255)
-		&& (pair_iter_sum(pm1.pair_iter(3)) == 307)
-		&& (pair_iter_sum(pm1.pair_iter(4)) == 350)
-		&& (pair_iter_sum(pm1.pair_iter(5)) == 384)
-		&& (pair_iter_sum(pm1.pair_iter(6)) == 409)
-		&& (pair_iter_sum(pm1.pair_iter(7)) == 425)
-		&& (pair_iter_sum(pm1.pair_iter(8)) == 432)
-		&& (pm3sum == int(11 * (pm3.size() * (pm3.size() - 1)) / 2))
+		&& (pair_sum(pm1.begin(0)) == 124)
+		&& (pair_sum(pm1.begin(1)) == 194)
+		&& (pair_sum(pm1.begin(2)) == 255)
+		&& (pair_sum(pm1.begin(3)) == 307)
+		&& (pair_sum(pm1.begin(4)) == 350)
+		&& (pair_sum(pm1.begin(5)) == 384)
+		&& (pair_sum(pm1.begin(6)) == 409)
+		&& (pair_sum(pm1.begin(7)) == 425)
+		&& (pair_sum(pm1.begin(8)) == 432)
+		&& (pm3sum == int(11 * (pm3.index_count() * (pm3.index_count() - 1)) / 2))
 		&& (pm1(0,1) == 12) && (pm1(0,1) == 12)
 		&& (pm1(0,2) == 13) && (pm1(0,2) == 13)
 		&& (pm1(0,3) == 14) && (pm1(0,3) == 14)

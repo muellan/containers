@@ -56,13 +56,13 @@ class dynmatrix
 	 *
 	 *************************************************************************/
 	template<class T>
-	class stride_iter_t :
+	class stride_iter__ :
 		public std::iterator<std::random_access_iterator_tag,T>
 	{
 		friend class dynmatrix;
 
 		using base_t = std::iterator<std::random_access_iterator_tag,T> ;
-		using this_t = stride_iter_t<T> ;
+		using this_t = stride_iter__<T> ;
 
 	public:
 		//---------------------------------------------------------------
@@ -73,7 +73,7 @@ class dynmatrix
 
 		//---------------------------------------------------------------
 		explicit constexpr
-		stride_iter_t():
+		stride_iter__():
 			base_t{},
 			p_(nullptr), stride_{0}
 		{}
@@ -81,7 +81,7 @@ class dynmatrix
 	private:
 		//---------------------------------------------------------------
 		explicit constexpr
-		stride_iter_t(pointer p, std::size_t stride = 0):
+		stride_iter__(pointer p, std::size_t stride = 0):
 			base_t{},
 			p_(p), stride_{static_cast<difference_type>(stride)}
 		{}
@@ -176,13 +176,13 @@ class dynmatrix
 	 *
 	 *************************************************************************/
 	template<class T>
-	class block_iter_t :
+	class block_traverser__ :
 		public std::iterator<std::forward_iterator_tag,T>
 	{
 		friend class dynmatrix;
 
 		using base_t = std::iterator<std::forward_iterator_tag,T> ;
-		using this_t = block_iter_t<T> ;
+		using this_t = block_traverser__<T> ;
 
 	public:
 		//---------------------------------------------------------------
@@ -193,7 +193,7 @@ class dynmatrix
 
 		//---------------------------------------------------------------
 		explicit constexpr
-		block_iter_t() :
+		block_traverser__() :
 			base_t{},
 			p_{nullptr}, pend_{nullptr}, count_(0), length_(0), stride_(0)
 		{}
@@ -201,7 +201,7 @@ class dynmatrix
 	private:
 		//---------------------------------------------------------------
 		explicit constexpr
-		block_iter_t(
+		block_traverser__(
 			pointer p, pointer pend = nullptr,
 			difference_type length = 0, difference_type stride = 0)
 		:
@@ -243,8 +243,8 @@ class dynmatrix
 
 
 		//---------------------------------------------------------------
-		constexpr block_iter_t end() const {
-			return block_iter_t(pend_);
+		constexpr block_traverser__ end() const {
+			return block_traverser__(pend_);
 		}
 
 
@@ -285,11 +285,11 @@ public:
 	using row_iterator       = pointer;
 	using const_row_iterator = const_pointer;
 	//-----------------------------------------------------
-	using col_iterator       = stride_iter_t<value_type>;
-	using const_col_iterator = stride_iter_t<const value_type>;
+	using col_iterator       = stride_iter__<value_type>;
+	using const_col_iterator = stride_iter__<const value_type>;
 	//-----------------------------------------------------
-	using block_iterator       = block_iter_t<value_type>;
-	using const_block_iterator = block_iter_t<const value_type>;
+	using block_traverser       = block_traverser__<value_type>;
+	using const_block_traverser = block_traverser__<const value_type>;
 	//-----------------------------------------------------
 	using size_type       = std::size_t;
 	using difference_type = std::ptrdiff_t;
@@ -416,13 +416,13 @@ public:
 	void
 	fill_row(size_type index, const value_type& value)
 	{
-		std::fill(row_begin(index), row_end(index), value);
+		std::fill(begin_row(index), end_row(index), value);
 	}
 	//-----------------------------------------------------
 	void
 	fill_col(size_type index, const value_type& value)
 	{
-		std::fill(col_begin(index), col_end(index), value);
+		std::fill(begin_col(index), end_col(index), value);
 	}
 
 
@@ -543,14 +543,14 @@ public:
 	col_iterator
 	insert_col(size_type index) {
 		insert_cols(index, 1);
-		return col_begin(index);
+		return begin_col(index);
 	}
 	//-----------------------------------------------------
 	/// @brief returns valid iterator to the newly inserted col
 	col_iterator
 	insert_col(size_type index, const value_type& value) {
 		insert_cols(index, 1, value);
-		return col_begin(index);
+		return begin_col(index);
 	}
 
 	//-----------------------------------------------------
@@ -558,14 +558,14 @@ public:
 	row_iterator
 	insert_row(size_type index) {
 		insert_rows(index, 1);
-		return row_begin(index);
+		return begin_row(index);
 	}
 	//-----------------------------------------------------
 	/// @brief returns valid iterator to the newly inserted row
 	row_iterator
 	insert_row(size_type index, const value_type& value) {
 		insert_rows(index, 1, value);
-		return row_begin(index);
+		return begin_row(index);
 	}
 
 	//-----------------------------------------------------
@@ -575,12 +575,12 @@ public:
 	{
 		if(rows_ < 1) {
 			resize(1,quantity);
-			col_begin(0);
+			begin_col(0);
 		}
 		else {
 			mem_insert_cols(index,quantity);
 		}
-		return col_begin(index);
+		return begin_col(index);
 	}
 	//-----------------------------------------------------
 	/// @brief returns valid iterator to the first of the newly inserted cols
@@ -596,7 +596,7 @@ public:
 			for(auto i = index, e = index+quantity; i < e; ++i)
 				fill_col(i, value);
 		}
-		return col_begin(index);
+		return begin_col(index);
 	}
 
 	//-----------------------------------------------------
@@ -610,7 +610,7 @@ public:
 		else {
 			mem_insert_rows(index,quantity);
 		}
-		return row_begin(index);
+		return begin_row(index);
 	}
 	//-----------------------------------------------------
 	/// @brief returns valid iterator to the first of the newly inserted rows
@@ -626,7 +626,7 @@ public:
 			for(auto i = index, e = index+quantity; i < e; ++i)
 				fill_row(i, value);
 		}
-		return row_begin(index);
+		return begin_row(index);
 	}
 
 
@@ -665,7 +665,8 @@ public:
 	void
 	shrink_to_fit() {
 		if(!last_) return;
-		alloc_traits::deallocate(alloc_, last_, std::distance(last_, memEnd_));
+		using std::distance;
+		alloc_traits::deallocate(alloc_, last_, distance(last_, memEnd_));
 		memEnd_ = last_;
 	}
 
@@ -675,12 +676,12 @@ public:
 	//---------------------------------------------------------------
 	void
 	swap_rows(size_type r1, size_type r2) {
-		std::swap_ranges(row_begin(r1), row_end(r1), row_begin(r2));
+		std::swap_ranges(begin_row(r1), end_row(r1), begin_row(r2));
 	}
 	//-----------------------------------------------------
 	void
 	swap_cols(size_type c1, size_type c2) {
-		std::swap_ranges(col_begin(c1), col_end(c1), col_begin(c2));
+		std::swap_ranges(begin_col(c1), end_col(c1), begin_col(c2));
 	}
 
 
@@ -695,6 +696,19 @@ public:
 	const_reference
 	operator () (size_type row, size_type col) const {
 		return first_[row*cols_+col];
+	}
+
+	//-----------------------------------------------------
+	size_type
+	row(const_iterator it) const {
+		using std::distance;
+		return static_cast<size_type>(distance(begin(), it) / cols_);
+	}
+	//-----------------------------------------------------
+	size_type
+	col(const_iterator it) const {
+		using std::distance;
+		return static_cast<size_type>(distance(begin(), it) % cols_);
 	}
 
 
@@ -712,7 +726,8 @@ public:
 	//-----------------------------------------------------
 	size_type
 	size() const {
-		return std::distance(first_, last_);
+		using std::distance;
+		return distance(first_, last_);
 	}
 	//-----------------------------------------------------
 	size_type
@@ -722,7 +737,8 @@ public:
 	//-----------------------------------------------------
 	size_type
 	capacity() const {
-		return std::distance(first_, memEnd_);
+		using std::distance;
+		return distance(first_, memEnd_);
 	}
 	//-----------------------------------------------------
 	bool
@@ -869,33 +885,33 @@ public:
 	// ROW ITERATORS
 	//---------------------------------------------------------------
 	row_iterator
-	row_begin(size_type row) {
+	begin_row(size_type row) {
 		return ptr(row,0);
 	}
 	//-----------------------------------------------------
 	const_row_iterator
-	row_begin(size_type row) const {
+	begin_row(size_type row) const {
 		return ptr(row,0);
 	}
 	//-----------------------------------------------------
 	const_row_iterator
-	row_cbegin(size_type row) const {
+	cbegin_row(size_type row) const {
 		return ptr(row,0);
 	}
 
 	//-----------------------------------------------------
 	row_iterator
-	row_end(size_type row) {
+	end_row(size_type row) {
 		return ptr(row+1,0);
 	}
 	//-----------------------------------------------------
 	const_row_iterator
-	row_end(size_type row) const {
+	end_row(size_type row) const {
 		return ptr(row+1,0);
 	}
 	//-----------------------------------------------------
 	const_row_iterator
-	row_cend(size_type row) const {
+	cend_row(size_type row) const {
 		return ptr(row+1,0);
 	}
 
@@ -904,76 +920,76 @@ public:
 	// COLUMN ITERATORS
 	//---------------------------------------------------------------
 	col_iterator
-	col_begin(size_type col) {
+	begin_col(size_type col) {
 		return col_iterator{first_ + col, cols_};
 	}
 	//-----------------------------------------------------
 	const_col_iterator
-	col_begin(size_type col) const {
+	begin_col(size_type col) const {
 		return const_col_iterator{first_ + col, cols_};
 	}
 	//-----------------------------------------------------
 	const_col_iterator
-	col_cbegin(size_type col) const {
+	cbegin_col(size_type col) const {
 		return const_col_iterator{first_ + col, cols_};
 	}
 
 	//-----------------------------------------------------
 	col_iterator
-	col_end(size_type col) {
+	end_col(size_type col) {
 		return col_iterator{first_ + col + size()};
 	}
 	//-----------------------------------------------------
 	const_col_iterator
-	col_end(size_type col) const {
+	end_col(size_type col) const {
 		return const_col_iterator{first_ + col + size()};
 	}
 	//-----------------------------------------------------
 	const_col_iterator
-	col_cend(size_type col) const {
+	cend_col(size_type col) const {
 		return const_col_iterator{first_ + col + size()};
 	}
 
 
 	//---------------------------------------------------------------
-	// BLOCK ITERATORS
+	// BLOCK TRAVERSERS
 	//---------------------------------------------------------------
-	block_iterator
-	block_iter(
+	block_traverser
+	traverse_block(
 		size_type firstRow, size_type firstCol,
 		size_type lastRow,  size_type lastCol)
 	{
 		auto stride = difference_type(cols_ -  lastCol - 1 + firstCol);
 
-		return block_iterator{
+		return block_traverser{
 			ptr(firstRow,firstCol),
 			ptr(lastRow,lastCol) + stride + 1,
 			static_cast<difference_type>(lastCol - firstCol + 1),
 			stride };
 	}
 	//-----------------------------------------------------
-	const_block_iterator
-	block_iter(
+	const_block_traverser
+	traverse_block(
 		size_type firstRow, size_type firstCol,
 		size_type lastRow,  size_type lastCol) const
 	{
 		auto stride = difference_type(cols_ -  lastCol - 1 + firstCol);
 
-		return const_block_iterator{
+		return const_block_traverser{
 			ptr(firstRow,firstCol),
 			ptr(lastRow,lastCol) + stride + 1,
 			static_cast<difference_type>(lastCol - firstCol + 1),
 			stride };
 	}
 	//-----------------------------------------------------
-	const_block_iterator
-	block_citer(
+	const_block_traverser
+	ctraverse_block(
 		size_type firstRow, size_type firstCol,
 		size_type lastRow,  size_type lastCol) const
 	{
 		auto stride = difference_type(cols_ -  lastCol - 1 + firstCol);
 
-		return const_block_iterator{
+		return const_block_traverser{
 			ptr(firstRow,firstCol),
 			ptr(lastRow,lastCol) + stride + 1,
 			static_cast<difference_type>(lastCol - firstCol + 1),
@@ -982,7 +998,8 @@ public:
 
 
 	//---------------------------------------------------------------
-	friend void swap(dynmatrix& a, dynmatrix& b) noexcept
+	friend void
+	swap(dynmatrix& a, dynmatrix& b) noexcept
 	{
 		using std::swap;
 
@@ -996,7 +1013,8 @@ public:
 
 
 	//---------------------------------------------------------------
-	const allocator_type& get_allocator() const {
+	const allocator_type&
+	get_allocator() const {
 		return alloc_;
 	}
 
