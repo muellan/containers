@@ -571,16 +571,16 @@ public:
 
 	//-----------------------------------------------------
 	local_iterator
-	end(size_type) {
-		return local_iterator(vals_.end());
+	end(size_type index) {
+		return local_iterator(vals_.begin() + ((index+1) * vals_.cols()));
 	}
 	const_local_iterator
-	end(size_type) const {
-		return const_local_iterator(vals_.end());
+	end(size_type index) const {
+		return const_local_iterator(vals_.begin() + ((index+1) * vals_.cols()));
 	}
 	const_local_iterator
-	cend(size_type) const {
-		return const_local_iterator(vals_.end());
+	cend(size_type index) const {
+		return const_local_iterator(vals_.begin() + ((index+1) * vals_.cols()));
 	}
 
 
