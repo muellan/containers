@@ -23,7 +23,7 @@ namespace am {
 
 /*****************************************************************************
  *
- * @brief   stores pairwise values v = f(i,j) where i < j
+ * @brief   stores pairwise values v = f(i,j)
  * @details values are stored in a matrix
  *          (only upper triangle matrix is used)
  *
