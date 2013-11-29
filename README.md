@@ -21,7 +21,10 @@ Generic Containers
 <p>
   manages n*(n-1)/2 pairwise values, dynamically sized
 </p>
-
+- sparse_pairmap</br>
+<p>
+  manages pairwise values, dynamically sized, hashed
+</p>
 
 Prerequisites
   - requires C++11 conforming compiler
