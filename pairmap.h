@@ -59,15 +59,12 @@ class pairmap
 		//---------------------------------------------------------------
 		constexpr
 		iter__():
-			p_{nullptr}, mark_{nullptr}, end_{nullptr}, stride_(0)
+			p_{nullptr}, mark_{nullptr}, stride_(0)
 		{}
 		//-----------------------------------------------------
 		explicit constexpr
 		iter__(iterator_type start):
-			p_{start},
-			mark_{start-1+numElems},
-			end_{(numElems<2) ? p_ : (start-1+numElems*(numElems-1)) },
-			stride_{2}
+			p_{start}, mark_{start-1+numElems}, stride_{2}
 		{}
 
 
@@ -75,7 +72,7 @@ class pairmap
 		iter__&
 		operator ++ () {
 			++p_;
-			if(p_ == mark_ && p_ != end_) {
+			if(p_ == mark_) {
 				p_ += stride_;
 				++stride_;
 				mark_ += numElems;
@@ -103,16 +100,6 @@ class pairmap
 			return std::addressof(*p_);
 		}
 
-		explicit
-		operator bool() const {
-			return (p_ && (p_!= end_));
-		}
-		//-----------------------------------------------------
-		constexpr iter__
-		end() const {
-			return iter__{end_};
-		}
-
 		//---------------------------------------------------------------
 		bool operator == (const iter__& other) const {
 			return (p_ == other.p_);
@@ -124,7 +111,6 @@ class pairmap
 	private:
 		iterator_type p_;
 		iterator_type mark_;
-		iterator_type const end_;
 		difference_type stride_;
 	};
 
@@ -152,18 +138,18 @@ class pairmap
 		//---------------------------------------------------------------
 		constexpr
 		local_iter__() :
-			p_{nullptr}, mark_{nullptr}, end_{nullptr}, stride_(0)
+			p_{nullptr}, mark_{nullptr}, stride_(0)
 		{}
 		//-----------------------------------------------------
 		explicit constexpr
 		local_iter__(iterator_type start):
-			p_(start), mark_(nullptr), end_(start), stride_(0)
+			p_(start), mark_(nullptr), stride_(0)
 		{}
 		//-----------------------------------------------------
 		explicit constexpr
 		local_iter__(iterator_type start, difference_type index):
 			p_(start+((index<1)?1:index)), mark_(p_+index*numElems),
-			end_(start+(index+1)*numElems), stride_((index<1)?1:numElems)
+			stride_((index<1)?1:numElems)
 		{}
 
 		//---------------------------------------------------------------
@@ -197,18 +183,6 @@ class pairmap
 			return std::addressof(*p_);
 		}
 
-		//-----------------------------------------------------
-		explicit
-		operator bool() const {
-			return (p_ && (p_!= end_));
-		}
-
-		//-----------------------------------------------------
-		constexpr local_iter__
-		end() const {
-			return local_iter__{end_};
-		}
-
 		//---------------------------------------------------------------
 		bool operator == (const local_iter__& other) const {
 			return (p_ == other.p_);
@@ -219,8 +193,7 @@ class pairmap
 
 	private:
 		iterator_type p_;
-		iterator_type const mark_;
-		iterator_type const end_;
+		iterator_type mark_;
 		difference_type stride_;
 	};
 
@@ -426,15 +399,15 @@ public:
 	//-----------------------------------------------------
 	iterator
 	end() {
-		return iterator(vals_.end());
+		return iterator(vals_.end() + numElems);
 	}
 	const_iterator
 	end() const {
-		return const_iterator(vals_.end());
+		return const_iterator(vals_.end() + numElems);
 	}
 	const_iterator
 	cend() const {
-		return const_iterator(vals_.end());
+		return const_iterator(vals_.end() + numElems);
 	}
 
 	//-----------------------------------------------------

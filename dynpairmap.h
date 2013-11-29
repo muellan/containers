@@ -56,14 +56,12 @@ class dynpairmap
 		//---------------------------------------------------------------
 		constexpr
 		iter__():
-			p_{nullptr}, mark_{nullptr}, end_{nullptr}, count_{0}, stride_{0}
+			p_{nullptr}, mark_{nullptr}, count_{0}, stride_{0}
 		{}
 		//-----------------------------------------------------
 		explicit constexpr
 		iter__(iterator_type start, difference_type num = 0):
-			p_{start}, mark_{start + num - 1},
-			end_{(num < 2) ? p_ : (start - 1 + num*(num-1)) },
-			count_{num}, stride_{2}
+			p_{start}, mark_{start + num - 1}, count_{num}, stride_{2}
 		{}
 
 
@@ -71,7 +69,7 @@ class dynpairmap
 		iter__&
 		operator ++ () {
 			++p_;
-			if(p_ == mark_ && p_ != end_) {
+			if(p_ == mark_) {
 				p_ += stride_;
 				++stride_;
 				mark_ += count_;
@@ -100,18 +98,6 @@ class dynpairmap
 		}
 
 		//---------------------------------------------------------------
-		explicit
-		operator bool() const {
-			return (p_ && (p_!= end_));
-		}
-
-		//-----------------------------------------------------
-		constexpr iter__
-		end() const {
-			return iter__{end_};
-		}
-
-		//---------------------------------------------------------------
 		bool operator == (const iter__& other) const {
 			return (p_ == other.p_);
 		}
@@ -122,7 +108,6 @@ class dynpairmap
 	private:
 		iterator_type p_;
 		iterator_type mark_;
-		iterator_type const end_;
 		difference_type count_, stride_;
 	};
 
@@ -148,12 +133,12 @@ class dynpairmap
 		//---------------------------------------------------------------
 		constexpr
 		local_iter__() :
-			p_{nullptr}, mark_{nullptr}, end_{nullptr}, stride_(0)
+			p_{nullptr}, mark_{nullptr}, stride_(0)
 		{}
 		//-----------------------------------------------------
 		constexpr explicit
 		local_iter__(iterator_type start) :
-			p_(start), mark_(nullptr), end_(start), stride_(0)
+			p_(start), mark_(nullptr), stride_(0)
 		{}
 		//-----------------------------------------------------
 		constexpr explicit
@@ -161,7 +146,7 @@ class dynpairmap
 			iterator_type start, difference_type num, difference_type index)
 		:
 			p_(start+((index<1)?1:index)), mark_(p_+index*num),
-			end_(start+(index+1)*num), stride_((index<1)?1:num)
+			stride_((index<1)?1:num)
 		{}
 
 		//---------------------------------------------------------------
@@ -195,18 +180,6 @@ class dynpairmap
 			return std::addressof(*p_);
 		}
 
-		//-----------------------------------------------------
-		explicit
-		operator bool() const {
-			return (p_ && (p_!= end_));
-		}
-
-		//-----------------------------------------------------
-		constexpr local_iter__
-		end() const {
-			return local_iter__{end_};
-		}
-
 		//---------------------------------------------------------------
 		bool operator == (const local_iter__& other) const {
 			return (p_ == other.p_);
@@ -217,8 +190,7 @@ class dynpairmap
 
 	private:
 		iterator_type p_;
-		iterator_type const mark_;
-		iterator_type const end_;
+		iterator_type mark_;
 		difference_type stride_;
 	};
 
@@ -531,15 +503,15 @@ public:
 	//-----------------------------------------------------
 	iterator
 	end() {
-		return iterator(vals_.end());
+		return iterator(vals_.end() + vals_.cols());
 	}
 	const_iterator
 	end() const {
-		return const_iterator(vals_.end());
+		return const_iterator(vals_.end() + vals_.cols());
 	}
 	const_iterator
 	cend() const {
-		return const_iterator(vals_.end());
+		return const_iterator(vals_.end() + vals_.cols());
 	}
 
 	//-----------------------------------------------------
