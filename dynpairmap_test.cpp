@@ -22,20 +22,6 @@ namespace test {
 
 
 //-------------------------------------------------------------------
-template<class PairIter>
-auto
-pair_sum(PairIter i) -> typename std::decay<decltype(*i)>::type
-{
-	auto s = typename std::decay<decltype(*i)>::type(0);
-	while(i) {
-		s += *i;
-		++i;
-	}
-	return s;
-}
-
-
-//-------------------------------------------------------------------
 bool dynpairmap_correct()
 {
 	dynpairmap<int> pm;
@@ -62,15 +48,15 @@ bool dynpairmap_correct()
 //	std::cout << pm2 << std::endl;
 
 	return (true
-		&& (pair_sum(pm1.begin(0)) == 124)
-		&& (pair_sum(pm1.begin(1)) == 194)
-		&& (pair_sum(pm1.begin(2)) == 255)
-		&& (pair_sum(pm1.begin(3)) == 307)
-		&& (pair_sum(pm1.begin(4)) == 350)
-		&& (pair_sum(pm1.begin(5)) == 384)
-		&& (pair_sum(pm1.begin(6)) == 409)
-		&& (pair_sum(pm1.begin(7)) == 425)
-		&& (pair_sum(pm1.begin(8)) == 432)
+		&& (std::accumulate(pm1.begin(0), pm1.end(0), 0) == 124)
+		&& (std::accumulate(pm1.begin(1), pm1.end(1), 0) == 194)
+		&& (std::accumulate(pm1.begin(2), pm1.end(2), 0) == 255)
+		&& (std::accumulate(pm1.begin(3), pm1.end(3), 0) == 307)
+		&& (std::accumulate(pm1.begin(4), pm1.end(4), 0) == 350)
+		&& (std::accumulate(pm1.begin(5), pm1.end(5), 0) == 384)
+		&& (std::accumulate(pm1.begin(6), pm1.end(6), 0) == 409)
+		&& (std::accumulate(pm1.begin(7), pm1.end(7), 0) == 425)
+		&& (std::accumulate(pm1.begin(8), pm1.end(8), 0) == 432)
 		&& (pm3sum == int(11 * (pm3.index_count() * (pm3.index_count() - 1)) / 2))
 		&& (pm1(0,1) == 12) && (pm1(0,1) == 12)
 		&& (pm1(0,2) == 13) && (pm1(0,2) == 13)

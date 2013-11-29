@@ -240,7 +240,6 @@ public:
 
 	//---------------------------------------------------------------
 	class memento {
-		friend class dynpairmap;
 	public:
 		//-----------------------------------------------------
 		memento() = default;
@@ -259,8 +258,7 @@ public:
 
 		//-----------------------------------------------------
 		void
-		backup(const dynpairmap& source, size_type index)
-		{
+		backup(const dynpairmap& source, size_type index) {
 			if(vals_.size() < source.vals_.rows()) {
 				vals_.resize(source.vals_.rows());
 			}
@@ -272,9 +270,21 @@ public:
 			}
 		}
 
+		//-----------------------------------------------------
+		void
+		restore(dynpairmap& target, size_type index) const {
+			for(size_type i = 0; i < index; ++i) {
+				target.vals_(i,index) = vals_[i];
+			}
+			for(size_type i = index+1; i < vals_.cols(); ++i) {
+				target.vals_(index,i) = vals_[i-1];
+			}
+		}
+
 	private:
 		std::vector<value_type> vals_;
 	};
+	friend class memento;
 
 
 	//---------------------------------------------------------------
@@ -329,12 +339,7 @@ public:
 	//-----------------------------------------------------
 	void
 	assign_index(size_type index, const memento& mem) {
-		for(size_type i = 0; i < index; ++i) {
-			vals_(i,index) = mem.vals_[i];
-		}
-		for(size_type i = index+1; i < vals_.cols(); ++i) {
-			vals_(index,i) = mem.vals_[i-1];
-		}
+		mem.restore(*this, index);
 	}
 
 	//-----------------------------------------------------
@@ -352,10 +357,22 @@ public:
 		return vals_.cols();
 	}
 	//-----------------------------------------------------
+	static constexpr size_type
+	min_index() noexcept {
+		return 0;
+	}
+	//-----------------------------------------------------
+	size_type
+	max_index() const {
+		return vals_.rows();
+	}
+
+	//-----------------------------------------------------
 	size_type
 	size() const {
 		return (vals_.cols() * vals_.rows()) / size_type(2);
 	}
+
 	//-----------------------------------------------------
 	value_type&
 	operator () (size_type idx1, size_type idx2) {
@@ -485,6 +502,13 @@ public:
 		for(size_type i = idx2+1, n = vals_.rows(); i < n; ++i) {
 			swap(vals_(idx1,i), vals_(idx2,i));
 		}
+	}
+
+
+	//---------------------------------------------------------------
+	memento
+	get_memento(size_type index) const {
+		return memento{*this,index};
 	}
 
 

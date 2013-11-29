@@ -243,7 +243,6 @@ public:
 
 	//---------------------------------------------------------------
 	class memento {
-		friend class pairmap;
 	public:
 		//-----------------------------------------------------
 		memento() = default;
@@ -272,9 +271,21 @@ public:
 			}
 		}
 
+		//-----------------------------------------------------
+		void
+		restore(pairmap& target, size_type index) const {
+			for(size_type i = 0; i < index; ++i) {
+				target.vals_(i,index) = vals_[i];
+			}
+			for(size_type i = index+1; i < vals_.cols(); ++i) {
+				target.vals_(index,i) = vals_[i-1];
+			}
+		}
+
 	private:
 		std::array<value_type,numElems-1> vals_;
 	};
+	friend class memento;
 
 
 	//---------------------------------------------------------------
@@ -320,12 +331,7 @@ public:
 	//-----------------------------------------------------
 	void
 	assign_index(size_type index, const memento& mem) {
-		for(size_type i = 0; i < index; ++i) {
-			vals_(i,index) = mem.vals_[i];
-		}
-		for(size_type i = index+1; i < numElems; ++i) {
-			vals_(index,i) = mem.vals_[i-1];
-		}
+		mem.restore(*this, index);
 	}
 
 	//-----------------------------------------------------
@@ -344,9 +350,21 @@ public:
 	}
 	//-----------------------------------------------------
 	static constexpr size_type
+	min_index() noexcept {
+		return 0;
+	}
+	//-----------------------------------------------------
+	static constexpr size_type
+	max_index() noexcept {
+		return (numElems-1);
+	}
+
+	//-----------------------------------------------------
+	static constexpr size_type
 	size() noexcept {
 		return (numElems * (numElems-1)) / size_type(2);
 	}
+
 	//-----------------------------------------------------
 	value_type&
 	operator () (size_type idx1, size_type idx2) {
@@ -379,6 +397,13 @@ public:
 		for(size_type i = idx2+1; i < (numElems-1); ++i) {
 			swap(vals_(idx1,i), vals_(idx2,i));
 		}
+	}
+
+
+	//---------------------------------------------------------------
+	memento
+	get_memento(size_type index) const {
+		return memento{*this,index};
 	}
 
 
