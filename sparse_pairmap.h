@@ -476,11 +476,11 @@ public:
 	}
 	const_iterator
 	begin() const {
-		return iterator(vals_.begin());
+		return const_iterator(vals_.begin());
 	}
 	const_iterator
 	cbegin() const {
-		return iterator(vals_.begin());
+		return const_iterator(vals_.begin());
 	}
 
 	//-----------------------------------------------------
@@ -490,11 +490,11 @@ public:
 	}
 	const_iterator
 	end() const {
-		return iterator(vals_.end());
+		return const_iterator(vals_.end());
 	}
 	const_iterator
 	cend() const {
-		return iterator(vals_.end());
+		return const_iterator(vals_.end());
 	}
 
 	//-----------------------------------------------------
@@ -504,11 +504,11 @@ public:
 	}
 	const_local_iterator
 	begin(size_type index) const {
-		return local_iterator(vals_.begin(), vals_.end(), index);
+		return const_local_iterator(vals_.begin(), vals_.end(), index);
 	}
 	const_local_iterator
 	cbegin(size_type index) const {
-		return local_iterator(vals_.begin(), vals_.end(), index);
+		return const_local_iterator(vals_.begin(), vals_.end(), index);
 	}
 
 	//-----------------------------------------------------
@@ -518,11 +518,11 @@ public:
 	}
 	const_local_iterator
 	end(size_type) const {
-		return local_iterator(vals_.end());
+		return const_local_iterator(vals_.end());
 	}
 	const_local_iterator
 	cend(size_type) const {
-		return local_iterator(vals_.end());
+		return const_local_iterator(vals_.end());
 	}
 
 
