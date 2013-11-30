@@ -183,18 +183,6 @@ class sparse_pairmap
 		}
 
 		//---------------------------------------------------------------
-		explicit
-		operator bool() const {
-			return (it_ != end_);
-		}
-
-		//-----------------------------------------------------
-		constexpr index_iter__
-		end() const {
-			return index_iter__{end_};
-		}
-
-		//---------------------------------------------------------------
 		bool operator == (const index_iter__& other) const {
 			return (it_ == other.it_);
 		}
@@ -380,15 +368,47 @@ public:
 			: (vals_.find({idx2,idx1}) != vals_.end()) );
 	}
 
-
-	//---------------------------------------------------------------
+	//-----------------------------------------------------
 	void
-	insert_index(size_type index, const memento& mem) {
-		mem.restore(*this, index);
+	increase_indices_from(size_type index, size_type n = 1) {
+		if(n < 1) return;
+
+		using backup__ = std::vector<typename storage__::value_type>;
+
+		//backup values with occurences of indices >= 'index'
+		backup__ backup;
+		for(auto it = vals_.begin(); it != vals_.end();) {
+			if(	(it->first.first >= index) || (it->first.second >= index)) {
+				backup.push_back(*it);
+				it = vals_.erase(it);
+			} else {
+				++it;
+			}
+		}
+
+		//insert values with increased indices
+		for(const auto& x : backup) {
+			auto k = x.first;
+			if(k.first  >= index) k.first  += n;
+			if(k.second >= index) k.second += n;
+			vals_[k] = x.second;
+		}
 	}
 
 
 	//---------------------------------------------------------------
+	void
+	erase(size_type idx1, size_type idx2)
+	{
+		if(idx1 < idx2) {
+			auto it = vals_.find({idx1,idx2});
+			if(it != vals_.end()) vals_.erase(it);
+		} else {
+			auto it = vals_.find({idx2,idx1});
+			if(it != vals_.end()) vals_.erase(it);
+		}
+	}
+	//-----------------------------------------------------
 	void
 	erase_index(size_type index)
 	{
@@ -399,12 +419,13 @@ public:
 				++it;
 			}
 		}
-
 	}
 	//-----------------------------------------------------
 	void
-	erase_indices(size_type firstIndex, size_type lastIndex)
+	erase_range(size_type firstIndex, size_type lastIndex)
 	{
+		if(firstIndex >= lastIndex) return;
+
 		for(auto it = vals_.begin(); it != vals_.end();) {
 
 			if( (it->first.first  >= firstIndex &&
@@ -421,6 +442,74 @@ public:
 
 	//-----------------------------------------------------
 	void
+	erase_index_decrease_above(size_type index) {
+		using backup__ = std::vector<typename storage__::value_type>;
+
+		//backup values with occurences of indices > 'index'
+		backup__ backup;
+		for(auto it = vals_.begin(); it != vals_.end();) {
+			if(	(it->first.first == index) || (it->first.second == index)) {
+				it = vals_.erase(it);
+			}
+			else if( (it->first.first > index) || (it->first.second > index)) {
+				backup.push_back(*it);
+				it = vals_.erase(it);
+			}
+			else {
+				++it;
+			}
+		}
+
+		//insert values with decreased indices
+		for(const auto& x : backup) {
+			auto k = x.first;
+			if(k.first  > index) --k.first;
+			if(k.second > index) --k.second;
+			vals_[k] = x.second;
+		}
+	}
+	//-----------------------------------------------------
+	void
+	erase_range_decrease_above(size_type firstIndex, size_type lastIndex) {
+		if(firstIndex >= lastIndex) return;
+
+		using backup__ = std::vector<typename storage__::value_type>;
+
+		//backup values with occurences of indices > 'lastIndex'
+		backup__ backup;
+		for(auto it = vals_.begin(); it != vals_.end();) {
+
+			if( (it->first.first  >= firstIndex &&
+				 it->first.first  <= lastIndex) ||
+				(it->first.second >= firstIndex &&
+				 it->first.second <= lastIndex) )
+			{
+				it = vals_.erase(it);
+			}
+			else if( (it->first.first  > lastIndex) ||
+				     (it->first.second > lastIndex) )
+			{
+				backup.push_back(*it);
+				it = vals_.erase(it);
+			}
+			else {
+				++it;
+			}
+		}
+
+		const auto n = lastIndex - firstIndex + 1;
+
+		//insert values with decreased indices
+		for(const auto& x : backup) {
+			auto k = x.first;
+			if(k.first  > lastIndex) k.first  -= n;
+			if(k.second > lastIndex) k.second -= n;
+			vals_[k] = x.second;
+		}
+	}
+
+	//-----------------------------------------------------
+	void
 	swap_indices(size_type idx1, size_type idx2) {
 		using std::swap;
 
@@ -428,17 +517,18 @@ public:
 
 		using backup__ = std::vector<typename storage__::value_type>;
 
-		//backup values with occurences of idx1 or idx2
+		//backup and erase values with occurences of idx1 or idx2
 		backup__ backup;
-		for(const auto& x : vals_) {
-			if(	(x.first.first == idx1) || (x.first.second == idx1) ||
-				(x.first.first == idx2) || (x.first.second == idx2) )
+		for(auto it = vals_.begin(); it != vals_.end();) {
+			if(	(it->first.first == idx1) || (it->first.second == idx1) ||
+				(it->first.first == idx2) || (it->first.second == idx2) )
 			{
-				backup.push_back(x);
+				backup.push_back(*it);
+				it = vals_.erase(it);
+			} else {
+				++it;
 			}
 		}
-		erase_index(idx1);
-		erase_index(idx2);
 
 		//insert values with reversed indices
 		for(const auto& x : backup) {

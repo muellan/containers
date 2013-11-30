@@ -67,7 +67,7 @@ bool sparse_pairmap_correct()
 	pm3(6,7) = 14;
 
 	pm1.erase_index(20);
-	pm1.erase_indices(9,11);
+	pm1.erase_range(9,11);
 
 	pm3.swap_indices(0,3);
 	pm3.swap_indices(2,4);

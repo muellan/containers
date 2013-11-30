@@ -374,34 +374,22 @@ public:
 	resize_indices(size_type size, const value_type& value) {
 		vals_.resize(size-1, size, value);
 	}
-	//-----------------------------------------------------
-	void
-	insert_index(size_type index) {
-		vals_.insert_row(index);
-		vals_.insert_col(index);
-	}
-	//-----------------------------------------------------
-	void
-	insert_index(size_type index, const value_type& value) {
-		insert_index(index);
 
-		for(size_type i = 0; i < index; ++i) {
-			vals_(i,index) = value;
-		}
-		for(size_type i = index+1; i < vals_.cols(); ++i) {
-			vals_(index,i) = value;
-		}
-	}
 	//-----------------------------------------------------
 	void
-	insert_indices(size_type index, size_type n) {
+	increase_indices_from(size_type index, size_type n = 1) {
+		if(n < 1) return;
 		vals_.insert_rows(index, n);
 		vals_.insert_cols(index, n);
 	}
 	//-----------------------------------------------------
 	void
-	insert_indices(size_type index, size_type n, const value_type& value) {
-		insert_indices(index,n);
+	increase_indices_from(
+		size_type index, size_type n, const value_type& value)
+	{
+		if(n < 1) return;
+
+		increase_indices_from(index,n);
 
 		for(size_type j = index; j < index+n; ++j) {
 			for(size_type i = 0; i < j; ++i) {
@@ -412,17 +400,11 @@ public:
 			}
 		}
 	}
-	//-----------------------------------------------------
-	void
-	insert_index(size_type index, const memento& mem) {
-		insert_index(index);
-		assign_index(index,mem);
-	}
 
 
 	//---------------------------------------------------------------
 	void
-	erase_index(size_type index)
+	erase_index_decrease_above(size_type index)
 	{
 		for(size_type r = 0; r < index; ++r) {
 			for(size_type c = index; c < vals_.rows(); ++c) {
@@ -441,9 +423,11 @@ public:
 	}
 	//-----------------------------------------------------
 	void
-	erase_indices(size_type firstIndex, size_type lastIndex)
+	erase_range_decrease_above(size_type firstIndex, size_type lastIndex)
 	{
 		using std::min;
+
+		if(firstIndex >= lastIndex) return;
 
 		vals_.erase_rows(
 			min(firstIndex,vals_.rows()-1),
