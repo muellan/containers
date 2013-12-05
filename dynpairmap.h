@@ -83,6 +83,21 @@ class dynpairmap
 			++*this;
 			return old;
 		}
+		//-----------------------------------------------------
+		iter__&
+		operator += (difference_type diff) {
+			for(difference_type i = 0; i < diff; ++i) {
+				operator++();
+			}
+			return *this;
+		}
+		//-----------------------------------------------------
+		iter__
+		operator + (difference_type diff) const {
+			auto cp(*this);
+			cp += diff;
+			return cp;
+		}
 
 		//---------------------------------------------------------------
 		auto
@@ -165,6 +180,21 @@ class dynpairmap
 			local_iter__ old(*this);
 			++*this;
 			return old;
+		}
+		//-----------------------------------------------------
+		local_iter__&
+		operator += (difference_type diff) {
+			for(difference_type i = 0; i < diff; ++i) {
+				operator++();
+			}
+			return *this;
+		}
+		//-----------------------------------------------------
+		local_iter__
+		operator + (difference_type diff) const {
+			auto cp(*this);
+			cp += diff;
+			return cp;
 		}
 
 		//---------------------------------------------------------------
