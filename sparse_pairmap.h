@@ -84,17 +84,6 @@ class sparse_pairmap
 			++*this;
 			return old;
 		}
-		//-----------------------------------------------------
-		iter__&
-		operator += (difference_type diff) {
-			it_ += diff;
-			return *this;
-		}
-		//-----------------------------------------------------
-		iter__
-		operator + (difference_type diff) const {
-			return iter__(it_ + diff);
-		}
 
 		//---------------------------------------------------------------
 		auto
@@ -173,21 +162,6 @@ class sparse_pairmap
 			index_iter__ old(*this);
 			++*this;
 			return old;
-		}
-		//-----------------------------------------------------
-		index_iter__&
-		operator += (difference_type diff) {
-			for(difference_type i = 0; i < diff; ++i) {
-				operator++();
-			}
-			return *this;
-		}
-		//-----------------------------------------------------
-		index_iter__
-		operator + (difference_type diff) const {
-			auto cp(*this);
-			cp += diff;
-			return cp;
 		}
 
 		//---------------------------------------------------------------
