@@ -67,13 +67,10 @@ class matrix
 			return (*p_);
 		}
 		//-----------------------------------------------------
-		pointer operator ->() const {
+		pointer operator ->() const noexcept {
 			return (p_);
 		}
-		//-----------------------------------------------------
-		explicit operator bool() const {
-			return (p_);
-		}
+
 
 		//-----------------------------------------------------
 		value_type& operator [] (difference_type i) const {
@@ -142,89 +139,103 @@ class matrix
 	};
 
 
-
-
-	/*************************************************************************
-	 *
-	 *
-	 *************************************************************************/
+	//---------------------------------------------------------------
 	template<class T>
-	class block_traverser__ :
-		public std::iterator<std::forward_iterator_tag,T>
+	struct section__
 	{
-		using base_t = std::iterator<std::forward_iterator_tag,T> ;
-		using this_t = block_traverser__<T> ;
+		//-----------------------------------------------------
+		using value_type = T;
+		using pointer = T*;
+		using reference = T&;
+		using difference_type = std::ptrdiff_t;
 
-	public:
+		//--------------------------------------------------------
+		class iterator
+		{
+		public:
+			//-----------------------------------------------------
+			using iterator_category = std::forward_iterator_tag;
+			using value_type = T;
+			using pointer = T*;
+			using reference = T&;
+			using difference_type = std::ptrdiff_t;
 
-		//---------------------------------------------------------------
-		using value_type = typename base_t::value_type ;
-		using pointer = typename base_t::pointer ;
-		using reference = typename base_t::reference ;
-		using difference_type = typename base_t::difference_type ;
+			//-----------------------------------------------------
+			explicit constexpr
+			iterator(
+				pointer p = nullptr,
+				difference_type length = 0, difference_type stride = 0) noexcept
+			:
+				p_{p}, count_(0), length_(length), stride_(stride)
+			{}
+
+
+			//-----------------------------------------------------
+			reference operator *() const {
+				return (*p_);
+			}
+			//-----------------------------------------------------
+			pointer operator ->() const noexcept {
+				return (p_);
+			}
+
+			//-----------------------------------------------------
+			iterator& operator ++ () {
+				++p_;
+				++count_;
+				if(count_ >= length_) {
+					count_ = 0;
+					p_ += stride_;
+				}
+				return *this;
+			}
+			//-----------------------------------------------------
+			iterator operator ++ (int) {
+				auto old(*this);
+				++*this;
+				return old;
+			}
+
+			//-----------------------------------------------------
+			bool operator ==(const iterator& other) {
+				return (p_ == other.p_);
+			}
+			bool operator !=(const iterator& other) {
+				return (p_ != other.p_);
+			}
+
+		private:
+			pointer p_;
+			difference_type count_, length_, stride_;
+		};
+
 
 		//---------------------------------------------------------------
 		explicit constexpr
-		block_traverser__(
-			pointer p = nullptr, pointer pend = nullptr,
-			difference_type length = 0, difference_type stride = 0)
+		section__(
+			pointer pbeg = nullptr, pointer pend = nullptr,
+			difference_type length = 0, difference_type stride = 0) noexcept
 		:
-			base_t{},
-			p_{p}, pend_{pend}, count_(0), length_(length), stride_(stride)
+			pbeg_{pbeg}, pend_{pend}, length_(length), stride_(stride)
 		{}
 
-
-		//---------------------------------------------------------------
-		reference operator *() const {
-			return (*p_);
-		}
 		//-----------------------------------------------------
-		pointer operator ->() const {
-			return (p_);
+		constexpr iterator
+		begin() const noexcept {
+			return iterator{pbeg_, length_, stride_};
 		}
+
 		//-----------------------------------------------------
-		explicit operator bool() const {
-			return (p_ != pend_);
+		constexpr iterator
+		end() const noexcept {
+			return iterator{pend_};
 		}
 
-		//---------------------------------------------------------------
-		this_t& operator ++ () {
-			++p_;
-			++count_;
-			if(count_ >= length_) {
-				count_ = 0;
-				p_ += stride_;
-			}
-			return *this;
-		}
-		//-----------------------------------------------------
-		this_t operator ++ (int) {
-			this_t old(*this);
-			++*this;
-			return old;
-		}
-
-
-		//---------------------------------------------------------------
-		constexpr block_traverser__
-		end() const {
-			return block_traverser__(pend_);
-		}
-
-
-		//---------------------------------------------------------------
-		bool operator ==(const this_t& other) {
-			return ((this == &other) ? true : (p_ == other.p_));
-		}
-		bool operator !=(const this_t& other) {
-			return ((this == &other) ? (p_ != pend_) : (p_ != other.p_));
-		}
 
 	private:
-		pointer p_, pend_;
-		difference_type count_, length_, stride_;
+		pointer pbeg_, pend_;
+		difference_type length_, stride_;
 	};
-
 
 
 public:
@@ -254,11 +265,12 @@ public:
 	using diag_iterator        = stride_iter__<value_type,ncols+1>;
 	using const_diag_iterator  = stride_iter__<const value_type,ncols+1>;
 	//-----------------------------------------------------
-	using block_traverser       = block_traverser__<value_type>;
-	using const_block_traverser = block_traverser__<const value_type>;
+	using section              = section__<value_type>;
+	using const_section        = section__<const value_type>;
 	//-----------------------------------------------------
 	using size_type       = std::size_t;
 	using difference_type = std::ptrdiff_t;
+
 
 
 	//---------------------------------------------------------------
@@ -648,47 +660,47 @@ public:
 
 
 	//---------------------------------------------------------------
-	// BLOCK ITERATORS
+	// SECTIONS
 	//---------------------------------------------------------------
-	block_traverser
-	traverse_block(
+	section
+	block(
 		size_type firstRow, size_type firstCol,
 		size_type lastRow,  size_type lastCol)
 	{
-		difference_type stride = ncols -  lastCol - 1 + firstCol;
+		const auto stride = difference_type(ncols -  lastCol - 1 + firstCol);
 
-		return block_traverser{
+		return section{
 			std::addressof(m_[firstRow][firstCol]),
 			std::addressof(m_[lastRow][lastCol]) + stride + 1,
-			static_cast<difference_type>(lastCol - firstCol + 1),
+			difference_type(lastCol - firstCol + 1),
 			stride };
 	}
 	//-----------------------------------------------------
-	const_block_traverser
-	traverse_block(
+	const_section
+	block(
 		size_type firstRow, size_type firstCol,
 		size_type lastRow,  size_type lastCol) const
 	{
-		difference_type stride = ncols -  lastCol - 1 + firstCol;
+		const auto stride = difference_type(ncols -  lastCol - 1 + firstCol);
 
-		return const_block_traverser{
+		return const_section{
 			std::addressof(m_[firstRow][firstCol]),
 			std::addressof(m_[lastRow][lastCol]) + stride + 1,
-			static_cast<difference_type>(lastCol - firstCol + 1),
+			difference_type(lastCol - firstCol + 1),
 			stride };
 	}
 	//-----------------------------------------------------
-	const_block_traverser
-	ctraverse_block(
+	const_section
+	cblock(
 		size_type firstRow, size_type firstCol,
 		size_type lastRow,  size_type lastCol) const
 	{
-		difference_type stride = ncols -  lastCol - 1 + firstCol;
+		const auto stride = difference_type(ncols -  lastCol - 1 + firstCol);
 
-		return const_block_traverser{
+		return const_section{
 			std::addressof(m_[firstRow][firstCol]),
 			std::addressof(m_[lastRow][lastCol]) + stride + 1,
-			static_cast<difference_type>(lastCol - firstCol + 1),
+			difference_type(lastCol - firstCol + 1),
 			stride };
 	}
 

@@ -214,29 +214,23 @@ bool dynmatrix_iterators_correct()
 	}
 	sum *= 100;
 
-	auto i = m.traverse_block(0,0, m.rows()-1, m.cols()-1);
-	while(i) {
-		sum += *i;
-		++i;
+	for(auto x : m.block(0,0, m.rows()-1, m.cols()-1)) {
+		sum += x;
 	}
 	sum *= 100;
 
 	for(std::size_t r = 0; r < m.rows(); ++r) {
 		for(std::size_t c = 0; c < m.cols(); ++c) {
-			i = m.traverse_block(0,0, r,c);
-			while(i) {
-				sum += *i;
-				++i;
+			for(auto x : m.block(0,0, r,c)) {
+				sum += x;
 			}
 		}
 	}
 
 	for(int r =  m.rows()-1; r >= 0; --r) {
 		for(int c = m.cols()-1; c >= 0; --c) {
-			i = m.traverse_block(r,c, m.rows()-1, m.cols()-1);
-			while(i) {
-				sum += *i;
-				++i;
+			for(auto x : m.block(r,c, m.rows()-1, m.cols()-1)) {
+				sum += x;
 			}
 		}
 	}
