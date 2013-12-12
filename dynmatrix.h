@@ -293,8 +293,8 @@ public:
 	using col_iterator       = stride_iter__<value_type>;
 	using const_col_iterator = stride_iter__<const value_type>;
 	//-----------------------------------------------------
-	using section              = section__<value_type>;
-	using const_section        = section__<const value_type>;
+	using section            = section__<value_type>;
+	using const_section      = section__<const value_type>;
 	//-----------------------------------------------------
 	using size_type       = std::size_t;
 	using difference_type = std::ptrdiff_t;
@@ -960,7 +960,7 @@ public:
 	// SECTIONS
 	//---------------------------------------------------------------
 	section
-	block(
+	subrange(
 		size_type firstRow, size_type firstCol,
 		size_type lastRow,  size_type lastCol)
 	{
@@ -974,7 +974,7 @@ public:
 	}
 	//-----------------------------------------------------
 	const_section
-	block(
+	subrange(
 		size_type firstRow, size_type firstCol,
 		size_type lastRow,  size_type lastCol) const
 	{
@@ -988,7 +988,7 @@ public:
 	}
 	//-----------------------------------------------------
 	const_section
-	cblock(
+	csubrange(
 		size_type firstRow, size_type firstCol,
 		size_type lastRow,  size_type lastCol) const
 	{

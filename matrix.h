@@ -663,7 +663,7 @@ public:
 	// SECTIONS
 	//---------------------------------------------------------------
 	section
-	block(
+	subrange(
 		size_type firstRow, size_type firstCol,
 		size_type lastRow,  size_type lastCol)
 	{
@@ -677,7 +677,7 @@ public:
 	}
 	//-----------------------------------------------------
 	const_section
-	block(
+	subrange(
 		size_type firstRow, size_type firstCol,
 		size_type lastRow,  size_type lastCol) const
 	{
@@ -691,7 +691,7 @@ public:
 	}
 	//-----------------------------------------------------
 	const_section
-	cblock(
+	csubrange(
 		size_type firstRow, size_type firstCol,
 		size_type lastRow,  size_type lastCol) const
 	{

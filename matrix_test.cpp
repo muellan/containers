@@ -63,14 +63,14 @@ bool matrix_iterators_correct()
 	}
 	sum *= 100;
 
-	for(auto x : m.block(0,0, m.rows()-1, m.cols()-1)) {
+	for(auto x : m.subrange(0,0, m.rows()-1, m.cols()-1)) {
 		sum += x;
 	}
 	sum *= 100;
 
 	for(std::size_t r = 0; r < m.rows(); ++r) {
 		for(std::size_t c = 0; c < m.cols(); ++c) {
-			for(auto x : m.block(0,0, r,c)) {
+			for(auto x : m.subrange(0,0, r,c)) {
 				sum += x;
 			}
 		}
@@ -78,7 +78,7 @@ bool matrix_iterators_correct()
 
 	for(int r =  m.rows()-1; r >= 0; --r) {
 		for(int c = m.cols()-1; c >= 0; --c) {
-			for(auto x : m.block(r,c, m.rows()-1, m.cols()-1)) {
+			for(auto x : m.subrange(r,c, m.rows()-1, m.cols()-1)) {
 				sum += x;
 			}
 		}
