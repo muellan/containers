@@ -10,6 +10,7 @@
 
 #ifdef AM_USE_TESTS
 
+#include <map>
 #include <algorithm>
 #include <numeric>
 #include <iostream>
@@ -22,21 +23,74 @@ namespace test {
 
 
 //-------------------------------------------------------------------
+bool dynpairmap_subranges_correct()
+{
+	//expected range results
+	std::map<std::pair<int,int>,int> rr;
+	rr[{0,0}] = 144;  rr[{0,1}] = 356;  rr[{0,2}] = 615;  rr[{0,3}] = 900;
+	rr[{0,4}] = 1190; rr[{0,5}] = 1464; rr[{0,6}] = 1701; rr[{0,7}] = 1880;
+	rr[{0,8}] = 1980; rr[{0,9}] = 1980; rr[{1,1}] = 224;  rr[{1,2}] = 496;
+	rr[{1,3}] = 795;  rr[{1,4}] = 1100; rr[{1,5}] = 1390; rr[{1,6}] = 1644;
+	rr[{1,7}] = 1841; rr[{1,8}] = 1960; rr[{1,9}] = 1980;
+	rr[{2,2}] = 295;  rr[{2,3}] = 618;  rr[{2,4}] = 948;  rr[{2,5}] = 1264;
+	rr[{2,6}] = 1545; rr[{2,7}] = 1770; rr[{2,8}] = 1918; rr[{2,9}] = 1968;
+	rr[{3,3}] = 357;  rr[{3,4}] = 722;  rr[{3,5}] = 1074; rr[{3,6}] = 1392;
+	rr[{3,7}] = 1655; rr[{3,8}] = 1842; rr[{3,9}] = 1932;
+	rr[{4,4}] = 410;  rr[{4,5}] = 808;  rr[{4,6}] = 1173; rr[{4,7}] = 1484;
+	rr[{4,8}] = 1720; rr[{4,9}] = 1860;
+	rr[{5,5}] = 454;  rr[{5,6}] = 876;  rr[{5,7}] = 1245; rr[{5,8}] = 1540;
+	rr[{5,9}] = 1740;
+	rr[{6,6}] = 489;  rr[{6,7}] = 926;  rr[{6,8}] = 1290; rr[{6,9}] = 1560;
+	rr[{7,7}] = 515;  rr[{7,8}] = 958;  rr[{7,9}] = 1308;
+	rr[{8,8}] = 532;  rr[{8,9}] = 972;
+	rr[{9,9}] = 540;
+
+
+	dynpairmap<int> pm;
+	pm.max_index(9);
+	pm = 0;
+
+	for(size_t i = 0; i <= pm.max_index(); ++i) {
+		for(size_t j = i+1; j <= pm.max_index(); ++j) {
+			pm(i,j) = 10*(i+1) + j+1;
+		}
+	}
+
+	for(size_t f = 0; f <= pm.max_index(); ++f) {
+		for(size_t l = f; l <= pm.max_index(); ++l) {
+			auto r = pm.subrange(f,l);
+
+//			std::cout << "[" << f << "," << l << "] : "
+//				<< std::accumulate(r.begin(), r.end(), 0)
+//				<< " == " << rr[{f,l}]
+//				<< std::endl;
+
+			if(std::accumulate(r.begin(), r.end(), 0) != rr[{f,l}])
+				return false;
+		}
+	}
+
+	return true;
+}
+
+
+
+//-------------------------------------------------------------------
 bool dynpairmap_correct()
 {
 	dynpairmap<int> pm;
 
-	pm.resize_indices(9);
+	pm.max_index(8);
 	pm = 0;
 
-	for(size_t i = 0; i < pm.index_count(); ++i) {
-		for(size_t j = i+1; j < pm.index_count(); ++j) {
+	for(size_t i = 0; i <= pm.max_index(); ++i) {
+		for(size_t j = i+1; j <= pm.max_index(); ++j) {
 			pm(i,j) = 10*(i+1) + j+1;
 		}
 	}
 
 	dynpairmap<int> pm3;
-	pm3.resize_indices(7);
+	pm3.max_index(6);
 	for(auto& x : pm3) {x = 11; }
 	auto pm3sum = std::accumulate(begin(pm3), end(pm3), 0);
 
@@ -48,6 +102,7 @@ bool dynpairmap_correct()
 //	std::cout << pm2 << std::endl;
 
 	return (true
+		&& dynpairmap_subranges_correct()
 		&& (std::accumulate(pm1.begin(0), pm1.end(0), 0) == 124)
 		&& (std::accumulate(pm1.begin(1), pm1.end(1), 0) == 194)
 		&& (std::accumulate(pm1.begin(2), pm1.end(2), 0) == 255)
@@ -57,7 +112,7 @@ bool dynpairmap_correct()
 		&& (std::accumulate(pm1.begin(6), pm1.end(6), 0) == 409)
 		&& (std::accumulate(pm1.begin(7), pm1.end(7), 0) == 425)
 		&& (std::accumulate(pm1.begin(8), pm1.end(8), 0) == 432)
-		&& (pm3sum == int(11 * (pm3.index_count() * (pm3.index_count() - 1)) / 2))
+		&& (pm3sum == int(11 * (pm3.size())))
 		&& (pm1(0,1) == 12) && (pm1(0,1) == 12)
 		&& (pm1(0,2) == 13) && (pm1(0,2) == 13)
 		&& (pm1(0,3) == 14) && (pm1(0,3) == 14)

@@ -29,12 +29,12 @@ namespace am {
  *
  *
  *****************************************************************************/
-template<class ValueType, std::size_t numElems>
+template<class ValueType, std::size_t maxIndex>
 class pairmap
 {
-	static_assert(numElems > 1, "pairmap<T,n> : n must be at least 2");
+	static_assert(maxIndex > 0, "pairmap<T,maxIdx> : maxIdx must be at least 1");
 
-	using storage__ = matrix<ValueType,numElems-1,numElems>;
+	using storage__ = matrix<ValueType,maxIndex,maxIndex+1>;
 	using storage_iter__ = typename storage__::iterator;
 	using storage_citer__ = typename storage__::const_iterator;
 
@@ -42,29 +42,28 @@ class pairmap
 	//-------------------------------------------------------------------
 	//
 	//-------------------------------------------------------------------
-	template<class T>
-	class iter__ :
-		public std::iterator<std::forward_iterator_tag, T>
+	template<class Iter>
+	class iter__
 	{
+		using traits__ = std::iterator_traits<Iter>;
 	public:
 		//---------------------------------------------------------------
 		using iterator_category = std::forward_iterator_tag;
-		using iterator_type = T;
-		using value_type = typename std::iterator_traits<T>::value_type;
-		using pointer = typename std::iterator_traits<T>::pointer;
-		using reference = typename std::iterator_traits<T>::reference;
-		using difference_type = typename std::iterator_traits<T>::difference_type;
+		using value_type = typename traits__::value_type;
+		using pointer = typename traits__::pointer;
+		using reference = typename traits__::reference;
+		using difference_type = typename traits__::difference_type;
 
 
 		//---------------------------------------------------------------
 		constexpr
 		iter__():
-			p_{nullptr}, mark_{nullptr}, stride_(0)
+			p_(), mark_(), stride_()
 		{}
 		//-----------------------------------------------------
 		explicit constexpr
-		iter__(iterator_type start):
-			p_{start}, mark_{start-1+numElems}, stride_{2}
+		iter__(Iter start):
+			p_(start), mark_(start+maxIndex), stride_(2)
 		{}
 
 
@@ -75,7 +74,7 @@ class pairmap
 			if(p_ == mark_) {
 				p_ += stride_;
 				++stride_;
-				mark_ += numElems;
+				mark_ += maxIndex+1;
 			}
 			return *this;
 		}
@@ -89,13 +88,13 @@ class pairmap
 
 		//---------------------------------------------------------------
 		auto
-		operator * () -> decltype(*std::declval<T>())
+		operator * () -> decltype(*std::declval<Iter>())
 		{
 			return *p_;
 		}
 		//-----------------------------------------------------
 		auto
-		operator -> () -> decltype(std::addressof(*std::declval<T>()))
+		operator -> () -> decltype(std::addressof(*std::declval<Iter>()))
 		{
 			return std::addressof(*p_);
 		}
@@ -109,8 +108,8 @@ class pairmap
 		}
 
 	private:
-		iterator_type p_;
-		iterator_type mark_;
+		Iter p_;
+		Iter mark_;
 		difference_type stride_;
 	};
 
@@ -120,36 +119,34 @@ class pairmap
 	//-------------------------------------------------------------------
 	//
 	//-------------------------------------------------------------------
-	template<class T>
-	class local_iter__ :
-		public std::iterator<std::forward_iterator_tag, T>
+	template<class Iter>
+	class local_iter__
 	{
-		using base_t = std::iterator<std::forward_iterator_tag, T>;
+		using traits__ = std::iterator_traits<Iter>;
 	public:
 		//---------------------------------------------------------------
 		using iterator_category = std::forward_iterator_tag;
-		using iterator_type = T;
-		using value_type = typename std::iterator_traits<T>::value_type;
-		using pointer = typename std::iterator_traits<T>::pointer;
-		using reference = typename std::iterator_traits<T>::reference;
-		using difference_type = typename std::iterator_traits<T>::difference_type;
+		using value_type = typename traits__::value_type;
+		using pointer = typename traits__::pointer;
+		using reference = typename traits__::reference;
+		using difference_type = typename traits__::difference_type;
 
 
 		//---------------------------------------------------------------
 		constexpr
 		local_iter__() :
-			p_{nullptr}, mark_{nullptr}, stride_(0)
+			p_(), mark_(), stride_()
 		{}
 		//-----------------------------------------------------
 		explicit constexpr
-		local_iter__(iterator_type start):
-			p_(start), mark_(nullptr), stride_(0)
+		local_iter__(Iter start):
+			p_(start), mark_(), stride_()
 		{}
 		//-----------------------------------------------------
 		explicit constexpr
-		local_iter__(iterator_type start, difference_type index):
-			p_(start+((index<1)?1:index)), mark_(p_+index*numElems),
-			stride_((index<1)?1:numElems)
+		local_iter__(Iter start, difference_type index):
+			p_(start+((index<1)?1:index)), mark_(p_+index*(maxIndex+1)),
+			stride_((index<1) ? 1 : (maxIndex+1))
 		{}
 
 		//---------------------------------------------------------------
@@ -172,13 +169,13 @@ class pairmap
 
 		//---------------------------------------------------------------
 		auto
-		operator * () -> decltype(*std::declval<T>())
+		operator * () -> decltype(*std::declval<Iter>())
 		{
 			return *p_;
 		}
 		//-----------------------------------------------------
 		auto
-		operator -> () -> decltype(std::addressof(*std::declval<T>()))
+		operator -> () -> decltype(std::addressof(*std::declval<Iter>()))
 		{
 			return std::addressof(*p_);
 		}
@@ -192,11 +189,133 @@ class pairmap
 		}
 
 	private:
-		iterator_type p_;
-		iterator_type mark_;
+		Iter p_;
+		Iter mark_;
 		difference_type stride_;
 	};
 
+
+	//---------------------------------------------------------------
+	template<class Iter>
+	struct section__
+	{
+		//-----------------------------------------------------
+		struct iterator
+		{
+			using traits__ = std::iterator_traits<Iter>;
+		public:
+			//-------------------------------------------
+			using iterator_category = std::forward_iterator_tag;
+			using value_type = typename traits__::value_type;
+			using pointer = typename traits__::pointer;
+			using reference = typename traits__::reference;
+			using difference_type = typename traits__::difference_type;
+
+			//-------------------------------------------
+			explicit constexpr
+			iterator(Iter p):
+				p_(p), mark_(), mark2_(), stride_(), dnf_()
+			{}
+			//-------------------------------------------
+			explicit constexpr
+			iterator(Iter p, difference_type fidx, difference_type lidx):
+				p_(p),
+				mark_(p	+ ((fidx > 0) ? (lidx - fidx) : (maxIndex - 1))),
+				mark2_(mark_ + ((fidx > 0) ? ((fidx-1) * (maxIndex+1)) : 0)),
+				stride_((fidx > 0) ? (1 + maxIndex + fidx - lidx) : 2),
+				dnf_(maxIndex - fidx - ((fidx > 0) ? 1 : 2))
+			{}
+
+			//-------------------------------------------
+			iterator&
+			operator ++ () {
+				if(p_ == mark_) {
+					if(p_ == mark2_) {
+						p_ += stride_ + 1;
+						mark2_ = p_ + dnf_;
+						stride_ = maxIndex - dnf_ + 2;
+					} else {
+						p_ += stride_;
+						mark_ += maxIndex + 1;
+					}
+				} else if(p_ == mark2_) {
+					p_ += stride_;
+					mark2_ += maxIndex + 1;
+					++stride_;
+				} else {
+					++p_;
+				}
+				return *this;
+			}
+			//-------------------------------------------
+			iterator
+			operator ++ (int) {
+				iterator old(*this);
+				++*this;
+				return old;
+			}
+
+			//-------------------------------------------
+			auto
+			operator * () -> decltype(*std::declval<Iter>())
+			{
+				return *p_;
+			}
+			//-------------------------------------------
+			auto
+			operator -> () -> decltype(std::addressof(*std::declval<Iter>()))
+			{
+				return std::addressof(*p_);
+			}
+
+			//-------------------------------------------
+			bool operator == (const iterator& other) const {
+				return (p_ == other.p_);
+			}
+			bool operator != (const iterator& other) const {
+				return (p_ != other.p_);
+			}
+
+		private:
+			Iter p_;
+			Iter mark_;
+			Iter mark2_;
+			difference_type stride_;
+			difference_type dnf_;
+		};
+
+
+		//-----------------------------------------------------
+		using difference_type = typename iterator::difference_type;
+
+		//-----------------------------------------------------
+		constexpr
+		section__() = default;
+		//-----------------------------------------------------
+		explicit constexpr
+		section__(Iter beg, difference_type fidx, difference_type lidx):
+			fst_{beg + ((fidx > 1) ? (fidx-1) : 0)},
+			lst_{beg + ((lidx+1)*(maxIndex+1) - 1) +
+				((lidx < difference_type(maxIndex)) ? (lidx + 2) : 0)},
+			fidx_{fidx}, lidx_{lidx}
+		{}
+
+		//-----------------------------------------------------
+		constexpr iterator
+		begin() const {
+			return iterator(fst_, fidx_, lidx_);
+		}
+		//-----------------------------------------------------
+		constexpr iterator
+		end() const {
+			return iterator(lst_);
+		}
+
+
+	private:
+		Iter fst_, lst_;
+		difference_type fidx_, lidx_;
+	};
 
 
 public:
@@ -212,6 +331,9 @@ public:
 	//-----------------------------------------------------
 	using       local_iterator = local_iter__<storage_iter__>;
 	using const_local_iterator = local_iter__<storage_citer__>;
+	//-----------------------------------------------------
+	using       section = section__<storage_iter__>;
+	using const_section = section__<storage_citer__>;
 
 
 	//---------------------------------------------------------------
@@ -227,7 +349,7 @@ public:
 			for(size_type i = 0; i < index; ++i) {
 				vals_[i] = source.vals_(i,index);
 			}
-			for(size_type i = index+1; i < numElems; ++i) {
+			for(size_type i = index+1; i <= maxIndex; ++i) {
 				vals_[i-1] = source.vals_(index,i);
 			}
 		}
@@ -239,7 +361,7 @@ public:
 			for(size_type i = 0; i < index; ++i) {
 				vals_[i] = source.vals_(i,index);
 			}
-			for(size_type i = index+1; i < numElems; ++i) {
+			for(size_type i = index+1; i <= maxIndex; ++i) {
 				vals_[i-1] = source.vals_(index,i);
 			}
 		}
@@ -256,7 +378,7 @@ public:
 		}
 
 	private:
-		std::array<value_type,numElems-1> vals_;
+		std::array<value_type,maxIndex> vals_;
 	};
 	friend class memento;
 
@@ -282,8 +404,8 @@ public:
 	pairmap&
 	operator = (const value_type& value)
 	{
-		for(size_type i = 0; i < (numElems-1); ++i) {
-			for(size_type j = i+1; j < numElems; ++j) {
+		for(size_type i = 0; i < maxIndex; ++i) {
+			for(size_type j = i+1; j <= maxIndex; ++j) {
 				vals_(i,j) = value;
 			}
 		}
@@ -297,7 +419,7 @@ public:
 		for(size_type i = 0; i < index; ++i){
 			vals_(i,index) = value;
 		}
-		for(size_type i = index+1; i < numElems; ++i) {
+		for(size_type i = index+1; i <= maxIndex; ++i) {
 			vals_(index,i) = value;
 		}
 	}
@@ -319,7 +441,7 @@ public:
 	//---------------------------------------------------------------
 	static constexpr size_type
 	index_count() noexcept {
-		return numElems;
+		return maxIndex+1;
 	}
 	//-----------------------------------------------------
 	static constexpr size_type
@@ -329,13 +451,13 @@ public:
 	//-----------------------------------------------------
 	static constexpr size_type
 	max_index() noexcept {
-		return (numElems-1);
+		return maxIndex;
 	}
 
 	//-----------------------------------------------------
 	static constexpr size_type
 	size() noexcept {
-		return (numElems * (numElems-1)) / size_type(2);
+		return (maxIndex * (maxIndex+1)) / size_type(2);
 	}
 
 	//-----------------------------------------------------
@@ -367,7 +489,7 @@ public:
 			swap(vals_(idx1,i), vals_(i,idx2));
 		}
 
-		for(size_type i = idx2+1; i < (numElems-1); ++i) {
+		for(size_type i = idx2+1; i < maxIndex; ++i) {
 			swap(vals_(idx1,i), vals_(idx2,i));
 		}
 	}
@@ -399,15 +521,15 @@ public:
 	//-----------------------------------------------------
 	iterator
 	end() {
-		return iterator(vals_.end() + numElems);
+		return iterator(vals_.end() + maxIndex + 1);
 	}
 	const_iterator
 	end() const {
-		return const_iterator(vals_.end() + numElems);
+		return const_iterator(vals_.end() + maxIndex + 1);
 	}
 	const_iterator
 	cend() const {
-		return const_iterator(vals_.end() + numElems);
+		return const_iterator(vals_.end() + maxIndex + 1);
 	}
 
 	//-----------------------------------------------------
@@ -427,26 +549,36 @@ public:
 	//-----------------------------------------------------
 	local_iterator
 	end(size_type index) {
-		return local_iterator(vals_.begin() + ((index+1)*numElems));
+		return local_iterator(vals_.begin() + ((index+1)*(maxIndex+1)));
 	}
 	const_local_iterator
 	end(size_type index) const {
-		return const_local_iterator(vals_.begin() + ((index+1)*numElems));
+		return const_local_iterator(vals_.begin() + ((index+1)*(maxIndex+1)));
 	}
 	const_local_iterator
 	cend(size_type index) const {
-		return const_local_iterator(vals_.begin() + ((index+1)*numElems));
+		return const_local_iterator(vals_.begin() + ((index+1)*(maxIndex+1)));
 	}
 
+
 	//---------------------------------------------------------------
-//	inline friend std::ostream&
-//	operator << (std::ostream& os, const pairmap& o) {
-//		return os << o.vals_;
-//	}
+	// SECTIONS
+	//---------------------------------------------------------------
+	section
+	subrange(size_type firstIncl, size_type lastIncl) {
+		return section(vals_.begin() + 1, firstIncl, lastIncl);
+	}
+	const_section
+	subrange(size_type firstIncl, size_type lastIncl) const {
+		return const_section(vals_.begin() + 1, firstIncl, lastIncl);
+	}
+	const_section
+	csubrange(size_type firstIncl, size_type lastIncl) const {
+		return const_section(vals_.begin() + 1, firstIncl, lastIncl);
+	}
 
 
 private:
-
 	//---------------------------------------------------------------
 	storage__ vals_;
 };

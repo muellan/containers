@@ -48,17 +48,17 @@ class sparse_pairmap
 
 
 	//---------------------------------------------------------------
-	template<class T>
-	class iter__
+	template<class Iter>
+	struct iter__
 	{
-	public:
 		//---------------------------------------------------------------
 		using iterator_category = std::forward_iterator_tag;
-		using iterator_type = T;
+		using iterator_type = Iter;
 		using value_type = ValueType;
 		using pointer = value_type*;
 		using reference = value_type&;
-		using difference_type = typename std::iterator_traits<T>::difference_type;
+		using difference_type =
+			typename std::iterator_traits<Iter>::difference_type;
 
 
 		//---------------------------------------------------------------
@@ -87,13 +87,13 @@ class sparse_pairmap
 
 		//---------------------------------------------------------------
 		auto
-		operator * () -> decltype(std::declval<T>()->second)
+		operator * () -> decltype(std::declval<Iter>()->second)
 		{
 			return it_->second;
 		}
 		//-----------------------------------------------------
 		auto
-		operator -> () -> decltype(std::addressof(std::declval<T>()->second))
+		operator -> () -> decltype(std::addressof(std::declval<Iter>()->second))
 		{
 			return std::addressof(it_->second);
 		}
@@ -117,17 +117,17 @@ class sparse_pairmap
 
 
 	//---------------------------------------------------------------
-	template<class T>
-	class index_iter__
+	template<class Iter>
+	struct index_iter__
 	{
-	public:
 		//---------------------------------------------------------------
 		using iterator_category = std::forward_iterator_tag;
-		using iterator_type = T;
+		using iterator_type = Iter;
 		using value_type = ValueType;
 		using pointer = value_type*;
 		using reference = value_type&;
-		using difference_type = typename std::iterator_traits<T>::difference_type;
+		using difference_type =
+			typename std::iterator_traits<Iter>::difference_type;
 
 
 		//---------------------------------------------------------------
@@ -166,13 +166,13 @@ class sparse_pairmap
 
 		//---------------------------------------------------------------
 		auto
-		operator * () -> decltype(std::declval<T>()->second)
+		operator * () -> decltype(std::declval<Iter>()->second)
 		{
 			return it_->second;
 		}
 		//-----------------------------------------------------
 		auto
-		operator -> () -> decltype(std::addressof(std::declval<T>()->second))
+		operator -> () -> decltype(std::addressof(std::declval<Iter>()->second))
 		{
 			return std::addressof(it_->second);
 		}
@@ -205,6 +205,13 @@ class sparse_pairmap
 	};
 
 
+	//---------------------------------------------------------------
+	template<class Iter>
+	struct section__
+	{
+
+	};
+
 public:
 
 	//---------------------------------------------------------------
@@ -218,6 +225,9 @@ public:
 	//-----------------------------------------------------
 	using       local_iterator = index_iter__<storage_iter__>;
 	using const_local_iterator = index_iter__<storage_citer__>;
+	//-----------------------------------------------------
+	using       section = section__<storage_iter__>;
+	using const_section = section__<storage_citer__>;
 
 
 	//---------------------------------------------------------------
@@ -370,7 +380,7 @@ public:
 
 	//-----------------------------------------------------
 	void
-	increase_indices_from(size_type index, size_type n = 1) {
+	increase_indices(size_type firstIndex, size_type n = 1) {
 		if(n < 1) return;
 
 		using backup__ = std::vector<typename storage__::value_type>;
@@ -378,7 +388,9 @@ public:
 		//backup values with occurences of indices >= 'index'
 		backup__ backup;
 		for(auto it = vals_.begin(); it != vals_.end();) {
-			if(	(it->first.first >= index) || (it->first.second >= index)) {
+			if(	(it->first.first  >= firstIndex) ||
+				(it->first.second >= firstIndex) )
+			{
 				backup.push_back(*it);
 				it = vals_.erase(it);
 			} else {
@@ -389,8 +401,8 @@ public:
 		//insert values with increased indices
 		for(const auto& x : backup) {
 			auto k = x.first;
-			if(k.first  >= index) k.first  += n;
-			if(k.second >= index) k.second += n;
+			if(k.first  >= firstIndex) k.first  += n;
+			if(k.second >= firstIndex) k.second += n;
 			vals_[k] = x.second;
 		}
 	}
@@ -613,6 +625,26 @@ public:
 	const_local_iterator
 	cend(size_type) const {
 		return const_local_iterator(vals_.end());
+	}
+
+
+	//---------------------------------------------------------------
+	// SECTIONS
+	//---------------------------------------------------------------
+	section
+	subrange(size_type firstIncl, size_type lastIncl) {
+		//TODO
+		return section();
+	}
+	const_section
+	subrange(size_type firstIncl, size_type lastIncl) const {
+		//TODO
+		return const_section();
+	}
+	const_section
+	csubrange(size_type firstIncl, size_type lastIncl) const {
+		//TODO
+		return const_section();
 	}
 
 
