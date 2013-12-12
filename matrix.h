@@ -20,8 +20,7 @@ namespace am {
 
 /*****************************************************************************
  *
- *
- *
+ * @brief statically sized 2-dimensional array
  *
  *
  *

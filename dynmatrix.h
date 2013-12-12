@@ -37,7 +37,8 @@ struct dynmatrix_init_incoherent_row_sizes :
 
 /*****************************************************************************
  *
- *
+ * @brief dynamically resizable 2-dimensional array
+ *        has a similar growth policy as std::vector
  *
  * TODO am::dynmatrix relies on value_type beeing CopyConstructible
  *
