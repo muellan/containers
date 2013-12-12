@@ -35,6 +35,7 @@ class dynpairmap
 	using storage__ = dynmatrix<ValueType>;
 	using storage_iter__ = typename storage__::iterator;
 	using storage_citer__ = typename storage__::const_iterator;
+	using index__ = typename storage__::size_type;
 
 
 	//-------------------------------------------------------------------

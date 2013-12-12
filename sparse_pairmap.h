@@ -53,7 +53,6 @@ class sparse_pairmap
 	{
 		//---------------------------------------------------------------
 		using iterator_category = std::forward_iterator_tag;
-		using iterator_type = Iter;
 		using value_type = ValueType;
 		using pointer = value_type*;
 		using reference = value_type&;
@@ -66,7 +65,7 @@ class sparse_pairmap
 		iter__() = default;
 		//-----------------------------------------------------
 		explicit constexpr
-		iter__(iterator_type it):
+		iter__(Iter it):
 			it_(it)
 		{}
 
@@ -112,8 +111,9 @@ class sparse_pairmap
 		}
 
 	private:
-		iterator_type it_;
+		Iter it_;
 	};
+
 
 
 	//---------------------------------------------------------------
@@ -122,7 +122,6 @@ class sparse_pairmap
 	{
 		//---------------------------------------------------------------
 		using iterator_category = std::forward_iterator_tag;
-		using iterator_type = Iter;
 		using value_type = ValueType;
 		using pointer = value_type*;
 		using reference = value_type&;
@@ -137,12 +136,12 @@ class sparse_pairmap
 		{}
 		//-----------------------------------------------------
 		explicit constexpr
-		index_iter__(iterator_type first):
+		index_iter__(Iter first):
 			it_(first), end_(first), idx_(0)
 		{}
 		//-----------------------------------------------------
 		explicit
-		index_iter__(iterator_type first, iterator_type last, index__ idx):
+		index_iter__(Iter first, Iter last, index__ idx):
 			it_(first), end_(last), idx_(idx)
 		{
 			seek();
@@ -199,18 +198,137 @@ class sparse_pairmap
 			};
 		}
 		//-----------------------------------------------------
-		iterator_type it_;
-		iterator_type end_;
+		Iter it_;
+		Iter end_;
 		index__ idx_;
 	};
+
 
 
 	//---------------------------------------------------------------
 	template<class Iter>
 	struct section__
 	{
+		//---------------------------------------------------------------
+		struct iterator
+		{
+			//---------------------------------------------------------------
+			using iterator_category = std::forward_iterator_tag;
+			using value_type = ValueType;
+			using pointer = value_type*;
+			using reference = value_type&;
+			using difference_type =
+				typename std::iterator_traits<Iter>::difference_type;
 
+
+			//---------------------------------------------------------------
+			constexpr
+			iterator():
+				it_(), end_(), fidx_(0), lidx_(0)
+			{}
+			//-----------------------------------------------------
+			explicit constexpr
+			iterator(Iter first):
+				it_(first), end_(first), fidx_(0), lidx_(0)
+			{}
+			//-----------------------------------------------------
+			explicit
+			iterator(Iter first, Iter last, index__ fidx, index__ lidx):
+				it_(first), end_(last), fidx_(fidx), lidx_(lidx)
+			{
+				seek();
+			}
+
+
+			//---------------------------------------------------------------
+			iterator&
+			operator ++ () {
+				++it_;
+				seek();
+				return *this;
+			}
+			//-----------------------------------------------------
+			iterator
+			operator ++ (int) {
+				iterator old(*this);
+				++*this;
+				return old;
+			}
+
+			//---------------------------------------------------------------
+			auto
+			operator * () -> decltype(std::declval<Iter>()->second)
+			{
+				return it_->second;
+			}
+			//-----------------------------------------------------
+			auto
+			operator -> () -> decltype(std::addressof(std::declval<Iter>()->second))
+			{
+				return std::addressof(it_->second);
+			}
+			//-----------------------------------------------------
+			const key__&
+			indices() const {
+				return it_->first;
+			}
+
+			//---------------------------------------------------------------
+			bool operator == (const iterator& other) const {
+				return (it_ == other.it_);
+			}
+			bool operator != (const iterator& other) const {
+				return (it_ != other.it_);
+			}
+
+		private:
+			void seek() {
+				while((it_ != end_) && (
+					  (it_->first.first < fidx_) ||
+					  (it_->first.second > lidx_)) )
+				{
+					++it_;
+				};
+			}
+			//-----------------------------------------------------
+			Iter it_;
+			Iter end_;
+			index__ fidx_, lidx_;
+		};
+
+
+		//-----------------------------------------------------
+		using difference_type = typename iterator::difference_type;
+
+		//-----------------------------------------------------
+		constexpr
+		section__() = default;
+		//-----------------------------------------------------
+		explicit constexpr
+		section__(Iter fst, Iter lst,
+			difference_type fidx, difference_type lidx)
+		:
+			fst_(fst), lst_(lst), fidx_(fidx), lidx_(lidx)
+		{}
+
+		//-----------------------------------------------------
+		constexpr iterator
+		begin() const {
+			return iterator(fst_, lst_, fidx_, lidx_);
+		}
+		//-----------------------------------------------------
+		constexpr iterator
+		end() const {
+			return iterator(lst_);
+		}
+
+
+	private:
+		Iter fst_;
+		Iter lst_;
+		difference_type fidx_, lidx_;
 	};
+
 
 public:
 
@@ -633,18 +751,15 @@ public:
 	//---------------------------------------------------------------
 	section
 	subrange(size_type firstIncl, size_type lastIncl) {
-		//TODO
-		return section();
+		return section(vals_.begin(), vals_.end(), firstIncl, lastIncl);
 	}
 	const_section
 	subrange(size_type firstIncl, size_type lastIncl) const {
-		//TODO
-		return const_section();
+		return const_section(vals_.begin(), vals_.end(), firstIncl, lastIncl);
 	}
 	const_section
 	csubrange(size_type firstIncl, size_type lastIncl) const {
-		//TODO
-		return const_section();
+		return const_section(vals_.begin(), vals_.end(), firstIncl, lastIncl);
 	}
 
 

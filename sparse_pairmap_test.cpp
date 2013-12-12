@@ -34,6 +34,23 @@ bool sparse_pairmap_correct()
 		}
 	}
 
+//	for(size_t f = 0; f < n; ++f) {
+//		for(size_t l = f; l < n; ++l) {
+//			auto r = pm.subrange(f,l);
+
+//			std::cout << "[" << f << "," << l << "] : " << content(r) << std::endl;
+
+//			std::cout << "[" << f << "," << l << "] : "
+//				<< std::accumulate(r.begin(), r.end(), 0)
+//				<< " == " << rr[{f,l}]
+//				<< std::endl;
+
+//			if(std::accumulate(r.begin(), r.end(), 0) != rr[{f,l}])
+//				return false;
+//		}
+//	}
+
+
 	pm(0,9) = 1000;
 	pm(1,10) = 1000;
 	pm(2,9) = 1000;
