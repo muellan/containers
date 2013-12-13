@@ -228,8 +228,8 @@ class sparse_pairmap
 			{}
 			//-----------------------------------------------------
 			explicit constexpr
-			iterator(Iter first):
-				it_(first), end_(first), fidx_(0), lidx_(0)
+			iterator(Iter end):
+				it_(end), end_(end), fidx_(0), lidx_(0)
 			{}
 			//-----------------------------------------------------
 			explicit
@@ -283,9 +283,10 @@ class sparse_pairmap
 
 		private:
 			void seek() {
-				while((it_ != end_) && (
-					  (it_->first.first < fidx_) ||
-					  (it_->first.second > lidx_)) )
+				//seek as long as first and second index are not in range
+				while((it_ != end_) &&
+					((it_->first.first < fidx_) || (it_->first.first > lidx_)) &&
+					((it_->first.second < fidx_)|| (it_->first.second > lidx_))	)
 				{
 					++it_;
 				};
