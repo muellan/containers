@@ -343,8 +343,8 @@ public:
 	using       iterator = iter__<storage_iter__>;
 	using const_iterator = iter__<storage_citer__>;
 	//-----------------------------------------------------
-	using       local_iterator = local_iter__<storage_iter__>;
-	using const_local_iterator = local_iter__<storage_citer__>;
+	using       index_iterator = local_iter__<storage_iter__>;
+	using const_index_iterator = local_iter__<storage_citer__>;
 	//-----------------------------------------------------
 	using       section = section__<storage_iter__>;
 	using const_section = section__<storage_citer__>;
@@ -640,31 +640,31 @@ public:
 	}
 
 	//-----------------------------------------------------
-	local_iterator
+	index_iterator
 	begin(size_type index) {
-		return local_iterator(vals_.begin(), vals_.cols(), index);
+		return index_iterator(vals_.begin(), vals_.cols(), index);
 	}
-	const_local_iterator
+	const_index_iterator
 	begin(size_type index) const {
-		return const_local_iterator(vals_.begin(), vals_.cols(), index);
+		return const_index_iterator(vals_.begin(), vals_.cols(), index);
 	}
-	const_local_iterator
+	const_index_iterator
 	cbegin(size_type index) const {
-		return const_local_iterator(vals_.begin(), vals_.cols(), index);
+		return const_index_iterator(vals_.begin(), vals_.cols(), index);
 	}
 
 	//-----------------------------------------------------
-	local_iterator
+	index_iterator
 	end(size_type index) {
-		return local_iterator(vals_.begin() + ((index+1) * vals_.cols()));
+		return index_iterator(vals_.begin() + ((index+1) * vals_.cols()));
 	}
-	const_local_iterator
+	const_index_iterator
 	end(size_type index) const {
-		return const_local_iterator(vals_.begin() + ((index+1) * vals_.cols()));
+		return const_index_iterator(vals_.begin() + ((index+1) * vals_.cols()));
 	}
-	const_local_iterator
+	const_index_iterator
 	cend(size_type index) const {
-		return const_local_iterator(vals_.begin() + ((index+1) * vals_.cols()));
+		return const_index_iterator(vals_.begin() + ((index+1) * vals_.cols()));
 	}
 
 
