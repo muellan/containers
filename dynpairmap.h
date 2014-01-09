@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * 2008-2013 André Müller
+ * 2008-2014 André Müller
  *
  *****************************************************************************/
 
@@ -64,6 +64,12 @@ class dynpairmap
 		iter__(Iter start, difference_type num = 0):
 			p_(start), mark_(start + num - 1), count_(num), stride_(2)
 		{}
+		//-----------------------------------------------------
+		explicit constexpr
+		iter__(Iter start, difference_type num, difference_type offset):
+			p_(start+offset), mark_(p_ + num - (offset % num)),
+			count_(num), stride_(2 + (offset / num))
+		{}
 
 
 		//---------------------------------------------------------------
@@ -87,13 +93,15 @@ class dynpairmap
 
 		//---------------------------------------------------------------
 		auto
-		operator * () -> decltype(*std::declval<Iter>())
+		operator * () const
+			-> decltype(*std::declval<Iter>())
 		{
 			return *p_;
 		}
 		//-----------------------------------------------------
 		auto
-		operator -> () -> decltype(std::addressof(*std::declval<Iter>()))
+		operator -> () const
+			-> decltype(std::addressof(*std::declval<Iter>()))
 		{
 			return std::addressof(*p_);
 		}
@@ -119,7 +127,7 @@ class dynpairmap
 	//
 	//-------------------------------------------------------------------
 	template<class Iter>
-	class local_iter__
+	class index_iter__
 	{
 		using traits__ = std::iterator_traits<Iter>;
 	public:
@@ -133,17 +141,17 @@ class dynpairmap
 
 		//---------------------------------------------------------------
 		constexpr
-		local_iter__() :
+		index_iter__() :
 			p_(), mark_(), stride_()
 		{}
 		//-----------------------------------------------------
 		constexpr explicit
-		local_iter__(Iter start) :
+		index_iter__(Iter start) :
 			p_(start), mark_(), stride_()
 		{}
 		//-----------------------------------------------------
 		constexpr explicit
-		local_iter__(
+		index_iter__(
 			Iter start, difference_type num, difference_type index)
 		:
 			p_(start+((index<1)?1:index)), mark_(p_+index*num),
@@ -151,7 +159,7 @@ class dynpairmap
 		{}
 
 		//---------------------------------------------------------------
-		local_iter__&
+		index_iter__&
 		operator ++ () {
 			p_ += stride_;
 			if(p_ == mark_) {
@@ -161,31 +169,33 @@ class dynpairmap
 			return *this;
 		}
 		//-----------------------------------------------------
-		local_iter__
+		index_iter__
 		operator ++ (int) {
-			local_iter__ old(*this);
+			index_iter__ old(*this);
 			++*this;
 			return old;
 		}
 
 		//---------------------------------------------------------------
 		auto
-		operator * () -> decltype(*std::declval<Iter>())
+		operator * () const
+			-> decltype(*std::declval<Iter>())
 		{
 			return *p_;
 		}
 		//-----------------------------------------------------
 		auto
-		operator -> () -> decltype(std::addressof(*std::declval<Iter>()))
+		operator -> () const
+			-> decltype(std::addressof(*std::declval<Iter>()))
 		{
 			return std::addressof(*p_);
 		}
 
 		//---------------------------------------------------------------
-		bool operator == (const local_iter__& other) const {
+		bool operator == (const index_iter__& other) const {
 			return (p_ == other.p_);
 		}
-		bool operator != (const local_iter__& other) const {
+		bool operator != (const index_iter__& other) const {
 			return (p_ != other.p_);
 		}
 
@@ -265,13 +275,15 @@ class dynpairmap
 
 			//-------------------------------------------
 			auto
-			operator * () -> decltype(*std::declval<Iter>())
+			operator * () const
+				-> decltype(*std::declval<Iter>())
 			{
 				return *p_;
 			}
 			//-------------------------------------------
 			auto
-			operator -> () -> decltype(std::addressof(*std::declval<Iter>()))
+			operator -> () const
+				-> decltype(std::addressof(*std::declval<Iter>()))
 			{
 				return std::addressof(*p_);
 			}
@@ -343,8 +355,8 @@ public:
 	using       iterator = iter__<storage_iter__>;
 	using const_iterator = iter__<storage_citer__>;
 	//-----------------------------------------------------
-	using       index_iterator = local_iter__<storage_iter__>;
-	using const_index_iterator = local_iter__<storage_citer__>;
+	using       index_iterator = index_iter__<storage_iter__>;
+	using const_index_iterator = index_iter__<storage_citer__>;
 	//-----------------------------------------------------
 	using       section = section__<storage_iter__>;
 	using const_section = section__<storage_citer__>;
@@ -357,15 +369,11 @@ public:
 		memento() = default;
 
 		//-----------------------------------------------------
+		explicit
 		memento(const dynpairmap& source, size_type index):
-			vals_(source.vals_.rows())
+			vals_()
 		{
-			for(size_type i = 0; i < index; ++i) {
-				vals_[i] = source.vals_(i,index);
-			}
-			for(size_type i = index+1; i < source.vals_.cols(); ++i) {
-				vals_[i-1] = source.vals_(index,i);
-			}
+			backup(source,index);
 		}
 
 		//-----------------------------------------------------
@@ -464,11 +472,6 @@ public:
 	//---------------------------------------------------------------
 	// GETTERS
 	//---------------------------------------------------------------
-	size_type
-	index_count() const {
-		return vals_.cols();
-	}
-	//-----------------------------------------------------
 	static constexpr size_type
 	min_index() noexcept {
 		return 0;
@@ -517,11 +520,47 @@ public:
 
 
 	//---------------------------------------------------------------
+	bool
+	contains(size_type idx1, size_type idx2) const {
+		return (idx1 <= max_index()) && (idx2 <= max_index());
+	}
+
+	//-----------------------------------------------------
+	iterator
+	find(size_type idx1, size_type idx2) {
+		if(!contains(idx1,idx2)) return end();
+
+		return iterator(vals_.begin(), vals_.cols(),
+			(idx1 < idx2) ?
+				idx1 * vals_.cols() + idx2 : idx2 * vals_.cols() + idx1);
+	}
+	//-----------------------------------------------------
+	const_iterator
+	find(size_type idx1, size_type idx2) const {
+		if(!contains(idx1,idx2)) return end();
+
+		return const_iterator(vals_.begin(), vals_.cols(),
+			(idx1 < idx2) ?
+				idx1 * vals_.cols() + idx2 : idx2 * vals_.cols() + idx1);
+	}
+
+
+	//---------------------------------------------------------------
 	void
 	increase_indices(size_type firstIndex, size_type n = 1) {
 		if(n < 1) return;
-		vals_.insert_rows(firstIndex, n);
-		vals_.insert_cols(firstIndex, n);
+
+		std::cout << "\nBEFORE\n" << vals_ << '\n';
+
+		if(max_index() < 1) {
+			max_index(1);
+		}
+		else {
+			vals_.insert_rows(firstIndex, n);
+			vals_.insert_cols(firstIndex, n);
+		}
+
+		std::cout << "\nAFTER\n" << vals_ << '\n';
 	}
 	//-----------------------------------------------------
 	void
@@ -547,20 +586,25 @@ public:
 	void
 	erase_index_decrease_above(size_type index)
 	{
-		for(size_type r = 0; r < index; ++r) {
-			for(size_type c = index; c < vals_.rows(); ++c) {
-				vals_(r,c) = vals_(r,c+1);
-			}
+		if(max_index() < 2) {
+			clear();
 		}
-
-		for(size_type r = index+1; r < vals_.rows(); ++r) {
-			for(size_type c = r+1; c < vals_.cols(); ++c) {
-				vals_(r-1,c-1) = vals_(r,c);
+		else {
+			for(size_type r = 0; r < index; ++r) {
+				for(size_type c = index; c < vals_.rows(); ++c) {
+					vals_(r,c) = vals_(r,c+1);
+				}
 			}
-		}
 
-		vals_.erase_row(vals_.rows()-1);
-		vals_.erase_col(vals_.cols()-1);
+			for(size_type r = index+1; r < vals_.rows(); ++r) {
+				for(size_type c = r+1; c < vals_.cols(); ++c) {
+					vals_(r-1,c-1) = vals_(r,c);
+				}
+			}
+
+			vals_.erase_row(vals_.rows()-1);
+			vals_.erase_col(vals_.cols()-1);
+		}
 	}
 	//-----------------------------------------------------
 	void
@@ -568,15 +612,26 @@ public:
 	{
 		using std::min;
 
-		if(firstIndex >= lastIndex) return;
+		if(max_index() < 2) {
+			 if(firstIndex < 2)	clear();
+		}
+		else if(firstIndex == lastIndex) {
+			erase_index_decrease_above(firstIndex);
+		}
+		else if(firstIndex < lastIndex) {
+			if(firstIndex == 0 && lastIndex == max_index()) {
+				clear();
+			}
+			else {
+				vals_.erase_rows(
+					min(firstIndex,vals_.rows()-1),
+					min(lastIndex,vals_.rows()-1));
 
-		vals_.erase_rows(
-			min(firstIndex,vals_.rows()-1),
-			min(lastIndex,vals_.rows()-1));
-
-		vals_.erase_cols(
-			min(firstIndex,vals_.cols()-1),
-			min(lastIndex,vals_.cols()-1));
+				vals_.erase_cols(
+					min(firstIndex,vals_.cols()-1),
+					min(lastIndex,vals_.cols()-1));
+			}
+		}
 	}
 
 	//-----------------------------------------------------
@@ -596,7 +651,7 @@ public:
 			swap(vals_(idx1,i), vals_(i,idx2));
 		}
 
-		for(size_type i = idx2+1, n = vals_.rows(); i < n; ++i) {
+		for(size_type i = idx2+1, n = vals_.cols(); i < n; ++i) {
 			swap(vals_(idx1,i), vals_(idx2,i));
 		}
 	}
@@ -610,7 +665,7 @@ public:
 
 
 	//---------------------------------------------------------------
-	// ACCESSSORS
+	// ITERATORS
 	//---------------------------------------------------------------
 	iterator
 	begin() {

@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * 2008-2013 André Müller
+ * 2008-2014 André Müller
  *
  *****************************************************************************/
 
@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <numeric>
 #include <iostream>
+#include <stdexcept>
 
 #include "pairmap.h"
 
@@ -22,9 +23,8 @@ namespace am {
 namespace test {
 
 
-
 //-------------------------------------------------------------------
-bool pairmap_subranges_correct()
+void pairmap_subranges_correct()
 {
 	//expected range results
 	std::map<std::pair<int,int>,int> rr;
@@ -65,19 +65,21 @@ bool pairmap_subranges_correct()
 //				<< " == " << rr[{f,l}]
 //				<< std::endl;
 
-			if(std::accumulate(r.begin(), r.end(), 0) != rr[{f,l}])
-				return false;
+			if(std::accumulate(r.begin(), r.end(), 0) != rr[{f,l}]) {
+				throw std::logic_error("am::pairmap subrange iteration");
+			}
 		}
 	}
-
-	return true;
 }
 
 
 
 //-------------------------------------------------------------------
-bool pairmap_correct()
+void pairmap_correct()
 {
+	pairmap_subranges_correct();
+
+
 	pairmap<int,8> pm;
 	pm = 0;
 
@@ -94,9 +96,7 @@ bool pairmap_correct()
 	auto pm2 = std::move(pm);
 	auto pm1 = pairmap<int,8>{pm2};
 
-	return (true
-		&& pairmap_subranges_correct()
-		&& (std::accumulate(pm1.begin(0), pm1.end(0), 0) == 124)
+	if( !( (std::accumulate(pm1.begin(0), pm1.end(0), 0) == 124)
 		&& (std::accumulate(pm1.begin(1), pm1.end(1), 0) == 194)
 		&& (std::accumulate(pm1.begin(2), pm1.end(2), 0) == 255)
 		&& (std::accumulate(pm1.begin(3), pm1.end(3), 0) == 307)
@@ -104,8 +104,12 @@ bool pairmap_correct()
 		&& (std::accumulate(pm1.begin(5), pm1.end(5), 0) == 384)
 		&& (std::accumulate(pm1.begin(6), pm1.end(6), 0) == 409)
 		&& (std::accumulate(pm1.begin(7), pm1.end(7), 0) == 425)
-		&& (std::accumulate(pm1.begin(8), pm1.end(8), 0) == 432)
-		&& (pm3sum == int(11 * pm3.size()))
+		&& (std::accumulate(pm1.begin(8), pm1.end(8), 0) == 432) ))
+	{
+		throw std::logic_error("am::pairmap iteration");
+	}
+
+	if( !( (pm3sum == int(11 * pm3.size()))
 		&& (pm1(0,1) == 12) && (pm1(0,1) == 12)
 		&& (pm1(0,2) == 13) && (pm1(0,2) == 13)
 		&& (pm1(0,3) == 14) && (pm1(0,3) == 14)
@@ -141,8 +145,10 @@ bool pairmap_correct()
 		&& (pm1(5,8) == 69) && (pm1(5,8) == 69)
 		&& (pm1(6,7) == 78) && (pm1(6,7) == 78)
 		&& (pm1(6,8) == 79) && (pm1(6,8) == 79)
-		&& (pm1(7,8) == 89) && (pm1(7,8) == 89)
-	);
+		&& (pm1(7,8) == 89) && (pm1(7,8) == 89) ))
+	{
+		throw std::logic_error("am::pairmap element access");
+	}
 }
 
 

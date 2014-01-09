@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * 2008-2013 André Müller
+ * 2008-2014 André Müller
  *
  *****************************************************************************/
 
@@ -15,13 +15,13 @@ namespace am {
 namespace test {
 
 
-bool dynmatrix_initialization_correct();
-bool dynmatrix_memory_correct();
-bool dynmatrix_move_correct();
-bool dynmatrix_resizing_correct();
-bool dynmatrix_iterators_correct();
+void dynmatrix_initialization_correct();
+void dynmatrix_memory_correct();
+void dynmatrix_move_correct();
+void dynmatrix_resizing_correct();
+void dynmatrix_iterators_correct();
 
-bool dynmatrix_correct();
+void dynmatrix_correct();
 
 
 }  // namespace test

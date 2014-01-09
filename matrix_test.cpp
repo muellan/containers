@@ -4,15 +4,17 @@
  *
  * released under MIT license
  *
- * 2008-2013 André Müller
+ * 2008-2014 André Müller
  *
  *****************************************************************************/
 
 #ifdef AM_USE_TESTS
 
 #include <algorithm>
+#include <stdexcept>
 
 #include "matrix.h"
+#include "matrix_test.h"
 
 
 namespace am {
@@ -20,7 +22,7 @@ namespace test {
 
 
 //-------------------------------------------------------------------
-bool matrix_initialization_correct()
+void matrix_initialization_correct()
 {
 	matrix<int,4,3> m1 = {
 		{11, 12, 13},
@@ -31,18 +33,21 @@ bool matrix_initialization_correct()
 
 	matrix<int,1,3> m2 = {{1,2,3}};
 
-	return (
+	if(!(
 		(m1(0,0) == 11) && (m1(0,1) == 12) && (m1(0,2) == 13) &&
 		(m1(1,0) == 21) && (m1(1,1) == 22) && (m1(1,2) == 23) &&
 		(m1(2,0) == 31) && (m1(2,1) == 32) && (m1(2,2) == 33) &&
 		(m1(3,0) == 41) && (m1(3,1) == 42) && (m1(3,2) == 43) &&
-		(m2(0,0) == 1) && (m2(0,1) == 2) && (m2(0,2) == 3) );
+		(m2(0,0) == 1) && (m2(0,1) == 2) && (m2(0,2) == 3) ))
+	{
+		throw std::logic_error("am::matrix initialization");
+	}
 }
 
 
 
 //-------------------------------------------------------------------
-bool matrix_iterators_correct()
+void matrix_iterators_correct()
 {
 	matrix<int,7,10> m;
 	std::iota(begin(m), end(m), 11);
@@ -92,18 +97,18 @@ bool matrix_iterators_correct()
 		sum += std::accumulate(md.begin_diag(), md.end_diag(),0);
 	}
 
-	return (sum == 3217308650);
+	if(sum != 3217308650) {
+		throw std::logic_error("am::matrix iteration");
+	}
 }
 
 
 
 //-------------------------------------------------------------------
-bool matrix_correct()
+void matrix_correct()
 {
-	return (
-			matrix_initialization_correct()	&&
-			matrix_iterators_correct()
-		);
+	matrix_initialization_correct();
+	matrix_iterators_correct();
 }
 
 

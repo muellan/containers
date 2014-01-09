@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * 2008-2013 André Müller
+ * 2008-2014 André Müller
  *
  *****************************************************************************/
 
@@ -18,7 +18,7 @@ namespace am {
 namespace test {
 
 
-bool sparse_pairmap_correct();
+void sparse_pairmap_correct();
 
 
 }  // namespace test

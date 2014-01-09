@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * 2008-2013 André Müller
+ * 2008-2014 André Müller
  *
  *****************************************************************************/
 
@@ -13,10 +13,11 @@
 #include <algorithm>
 #include <numeric>
 #include <iostream>
+#include <stdexcept>
 
 #include "sparse_pairmap.h"
+#include "sparse_pairmap_test.h"
 
-#include "../traversal.h"
 
 
 namespace am {
@@ -24,7 +25,7 @@ namespace test {
 
 
 //-------------------------------------------------------------------
-bool sparse_pairmap_correct()
+void sparse_pairmap_correct()
 {
 	sparse_pairmap<int> pm;
 
@@ -36,11 +37,11 @@ bool sparse_pairmap_correct()
 		}
 	}
 
-	for(size_t f = 0; f < n; ++f) {
-		for(size_t l = f; l < n; ++l) {
-			auto r = pm.subrange(f,l);
+//	for(size_t f = 0; f < n; ++f) {
+//		for(size_t l = f; l < n; ++l) {
+//			auto r = pm.subrange(f,l);
 
-			std::cout << "[" << f << "," << l << "] : " << content(r) << std::endl;
+//			std::cout << "[" << f << "," << l << "] : " << content(r) << std::endl;
 
 //			std::cout << "[" << f << "," << l << "] : "
 //				<< std::accumulate(r.begin(), r.end(), 0)
@@ -49,8 +50,8 @@ bool sparse_pairmap_correct()
 
 //			if(std::accumulate(r.begin(), r.end(), 0) != rr[{f,l}])
 //				return false;
-		}
-	}
+//		}
+//	}
 
 
 	pm(0,9) = 1000;
@@ -91,8 +92,7 @@ bool sparse_pairmap_correct()
 	pm3.swap_indices(0,3);
 	pm3.swap_indices(2,4);
 
-	return (true
-		&& (std::accumulate(pm1.begin(0), pm1.end(0), 0) == 64)
+	if( !( (std::accumulate(pm1.begin(0), pm1.end(0), 0) == 64)
 		&& (std::accumulate(pm1.begin(2), pm1.end(2), 0) == 124)
 		&& (std::accumulate(pm1.begin(4), pm1.end(4), 0) == 166)
 		&& (std::accumulate(pm1.begin(6), pm1.end(6), 0) == 190)
@@ -104,8 +104,13 @@ bool sparse_pairmap_correct()
 		&& (std::accumulate(pm3.begin(4), pm3.end(4), 0) == 19)
 		&& (std::accumulate(pm3.begin(5), pm3.end(5), 0) == 15)
 		&& (std::accumulate(pm3.begin(6), pm3.end(6), 0) == 31)
-		&& (std::accumulate(pm3.begin(7), pm3.end(7), 0) == 52)
-		&& !pm.contains(0,1) && !pm.contains(1,0)
+		&& (std::accumulate(pm3.begin(7), pm3.end(7), 0) == 52)) )
+	{
+		throw std::logic_error("am::sparse_pairmap iteration");
+	}
+
+
+	if(!(  !pm.contains(0,1) && !pm.contains(1,0)
 		&& !pm.contains(0,3) && !pm.contains(3,0)
 		&& !pm.contains(0,5) && !pm.contains(5,0)
 		&& !pm.contains(0,7) && !pm.contains(7,0)
@@ -140,8 +145,13 @@ bool sparse_pairmap_correct()
 		&& pm1.contains(2,8) && pm1.contains(2,8)
 		&& pm1.contains(4,6) && pm1.contains(4,6)
 		&& pm1.contains(4,8) && pm1.contains(4,8)
-		&& pm1.contains(6,8) && pm1.contains(6,8)
-		&& (pm1(0,2) == 13) && (pm1(0,2) == 13)
+		&& pm1.contains(6,8) && pm1.contains(6,8)) )
+	{
+		throw std::logic_error("am::sparse_pairmap containment test");
+	}
+
+
+	if(!(  (pm1(0,2) == 13) && (pm1(0,2) == 13)
 		&& (pm1(0,4) == 15) && (pm1(0,4) == 15)
 		&& (pm1(0,6) == 17) && (pm1(0,6) == 17)
 		&& (pm1(0,8) == 19) && (pm1(0,8) == 19)
@@ -150,8 +160,11 @@ bool sparse_pairmap_correct()
 		&& (pm1(2,8) == 39) && (pm1(2,8) == 39)
 		&& (pm1(4,6) == 57) && (pm1(4,6) == 57)
 		&& (pm1(4,8) == 59) && (pm1(4,8) == 59)
-		&& (pm1(6,8) == 79) && (pm1(6,8) == 79)
-	);
+		&& (pm1(6,8) == 79) && (pm1(6,8) == 79)) )
+	{
+		throw std::logic_error("am::sparse_pairmap element access");
+	}
+
 }
 
 

@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * 2008-2013 André Müller
+ * 2008-2014 André Müller
  *
  *****************************************************************************/
 
@@ -86,20 +86,17 @@ class sparse_pairmap
 
 		//---------------------------------------------------------------
 		auto
-		operator * () -> decltype(std::declval<Iter>()->second)
+		operator * () const
+			-> decltype(std::declval<Iter>()->second)
 		{
 			return it_->second;
 		}
 		//-----------------------------------------------------
 		auto
-		operator -> () -> decltype(std::addressof(std::declval<Iter>()->second))
+		operator -> () const
+			-> decltype(std::addressof(std::declval<Iter>()->second))
 		{
 			return std::addressof(it_->second);
-		}
-		//-----------------------------------------------------
-		const key__&
-		indices() const {
-			return it_->first;
 		}
 
 		//---------------------------------------------------------------
@@ -165,20 +162,17 @@ class sparse_pairmap
 
 		//---------------------------------------------------------------
 		auto
-		operator * () -> decltype(std::declval<Iter>()->second)
+		operator * () const
+			-> decltype(std::declval<Iter>()->second)
 		{
 			return it_->second;
 		}
 		//-----------------------------------------------------
 		auto
-		operator -> () -> decltype(std::addressof(std::declval<Iter>()->second))
+		operator -> () const
+			-> decltype(std::addressof(std::declval<Iter>()->second))
 		{
 			return std::addressof(it_->second);
-		}
-		//-----------------------------------------------------
-		const key__&
-		indices() const {
-			return it_->first;
 		}
 
 		//---------------------------------------------------------------
@@ -257,20 +251,17 @@ class sparse_pairmap
 
 			//---------------------------------------------------------------
 			auto
-			operator * () -> decltype(std::declval<Iter>()->second)
+			operator * () const
+				-> decltype(std::declval<Iter>()->second)
 			{
 				return it_->second;
 			}
 			//-----------------------------------------------------
 			auto
-			operator -> () -> decltype(std::addressof(std::declval<Iter>()->second))
+			operator -> () const
+				-> decltype(std::addressof(std::declval<Iter>()->second))
 			{
 				return std::addressof(it_->second);
-			}
-			//-----------------------------------------------------
-			const key__&
-			indices() const {
-				return it_->first;
 			}
 
 			//---------------------------------------------------------------
@@ -403,7 +394,7 @@ public:
 	sparse_pairmap(const sparse_pairmap&) = default;
 	//-----------------------------------------------------
 	sparse_pairmap(sparse_pairmap&& source):
-		vals_{std::move(source.vals_)}
+		vals_(std::move(source.vals_))
 	{}
 
 
@@ -420,6 +411,13 @@ public:
 
 	//-----------------------------------------------------
 	void
+	assign_index(size_type index, const value_type& value) {
+		for(auto i = begin(index), e = end(index); i != e; ++i) {
+			*i = value;
+		}
+	}
+	//-----------------------------------------------------
+	void
 	assign_index(size_type index, const memento& mem) {
 		mem.restore(*this, index);
 	}
@@ -434,18 +432,6 @@ public:
 	//---------------------------------------------------------------
 	// GETTERS
 	//---------------------------------------------------------------
-	size_type
-	index_count() const {
-		std::set<size_type> idxs;
-
-		for(auto& x : vals_) {
-			idxs.insert(x.first.first);
-			idxs.insert(x.first.second);
-		}
-
-		return idxs.size();
-	}
-	//-----------------------------------------------------
 	size_type
 	min_index() const {
 		if(vals_.empty()) return 0;
@@ -478,14 +464,10 @@ public:
 		return vals_.size();
 	}
 
-	//-----------------------------------------------------
+
+	//---------------------------------------------------------------
 	value_type&
 	operator () (size_type idx1, size_type idx2) {
-		return ((idx1 < idx2) ? vals_[{idx1,idx2}] : vals_[{idx2,idx1}]);
-	}
-	//-----------------------------------------------------
-	const value_type&
-	operator () (size_type idx1, size_type idx2) const {
 		return ((idx1 < idx2) ? vals_[{idx1,idx2}] : vals_[{idx2,idx1}]);
 	}
 
@@ -497,7 +479,24 @@ public:
 			: (vals_.find({idx2,idx1}) != vals_.end()) );
 	}
 
+
+	//---------------------------------------------------------------
+	iterator
+	find(size_type idx1, size_type idx2) {
+		return ((idx1 < idx2)
+			? iterator(vals_.find({idx1,idx2}))
+			: iterator(vals_.find({idx2,idx1})) );
+	}
 	//-----------------------------------------------------
+	const_iterator
+	find(size_type idx1, size_type idx2) const {
+		return ((idx1 < idx2)
+			? const_iterator(vals_.find({idx1,idx2}))
+			: const_iterator(vals_.find({idx2,idx1})) );
+	}
+
+
+	//---------------------------------------------------------------
 	void
 	increase_indices(size_type firstIndex, size_type n = 1) {
 		if(n < 1) return;

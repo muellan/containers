@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * 2008-2013 André Müller
+ * 2008-2014 André Müller
  *
  *****************************************************************************/
 
@@ -18,10 +18,10 @@ namespace am {
 namespace test {
 
 
-bool matrix_initialization_correct();
-bool matrix_iterators_correct();
+void matrix_initialization_correct();
+void matrix_iterators_correct();
 
-bool matrix_correct();
+void matrix_correct();
 
 
 }  // namespace test

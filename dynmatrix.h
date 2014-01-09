@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * 2008-2013 André Müller
+ * 2008-2014 André Müller
  *
  *****************************************************************************/
 
@@ -62,20 +62,20 @@ class dynmatrix
 	{
 		friend class dynmatrix;
 
-		using base_t = std::iterator<std::random_access_iterator_tag,T> ;
+		using base__ = std::iterator<std::random_access_iterator_tag,T> ;
 		using this_t = stride_iter__<T> ;
 
 	public:
 		//---------------------------------------------------------------
-		using value_type = typename base_t::value_type ;
-		using pointer = typename base_t::pointer ;
-		using reference = typename base_t::reference ;
-		using difference_type = typename base_t::difference_type ;
+		using value_type = typename base__::value_type ;
+		using pointer = typename base__::pointer ;
+		using reference = typename base__::reference ;
+		using difference_type = typename base__::difference_type ;
 
 		//---------------------------------------------------------------
 		explicit constexpr
 		stride_iter__():
-			base_t{},
+			base__{},
 			p_(nullptr), stride_{0}
 		{}
 
@@ -83,7 +83,7 @@ class dynmatrix
 		//---------------------------------------------------------------
 		explicit constexpr
 		stride_iter__(pointer p, std::size_t stride = 0):
-			base_t{},
+			base__{},
 			p_(p), stride_{static_cast<difference_type>(stride)}
 		{}
 

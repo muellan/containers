@@ -4,15 +4,17 @@
  *
  * released under MIT license
  *
- * 2008-2013 André Müller
+ * 2008-2014 André Müller
  *
  *****************************************************************************/
 
 #ifdef AM_USE_TESTS
 
 #include <algorithm>
+#include <stdexcept>
 
 #include "dynmatrix.h"
+#include "dynmatrix_test.h"
 
 
 namespace am {
@@ -49,7 +51,7 @@ int A::n = 0;
 
 
 //-------------------------------------------------------------------
-bool dynmatrix_initialization_correct()
+void dynmatrix_initialization_correct()
 {
 	dynmatrix<int> m1 = {
 		{11, 12, 13},
@@ -73,19 +75,22 @@ bool dynmatrix_initialization_correct()
 		bool caught = true;
 	#endif
 
-	return (
+	if(!(
 		caught &&
 		(m1(0,0) == 11) && (m1(0,1) == 12) && (m1(0,2) == 13) &&
 		(m1(1,0) == 21) && (m1(1,1) == 22) && (m1(1,2) == 23) &&
 		(m1(2,0) == 31) && (m1(2,1) == 32) && (m1(2,2) == 33) &&
 		(m1(3,0) == 41) && (m1(3,1) == 42) && (m1(3,2) == 43) &&
-		(m2(0,0) == 1) && (m2(0,1) == 2) && (m2(0,2) == 3) );
+		(m2(0,0) == 1) && (m2(0,1) == 2) && (m2(0,2) == 3) ))
+	{
+		throw std::logic_error("am::dynmatrix initialization");
+	}
 }
 
 
 
 //-------------------------------------------------------------------
-bool dynmatrix_memory_correct()
+void dynmatrix_memory_correct()
 {
 	{
 		dynmatrix<A> m;
@@ -112,13 +117,15 @@ bool dynmatrix_memory_correct()
 	}
 
 //	std::cout << "\n# " << A::n << '\n' << std::endl;
-	return (A::n == 0);
+	if(A::n != 0) {
+		throw std::logic_error("am::dynmatrix content destruction");
+	}
 }
 
 
 
 //-------------------------------------------------------------------
-bool dynmatrix_move_correct()
+void dynmatrix_move_correct()
 {
 	int sum1 = 0, sum2 = 0, sum3 = 0;
 	{
@@ -135,13 +142,15 @@ bool dynmatrix_move_correct()
 		for(auto i : m) sum3 += i;
 	}
 
-	return ((A::n == 0) && (sum1 == 4131) && (sum2 == 4131) && (sum3 == 4131));
+	if((A::n != 0) || (sum1 != 4131) || (sum2 != 4131) || (sum3 != 4131)) {
+		throw std::logic_error("am::dynmatrix move");
+	}
 }
 
 
 
 //-------------------------------------------------------------------
-bool dynmatrix_resizing_correct()
+void dynmatrix_resizing_correct()
 {
 	dynmatrix<int> m;
 	m.rows(10, 3);
@@ -180,17 +189,20 @@ bool dynmatrix_resizing_correct()
 	m.erase_row(4);
 	m.shrink_to_fit();
 
-	return (
+	if(! (
 		(m(0,0) == 11) && (m(0,1) == 88) &&
 		(m(1,0) == 2) && (m(1,1) == 2) &&
 		(m(2,0) == 3) && (m(2,1) == 3) &&
-		(m(3,0) == 0) && (m(3,1) == 0) );
+		(m(3,0) == 0) && (m(3,1) == 0) ) )
+	{
+		throw std::logic_error("am::dynmatrix resizing");
+	}
 }
 
 
 
 //-------------------------------------------------------------------
-bool dynmatrix_iterators_correct()
+void dynmatrix_iterators_correct()
 {
 	dynmatrix<int> m;
 	m.insert_cols(0,10);
@@ -235,21 +247,21 @@ bool dynmatrix_iterators_correct()
 		}
 	}
 
-	return (sum == 3217308640);
+	if(sum != 3217308640) {
+		throw std::logic_error("am::dynmatrix iteration");
+	}
 }
 
 
 
 //-------------------------------------------------------------------
-bool dynmatrix_correct()
+void dynmatrix_correct()
 {
-	return (
-			dynmatrix_initialization_correct() &&
-			dynmatrix_memory_correct() &&
-			dynmatrix_move_correct() &&
-			dynmatrix_resizing_correct() &&
-			dynmatrix_iterators_correct()
-		);
+	dynmatrix_initialization_correct();
+	dynmatrix_memory_correct();
+	dynmatrix_move_correct();
+	dynmatrix_resizing_correct();
+	dynmatrix_iterators_correct();
 }
 
 
