@@ -22,7 +22,7 @@ namespace test {
 
 
 //-------------------------------------------------------------------
-void matrix_initialization_correct()
+void matrix_initialization_correctness()
 {
 	matrix<int,4,3> m1 = {
 		{11, 12, 13},
@@ -47,7 +47,7 @@ void matrix_initialization_correct()
 
 
 //-------------------------------------------------------------------
-void matrix_iterators_correct()
+void matrix_iterators_correctness()
 {
 	matrix<int,7,10> m;
 	std::iota(begin(m), end(m), 11);
@@ -105,10 +105,10 @@ void matrix_iterators_correct()
 
 
 //-------------------------------------------------------------------
-void matrix_correct()
+void matrix_correctness()
 {
-	matrix_initialization_correct();
-	matrix_iterators_correct();
+	matrix_initialization_correctness();
+	matrix_iterators_correctness();
 }
 
 

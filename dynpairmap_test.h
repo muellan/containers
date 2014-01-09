@@ -18,7 +18,7 @@ namespace am {
 namespace test {
 
 
-void dynpairmap_correct();
+void dynpairmap_correctness();
 
 
 }  // namespace test

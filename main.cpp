@@ -8,23 +8,11 @@
  *
  *****************************************************************************/
 
-#ifndef AM_CONTAINERS_SPARSE_PAIRMAP_TEST_H_
-#define AM_CONTAINERS_SPARSE_PAIRMAP_TEST_H_
-
-#ifdef AM_USE_TESTS
+#include "tests.h"
 
 
-namespace am {
-namespace test {
-
-
-void sparse_pairmap_correctness();
-
-
-}  // namespace test
-}  // namespace am
-
-
-#endif
-
-#endif
+//-------------------------------------------------------------------
+int main()
+{
+	am::test::container_correctness();
+}

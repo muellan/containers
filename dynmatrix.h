@@ -40,7 +40,7 @@ struct dynmatrix_init_incoherent_row_sizes :
  * @brief dynamically resizable 2-dimensional array
  *        has a similar growth policy as std::vector
  *
- * TODO am::dynmatrix relies on value_type beeing CopyConstructible
+ * TODO am::dynmatrix relies on ValueType beeing CopyConstructible
  *
  *
  *
@@ -1233,7 +1233,6 @@ private:
 
 
 	//---------------------------------------------------------------
-	/// @brief returns valid iterator to the first of the newly inserted cols
 	void
 	mem_insert_cols(size_type index, size_type quantity)
 	{
@@ -1253,11 +1252,11 @@ private:
 				*tgt = *src;
 			}
 		}
+
 		cols_ += quantity;
 	}
 
 	//-----------------------------------------------------
-	/// @brief returns valid iterator to the first of the newly inserted rows
 	void
 	mem_insert_rows(size_type index, size_type quantity)
 	{
@@ -1267,7 +1266,7 @@ private:
 		//move elements towards back
 		const_pointer src = first_ + oldSize - 1;
 		const_pointer pidx = first_ + (index * cols_);
-		for(pointer tgt = last_-1; tgt >= pidx; --tgt, --src) {
+		for(pointer tgt = last_-1; src >= pidx; --tgt, --src) {
 			*tgt = *src;
 		}
 

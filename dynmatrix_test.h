@@ -15,13 +15,13 @@ namespace am {
 namespace test {
 
 
-void dynmatrix_initialization_correct();
-void dynmatrix_memory_correct();
-void dynmatrix_move_correct();
-void dynmatrix_resizing_correct();
-void dynmatrix_iterators_correct();
+void dynmatrix_initialization_correctness();
+void dynmatrix_memory_correctness();
+void dynmatrix_move_correctness();
+void dynmatrix_resizing_correctness();
+void dynmatrix_iterators_correctness();
 
-void dynmatrix_correct();
+void dynmatrix_correctness();
 
 
 }  // namespace test

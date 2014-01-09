@@ -25,7 +25,7 @@ namespace test {
 
 
 //-------------------------------------------------------------------
-void sparse_pairmap_correct()
+void sparse_pairmap_correctness()
 {
 	sparse_pairmap<int> pm;
 

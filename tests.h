@@ -8,17 +8,23 @@
  *
  *****************************************************************************/
 
-#ifndef AM_CONTAINERS_SPARSE_PAIRMAP_TEST_H_
-#define AM_CONTAINERS_SPARSE_PAIRMAP_TEST_H_
+#ifndef AM_CONTAINERS_TESTS_H_
+#define AM_CONTAINERS_TESTS_H_
 
 #ifdef AM_USE_TESTS
+
+#include "dynmatrix_test.h"
+#include "matrix_test.h"
+#include "pairmap_test.h"
+#include "dynpairmap_test.h"
+#include "sparse_pairmap_test.h"
 
 
 namespace am {
 namespace test {
 
-
-void sparse_pairmap_correctness();
+//-------------------------------------------------------------------
+void container_correctness();
 
 
 }  // namespace test
@@ -26,5 +32,4 @@ void sparse_pairmap_correctness();
 
 
 #endif
-
 #endif

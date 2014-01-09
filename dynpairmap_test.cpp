@@ -24,7 +24,7 @@ namespace test {
 
 
 //-------------------------------------------------------------------
-void dynpairmap_subranges_correct()
+void dynpairmap_subranges_correctness()
 {
 	//expected range results
 	std::map<std::pair<int,int>,int> rr;
@@ -77,9 +77,9 @@ void dynpairmap_subranges_correct()
 
 
 //-------------------------------------------------------------------
-void dynpairmap_correct()
+void dynpairmap_correctness()
 {
-	dynpairmap_subranges_correct();
+	dynpairmap_subranges_correctness();
 
 
 	dynpairmap<int> pm;

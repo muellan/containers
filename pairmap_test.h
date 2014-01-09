@@ -18,7 +18,7 @@ namespace am {
 namespace test {
 
 
-void pairmap_correct();
+void pairmap_correctness();
 
 
 }  // namespace test

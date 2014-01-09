@@ -550,8 +550,6 @@ public:
 	increase_indices(size_type firstIndex, size_type n = 1) {
 		if(n < 1) return;
 
-		std::cout << "\nBEFORE\n" << vals_ << '\n';
-
 		if(max_index() < 1) {
 			max_index(1);
 		}
@@ -559,8 +557,6 @@ public:
 			vals_.insert_rows(firstIndex, n);
 			vals_.insert_cols(firstIndex, n);
 		}
-
-		std::cout << "\nAFTER\n" << vals_ << '\n';
 	}
 	//-----------------------------------------------------
 	void

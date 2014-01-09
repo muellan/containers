@@ -18,10 +18,10 @@ namespace am {
 namespace test {
 
 
-void matrix_initialization_correct();
-void matrix_iterators_correct();
+void matrix_initialization_correctness();
+void matrix_iterators_correctness();
 
-void matrix_correct();
+void matrix_correctness();
 
 
 }  // namespace test

@@ -24,7 +24,7 @@ namespace test {
 
 
 //-------------------------------------------------------------------
-void pairmap_subranges_correct()
+void pairmap_subranges_correctness()
 {
 	//expected range results
 	std::map<std::pair<int,int>,int> rr;
@@ -75,9 +75,9 @@ void pairmap_subranges_correct()
 
 
 //-------------------------------------------------------------------
-void pairmap_correct()
+void pairmap_correctness()
 {
-	pairmap_subranges_correct();
+	pairmap_subranges_correctness();
 
 
 	pairmap<int,8> pm;

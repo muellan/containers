@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <stdexcept>
+#include <iostream>
 
 #include "dynmatrix.h"
 #include "dynmatrix_test.h"
@@ -51,7 +52,7 @@ int A::n = 0;
 
 
 //-------------------------------------------------------------------
-void dynmatrix_initialization_correct()
+void dynmatrix_initialization_correctness()
 {
 	dynmatrix<int> m1 = {
 		{11, 12, 13},
@@ -90,7 +91,7 @@ void dynmatrix_initialization_correct()
 
 
 //-------------------------------------------------------------------
-void dynmatrix_memory_correct()
+void dynmatrix_memory_correctness()
 {
 	{
 		dynmatrix<A> m;
@@ -106,26 +107,70 @@ void dynmatrix_memory_correct()
 		m.reserve(20,20);
 		m.resize(100,100, {1});
 
-		for(int i = 0; i < 100; ++i)
+		if(A::n != int(m.size())) {
+			throw std::logic_error("am::dynmatrix memory alloc");
+		}
+
+		for(int i = 0; i < 100; ++i) {
 			m.erase_col(0);
 
+			if(A::n != int(m.size())) {
+				throw std::logic_error("am::dynmatrix memory content destruct");
+			}
+		}
+
 		m.resize(100,100, {1});
-		for(int i = 0; i < 100; ++i)
+		for(int i = 0; i < 100; ++i) {
 			m.erase_row(0);
+
+			if(A::n != int(m.size())) {
+				throw std::logic_error("am::dynmatrix memory content destruct");
+			}
+		}
 
 //		std::cout << m << std::endl;
 	}
 
+	{
+		dynmatrix<A> m;
+
+		int n = 1;
+		for(int i = 0; i < 50; ++i, ++n) {
+			m.insert_rows(i,n, i+1);
+			m.insert_cols(i,n, i+1);
+
+			if(A::n != int(m.size())) {
+				throw std::logic_error("am::dynmatrix memory alloc");
+			}
+		}
+	}
+
+	{
+		dynmatrix<A> m;
+		m.resize(210,210);
+
+		int n = 1;
+		for(int i = 0; i < 20; ++i, ++n) {
+			m.erase_cols(i, 2*i);
+			m.erase_rows(i, 2*i);
+
+			if(A::n != int(m.size())) {
+				throw std::logic_error(
+					"am::dynmatrix memory dealloc / content destruct");
+			}
+		}
+	}
+
 //	std::cout << "\n# " << A::n << '\n' << std::endl;
 	if(A::n != 0) {
-		throw std::logic_error("am::dynmatrix content destruction");
+		throw std::logic_error("am::dynmatrix memory dealloc / content destruct");
 	}
 }
 
 
 
 //-------------------------------------------------------------------
-void dynmatrix_move_correct()
+void dynmatrix_move_correctness()
 {
 	int sum1 = 0, sum2 = 0, sum3 = 0;
 	{
@@ -150,7 +195,7 @@ void dynmatrix_move_correct()
 
 
 //-------------------------------------------------------------------
-void dynmatrix_resizing_correct()
+void dynmatrix_resizing_correctness()
 {
 	dynmatrix<int> m;
 	m.rows(10, 3);
@@ -202,7 +247,7 @@ void dynmatrix_resizing_correct()
 
 
 //-------------------------------------------------------------------
-void dynmatrix_iterators_correct()
+void dynmatrix_iterators_correctness()
 {
 	dynmatrix<int> m;
 	m.insert_cols(0,10);
@@ -255,13 +300,13 @@ void dynmatrix_iterators_correct()
 
 
 //-------------------------------------------------------------------
-void dynmatrix_correct()
+void dynmatrix_correctness()
 {
-	dynmatrix_initialization_correct();
-	dynmatrix_memory_correct();
-	dynmatrix_move_correct();
-	dynmatrix_resizing_correct();
-	dynmatrix_iterators_correct();
+	dynmatrix_initialization_correctness();
+	dynmatrix_memory_correctness();
+	dynmatrix_move_correctness();
+	dynmatrix_resizing_correctness();
+	dynmatrix_iterators_correctness();
 }
 
 
