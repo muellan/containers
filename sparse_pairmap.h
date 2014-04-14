@@ -30,741 +30,740 @@ namespace am {
 template<class ValueType>
 class sparse_pairmap
 {
-	//---------------------------------------------------------------
-	using index__ = std::size_t;
-	//-----------------------------------------------------
-	using key__ = std::pair<index__,index__>;
-	//-----------------------------------------------------
-	struct key_hash__ {
-		index__
-		operator()(const key__& k) const noexcept {
-			return (k.first xor k.second);
-		}
-	};
+    //---------------------------------------------------------------
+    using index_t_ = std::size_t;
+    //-----------------------------------------------------
+    using key_t_ = std::pair<index_t_,index_t_>;
+    //-----------------------------------------------------
+    struct key_hash_t_ {
+        index_t_
+        operator()(const key_t_& k) const noexcept {
+            return (k.first xor k.second);
+        }
+    };
 
-	using storage__ = std::unordered_map<key__,ValueType,key_hash__>;
-	using storage_iter__ = typename storage__::iterator;
-	using storage_citer__ = typename storage__::const_iterator;
-
-
-	//---------------------------------------------------------------
-	template<class Iter>
-	struct iter__
-	{
-		//---------------------------------------------------------------
-		using iterator_category = std::forward_iterator_tag;
-		using value_type = ValueType;
-		using pointer = value_type*;
-		using reference = value_type&;
-		using difference_type =
-			typename std::iterator_traits<Iter>::difference_type;
+    using storage_t_ = std::unordered_map<key_t_,ValueType,key_hash_t_>;
+    using storage_iter_t_ = typename storage_t_::iterator;
+    using storage_citer_t_ = typename storage_t_::const_iterator;
 
 
-		//---------------------------------------------------------------
-		constexpr
-		iter__() = default;
-		//-----------------------------------------------------
-		explicit constexpr
-		iter__(Iter it):
-			it_(it)
-		{}
+    //---------------------------------------------------------------
+    template<class Iter>
+    struct iter_t_
+    {
+        //---------------------------------------------------------------
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = ValueType;
+        using pointer = value_type*;
+        using reference = value_type&;
+        using difference_type =
+            typename std::iterator_traits<Iter>::difference_type;
 
 
-		//---------------------------------------------------------------
-		iter__&
-		operator ++ () {
-			++it_;
-			return *this;
-		}
-		//-----------------------------------------------------
-		iter__
-		operator ++ (int) {
-			iter__ old(*this);
-			++*this;
-			return old;
-		}
-
-		//---------------------------------------------------------------
-		auto
-		operator * () const
-			-> decltype(std::declval<Iter>()->second)
-		{
-			return it_->second;
-		}
-		//-----------------------------------------------------
-		auto
-		operator -> () const
-			-> decltype(std::addressof(std::declval<Iter>()->second))
-		{
-			return std::addressof(it_->second);
-		}
-
-		//---------------------------------------------------------------
-		bool operator == (const iter__& other) const {
-			return (it_ == other.it_);
-		}
-		bool operator != (const iter__& other) const {
-			return (it_ != other.it_);
-		}
-
-	private:
-		Iter it_;
-	};
+        //---------------------------------------------------------------
+        constexpr
+        iter_t_() = default;
+        //-----------------------------------------------------
+        explicit constexpr
+        iter_t_(Iter it):
+            it_(it)
+        {}
 
 
+        //---------------------------------------------------------------
+        iter_t_&
+        operator ++ () {
+            ++it_;
+            return *this;
+        }
+        //-----------------------------------------------------
+        iter_t_
+        operator ++ (int) {
+            iter_t_ old(*this);
+            ++*this;
+            return old;
+        }
 
-	//---------------------------------------------------------------
-	template<class Iter>
-	struct index_iter__
-	{
-		//---------------------------------------------------------------
-		using iterator_category = std::forward_iterator_tag;
-		using value_type = ValueType;
-		using pointer = value_type*;
-		using reference = value_type&;
-		using difference_type =
-			typename std::iterator_traits<Iter>::difference_type;
+        //---------------------------------------------------------------
+        auto
+        operator * () const
+            -> decltype(std::declval<Iter>()->second)
+        {
+            return it_->second;
+        }
+        //-----------------------------------------------------
+        auto
+        operator -> () const
+            -> decltype(std::addressof(std::declval<Iter>()->second))
+        {
+            return std::addressof(it_->second);
+        }
 
+        //---------------------------------------------------------------
+        bool operator == (const iter_t_& other) const {
+            return (it_ == other.it_);
+        }
+        bool operator != (const iter_t_& other) const {
+            return (it_ != other.it_);
+        }
 
-		//---------------------------------------------------------------
-		constexpr
-		index_iter__():
-			it_(), end_(), idx_(0)
-		{}
-		//-----------------------------------------------------
-		explicit constexpr
-		index_iter__(Iter first):
-			it_(first), end_(first), idx_(0)
-		{}
-		//-----------------------------------------------------
-		explicit
-		index_iter__(Iter first, Iter last, index__ idx):
-			it_(first), end_(last), idx_(idx)
-		{
-			seek();
-		}
-
-
-		//---------------------------------------------------------------
-		index_iter__&
-		operator ++ () {
-			++it_;
-			seek();
-			return *this;
-		}
-		//-----------------------------------------------------
-		index_iter__
-		operator ++ (int) {
-			index_iter__ old(*this);
-			++*this;
-			return old;
-		}
-
-		//---------------------------------------------------------------
-		auto
-		operator * () const
-			-> decltype(std::declval<Iter>()->second)
-		{
-			return it_->second;
-		}
-		//-----------------------------------------------------
-		auto
-		operator -> () const
-			-> decltype(std::addressof(std::declval<Iter>()->second))
-		{
-			return std::addressof(it_->second);
-		}
-
-		//---------------------------------------------------------------
-		bool operator == (const index_iter__& other) const {
-			return (it_ == other.it_);
-		}
-		bool operator != (const index_iter__& other) const {
-			return (it_ != other.it_);
-		}
-
-	private:
-		void seek() {
-			while((it_ != end_) &&
-				  (it_->first.first != idx_) && (it_->first.second != idx_))
-			{
-				++it_;
-			};
-		}
-		//-----------------------------------------------------
-		Iter it_;
-		Iter end_;
-		index__ idx_;
-	};
+    private:
+        Iter it_;
+    };
 
 
 
-	//---------------------------------------------------------------
-	template<class Iter>
-	struct section__
-	{
-		//---------------------------------------------------------------
-		struct iterator
-		{
-			//---------------------------------------------------------------
-			using iterator_category = std::forward_iterator_tag;
-			using value_type = ValueType;
-			using pointer = value_type*;
-			using reference = value_type&;
-			using difference_type =
-				typename std::iterator_traits<Iter>::difference_type;
+    //---------------------------------------------------------------
+    template<class Iter>
+    struct index_iter_t_
+    {
+        //---------------------------------------------------------------
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = ValueType;
+        using pointer = value_type*;
+        using reference = value_type&;
+        using difference_type =
+            typename std::iterator_traits<Iter>::difference_type;
 
 
-			//---------------------------------------------------------------
-			constexpr
-			iterator():
-				it_(), end_(), fidx_(0), lidx_(0)
-			{}
-			//-----------------------------------------------------
-			explicit constexpr
-			iterator(Iter end):
-				it_(end), end_(end), fidx_(0), lidx_(0)
-			{}
-			//-----------------------------------------------------
-			explicit
-			iterator(Iter first, Iter last, index__ fidx, index__ lidx):
-				it_(first), end_(last), fidx_(fidx), lidx_(lidx)
-			{
-				seek();
-			}
+        //---------------------------------------------------------------
+        constexpr
+        index_iter_t_():
+            it_(), end_(), idx_(0)
+        {}
+        //-----------------------------------------------------
+        explicit constexpr
+        index_iter_t_(Iter first):
+            it_(first), end_(first), idx_(0)
+        {}
+        //-----------------------------------------------------
+        explicit
+        index_iter_t_(Iter first, Iter last, index_t_ idx):
+            it_(first), end_(last), idx_(idx)
+        {
+            seek();
+        }
 
 
-			//---------------------------------------------------------------
-			iterator&
-			operator ++ () {
-				++it_;
-				seek();
-				return *this;
-			}
-			//-----------------------------------------------------
-			iterator
-			operator ++ (int) {
-				iterator old(*this);
-				++*this;
-				return old;
-			}
+        //---------------------------------------------------------------
+        index_iter_t_&
+        operator ++ () {
+            ++it_;
+            seek();
+            return *this;
+        }
+        //-----------------------------------------------------
+        index_iter_t_
+        operator ++ (int) {
+            index_iter_t_ old(*this);
+            ++*this;
+            return old;
+        }
 
-			//---------------------------------------------------------------
-			auto
-			operator * () const
-				-> decltype(std::declval<Iter>()->second)
-			{
-				return it_->second;
-			}
-			//-----------------------------------------------------
-			auto
-			operator -> () const
-				-> decltype(std::addressof(std::declval<Iter>()->second))
-			{
-				return std::addressof(it_->second);
-			}
+        //---------------------------------------------------------------
+        auto
+        operator * () const
+            -> decltype(std::declval<Iter>()->second)
+        {
+            return it_->second;
+        }
+        //-----------------------------------------------------
+        auto
+        operator -> () const
+            -> decltype(std::addressof(std::declval<Iter>()->second))
+        {
+            return std::addressof(it_->second);
+        }
 
-			//---------------------------------------------------------------
-			bool operator == (const iterator& other) const {
-				return (it_ == other.it_);
-			}
-			bool operator != (const iterator& other) const {
-				return (it_ != other.it_);
-			}
+        //---------------------------------------------------------------
+        bool operator == (const index_iter_t_& other) const {
+            return (it_ == other.it_);
+        }
+        bool operator != (const index_iter_t_& other) const {
+            return (it_ != other.it_);
+        }
 
-		private:
-			void seek() {
-				//seek as long as first and second index are not in range
-				while((it_ != end_) &&
-					((it_->first.first < fidx_) || (it_->first.first > lidx_)) &&
-					((it_->first.second < fidx_)|| (it_->first.second > lidx_))	)
-				{
-					++it_;
-				};
-			}
-			//-----------------------------------------------------
-			Iter it_;
-			Iter end_;
-			index__ fidx_, lidx_;
-		};
+    private:
+        void seek() {
+            while((it_ != end_) &&
+                  (it_->first.first != idx_) && (it_->first.second != idx_))
+            {
+                ++it_;
+            };
+        }
+        //-----------------------------------------------------
+        Iter it_;
+        Iter end_;
+        index_t_ idx_;
+    };
 
 
-		//-----------------------------------------------------
-		using difference_type = typename iterator::difference_type;
 
-		//-----------------------------------------------------
-		constexpr
-		section__() = default;
-		//-----------------------------------------------------
-		explicit constexpr
-		section__(Iter fst, Iter lst,
-			difference_type fidx, difference_type lidx)
-		:
-			fst_(fst), lst_(lst), fidx_(fidx), lidx_(lidx)
-		{}
-
-		//-----------------------------------------------------
-		constexpr iterator
-		begin() const {
-			return iterator(fst_, lst_, fidx_, lidx_);
-		}
-		//-----------------------------------------------------
-		constexpr iterator
-		end() const {
-			return iterator(lst_);
-		}
+    //---------------------------------------------------------------
+    template<class Iter>
+    struct section_t_
+    {
+        //---------------------------------------------------------------
+        struct iterator
+        {
+            //---------------------------------------------------------------
+            using iterator_category = std::forward_iterator_tag;
+            using value_type = ValueType;
+            using pointer = value_type*;
+            using reference = value_type&;
+            using difference_type =
+                typename std::iterator_traits<Iter>::difference_type;
 
 
-	private:
-		Iter fst_;
-		Iter lst_;
-		difference_type fidx_, lidx_;
-	};
+            //---------------------------------------------------------------
+            constexpr
+            iterator():
+                it_(), end_(), fidx_(0), lidx_(0)
+            {}
+            //-----------------------------------------------------
+            explicit constexpr
+            iterator(Iter end):
+                it_(end), end_(end), fidx_(0), lidx_(0)
+            {}
+            //-----------------------------------------------------
+            explicit
+            iterator(Iter first, Iter last, index_t_ fidx, index_t_ lidx):
+                it_(first), end_(last), fidx_(fidx), lidx_(lidx)
+            {
+                seek();
+            }
+
+
+            //---------------------------------------------------------------
+            iterator&
+            operator ++ () {
+                ++it_;
+                seek();
+                return *this;
+            }
+            //-----------------------------------------------------
+            iterator
+            operator ++ (int) {
+                iterator old(*this);
+                ++*this;
+                return old;
+            }
+
+            //---------------------------------------------------------------
+            auto
+            operator * () const
+                -> decltype(std::declval<Iter>()->second)
+            {
+                return it_->second;
+            }
+            //-----------------------------------------------------
+            auto
+            operator -> () const
+                -> decltype(std::addressof(std::declval<Iter>()->second))
+            {
+                return std::addressof(it_->second);
+            }
+
+            //---------------------------------------------------------------
+            bool operator == (const iterator& other) const {
+                return (it_ == other.it_);
+            }
+            bool operator != (const iterator& other) const {
+                return (it_ != other.it_);
+            }
+
+        private:
+            void seek() {
+                //seek as long as first and second index are not in range
+                while((it_ != end_) &&
+                    ((it_->first.first < fidx_) || (it_->first.first > lidx_)) &&
+                    ((it_->first.second < fidx_)|| (it_->first.second > lidx_))    )
+                {
+                    ++it_;
+                };
+            }
+            //-----------------------------------------------------
+            Iter it_;
+            Iter end_;
+            index_t_ fidx_, lidx_;
+        };
+
+
+        //-----------------------------------------------------
+        using difference_type = typename iterator::difference_type;
+
+        //-----------------------------------------------------
+        constexpr
+        section_t_() = default;
+        //-----------------------------------------------------
+        explicit constexpr
+        section_t_(Iter fst, Iter lst,
+            difference_type fidx, difference_type lidx)
+        :
+            fst_(fst), lst_(lst), fidx_(fidx), lidx_(lidx)
+        {}
+
+        //-----------------------------------------------------
+        constexpr iterator
+        begin() const {
+            return iterator(fst_, lst_, fidx_, lidx_);
+        }
+        //-----------------------------------------------------
+        constexpr iterator
+        end() const {
+            return iterator(lst_);
+        }
+
+
+    private:
+        Iter fst_;
+        Iter lst_;
+        difference_type fidx_, lidx_;
+    };
 
 
 public:
 
-	//---------------------------------------------------------------
-	// TYPES
-	//---------------------------------------------------------------
-	using value_type = ValueType;
-	using size_type = index__;
-	//-----------------------------------------------------
-	using       iterator = iter__<storage_iter__>;
-	using const_iterator = iter__<storage_citer__>;
-	//-----------------------------------------------------
-	using       index_iterator = index_iter__<storage_iter__>;
-	using const_index_iterator = index_iter__<storage_citer__>;
-	//-----------------------------------------------------
-	using       section = section__<storage_iter__>;
-	using const_section = section__<storage_citer__>;
+    //---------------------------------------------------------------
+    // TYPES
+    //---------------------------------------------------------------
+    using value_type = ValueType;
+    using size_type = index_t_;
+    //-----------------------------------------------------
+    using       iterator = iter_t_<storage_iter_t_>;
+    using const_iterator = iter_t_<storage_citer_t_>;
+    //-----------------------------------------------------
+    using       index_iterator = index_iter_t_<storage_iter_t_>;
+    using const_index_iterator = index_iter_t_<storage_citer_t_>;
+    //-----------------------------------------------------
+    using       section = section_t_<storage_iter_t_>;
+    using const_section = section_t_<storage_citer_t_>;
 
 
-	//---------------------------------------------------------------
-	class memento {
-		friend class sparse_pairmap;
-	public:
-		//-----------------------------------------------------
-		memento() = default;
+    //---------------------------------------------------------------
+    class memento {
+        friend class sparse_pairmap;
+    public:
+        //-----------------------------------------------------
+        memento() = default;
 
-		//-----------------------------------------------------
-		memento(const sparse_pairmap& source, size_type index):
-			mem_()
-		{
-			backup(source,index);
-		}
+        //-----------------------------------------------------
+        memento(const sparse_pairmap& source, size_type index):
+            mem_()
+        {
+            backup(source,index);
+        }
 
-		//-----------------------------------------------------
-		void
-		backup(const sparse_pairmap& source, size_type index)
-		{
-			mem_.clear();
+        //-----------------------------------------------------
+        void
+        backup(const sparse_pairmap& source, size_type index)
+        {
+            mem_.clear();
 
-			for(const auto& x : source.vals_) {
-				if((x.first.first != index) && (x.first.second != index)) {
-					mem_.push_back(x);
-				}
-			}
-		}
+            for(const auto& x : source.vals_) {
+                if((x.first.first == index) || (x.first.second == index)) {
+                    mem_.push_back(x);
+                }
+            }
+        }
 
-		//-----------------------------------------------------
-		void
-		restore(sparse_pairmap& target, size_type index)
-		{
-			//remove current values associated with 'index'
-			target.erase_index(index);
-			//insert old ones
-			for(const auto& x : mem_) {
-				target.vals_.insert(x);
-			}
-		}
+        //-----------------------------------------------------
+        void
+        restore(sparse_pairmap& target, size_type index) const
+        {
+            //remove current values associated with 'index'
+            target.erase_index(index);
+            //insert old ones
+            for(const auto& x : mem_) {
+                target.vals_.insert(x);
+            }
+        }
 
-	private:
-		std::vector<typename storage__::value_type> mem_;
-	};
+    private:
+        std::vector<typename storage_t_::value_type> mem_;
+    };
 
-	friend class memento;
-
-
-	//---------------------------------------------------------------
-	// CONSTRUCTION
-	//---------------------------------------------------------------
-	sparse_pairmap() = default;
-	//-----------------------------------------------------
-	sparse_pairmap(const sparse_pairmap&) = default;
-	//-----------------------------------------------------
-	sparse_pairmap(sparse_pairmap&& source):
-		vals_(std::move(source.vals_))
-	{}
+    friend class memento;
 
 
-	//---------------------------------------------------------------
-	// SETTERS
-	//---------------------------------------------------------------
-	sparse_pairmap& operator = (const sparse_pairmap&) = default;
-	//-----------------------------------------------------
-	sparse_pairmap&
-	operator = (sparse_pairmap&& source) {
-		vals_ = std::move(source.vals_);
-		return *this;
-	}
-
-	//-----------------------------------------------------
-	void
-	assign_index(size_type index, const value_type& value) {
-		for(auto i = begin(index), e = end(index); i != e; ++i) {
-			*i = value;
-		}
-	}
-	//-----------------------------------------------------
-	void
-	assign_index(size_type index, const memento& mem) {
-		mem.restore(*this, index);
-	}
-
-	//-----------------------------------------------------
-	void
-	clear() {
-		vals_.clear();
-	}
+    //---------------------------------------------------------------
+    // CONSTRUCTION
+    //---------------------------------------------------------------
+    sparse_pairmap() = default;
+    //-----------------------------------------------------
+    sparse_pairmap(const sparse_pairmap&) = default;
+    //-----------------------------------------------------
+    sparse_pairmap(sparse_pairmap&& source):
+        vals_(std::move(source.vals_))
+    {}
 
 
-	//---------------------------------------------------------------
-	// GETTERS
-	//---------------------------------------------------------------
-	size_type
-	min_index() const {
-		if(vals_.empty()) return 0;
+    //---------------------------------------------------------------
+    // SETTERS
+    //---------------------------------------------------------------
+    sparse_pairmap& operator = (const sparse_pairmap&) = default;
+    //-----------------------------------------------------
+    sparse_pairmap&
+    operator = (sparse_pairmap&& source) {
+        vals_ = std::move(source.vals_);
+        return *this;
+    }
 
-		size_type n = std::numeric_limits<size_type>::max();
+    //-----------------------------------------------------
+    void
+    assign_index(size_type index, const value_type& value) {
+        for(auto i = begin(index), e = end(index); i != e; ++i) {
+            *i = value;
+        }
+    }
+    //-----------------------------------------------------
+    void
+    assign_index(size_type index, const memento& mem) {
+        mem.restore(*this, index);
+    }
 
-		for(auto& x : vals_) {
-			if(n < x.first.first) n = x.first.first;
-			if(n < x.first.first) n = x.first.second;
-		}
-
-		return n;
-	}
-	//-----------------------------------------------------
-	size_type
-	max_index() const {
-		size_type n = 0;
-
-		for(auto& x : vals_) {
-			if(n > x.first.first) n = x.first.first;
-			if(n > x.first.first) n = x.first.second;
-		}
-
-		return n;
-	}
-
-	//-----------------------------------------------------
-	size_type
-	size() const {
-		return vals_.size();
-	}
+    //-----------------------------------------------------
+    void
+    clear() {
+        vals_.clear();
+    }
 
 
-	//---------------------------------------------------------------
-	value_type&
-	operator () (size_type idx1, size_type idx2) {
-		return ((idx1 < idx2) ? vals_[{idx1,idx2}] : vals_[{idx2,idx1}]);
-	}
+    //---------------------------------------------------------------
+    // GETTERS
+    //---------------------------------------------------------------
+    size_type
+    min_index() const {
+        if(vals_.empty()) return 0;
 
-	//-----------------------------------------------------
-	bool
-	contains(size_type idx1, size_type idx2) const {
-		return ((idx1 < idx2)
-			? (vals_.find({idx1,idx2}) != vals_.end())
-			: (vals_.find({idx2,idx1}) != vals_.end()) );
-	}
+        size_type n = std::numeric_limits<size_type>::max();
 
+        for(const auto& x : vals_) {
+            if(n > x.first.first) n = x.first.first;
+            if(n > x.first.second) n = x.first.second;
+        }
 
-	//---------------------------------------------------------------
-	iterator
-	find(size_type idx1, size_type idx2) {
-		return ((idx1 < idx2)
-			? iterator(vals_.find({idx1,idx2}))
-			: iterator(vals_.find({idx2,idx1})) );
-	}
-	//-----------------------------------------------------
-	const_iterator
-	find(size_type idx1, size_type idx2) const {
-		return ((idx1 < idx2)
-			? const_iterator(vals_.find({idx1,idx2}))
-			: const_iterator(vals_.find({idx2,idx1})) );
-	}
+        return n;
+    }
+    //-----------------------------------------------------
+    size_type
+    max_index() const {
+        size_type n = 0;
 
+        for(const auto& x : vals_) {
+            if(n < x.first.first) n = x.first.first;
+            if(n < x.first.second) n = x.first.second;
+        }
+        return n;
+    }
 
-	//---------------------------------------------------------------
-	void
-	increase_indices(size_type firstIndex, size_type n = 1) {
-		if(n < 1) return;
-
-		using backup__ = std::vector<typename storage__::value_type>;
-
-		//backup values with occurences of indices >= 'index'
-		backup__ backup;
-		for(auto it = vals_.begin(); it != vals_.end();) {
-			if(	(it->first.first  >= firstIndex) ||
-				(it->first.second >= firstIndex) )
-			{
-				backup.push_back(*it);
-				it = vals_.erase(it);
-			} else {
-				++it;
-			}
-		}
-
-		//insert values with increased indices
-		for(const auto& x : backup) {
-			auto k = x.first;
-			if(k.first  >= firstIndex) k.first  += n;
-			if(k.second >= firstIndex) k.second += n;
-			vals_[k] = x.second;
-		}
-	}
+    //-----------------------------------------------------
+    size_type
+    size() const {
+        return vals_.size();
+    }
 
 
-	//---------------------------------------------------------------
-	void
-	erase(size_type idx1, size_type idx2)
-	{
-		if(idx1 < idx2) {
-			auto it = vals_.find({idx1,idx2});
-			if(it != vals_.end()) vals_.erase(it);
-		} else {
-			auto it = vals_.find({idx2,idx1});
-			if(it != vals_.end()) vals_.erase(it);
-		}
-	}
-	//-----------------------------------------------------
-	void
-	erase_index(size_type index)
-	{
-		for(auto it = vals_.begin(); it != vals_.end();) {
-			if(it->first.first == index || it->first.second == index) {
-				it = vals_.erase(it);
-			} else {
-				++it;
-			}
-		}
-	}
-	//-----------------------------------------------------
-	void
-	erase_range(size_type firstIndex, size_type lastIndex)
-	{
-		if(firstIndex >= lastIndex) return;
+    //---------------------------------------------------------------
+    value_type&
+    operator () (size_type idx1, size_type idx2) {
+        return ((idx1 < idx2) ? vals_[{idx1,idx2}] : vals_[{idx2,idx1}]);
+    }
 
-		for(auto it = vals_.begin(); it != vals_.end();) {
-
-			if( (it->first.first  >= firstIndex &&
-				 it->first.first  <= lastIndex) ||
-				(it->first.second >= firstIndex &&
-				 it->first.second <= lastIndex) )
-			{
-				it = vals_.erase(it);
-			} else {
-				++it;
-			}
-		}
-	}
-
-	//-----------------------------------------------------
-	void
-	erase_index_decrease_above(size_type index) {
-		using backup__ = std::vector<typename storage__::value_type>;
-
-		//backup values with occurences of indices > 'index'
-		backup__ backup;
-		for(auto it = vals_.begin(); it != vals_.end();) {
-			if(	(it->first.first == index) || (it->first.second == index)) {
-				it = vals_.erase(it);
-			}
-			else if( (it->first.first > index) || (it->first.second > index)) {
-				backup.push_back(*it);
-				it = vals_.erase(it);
-			}
-			else {
-				++it;
-			}
-		}
-
-		//insert values with decreased indices
-		for(const auto& x : backup) {
-			auto k = x.first;
-			if(k.first  > index) --k.first;
-			if(k.second > index) --k.second;
-			vals_[k] = x.second;
-		}
-	}
-	//-----------------------------------------------------
-	void
-	erase_range_decrease_above(size_type firstIndex, size_type lastIndex) {
-		if(firstIndex >= lastIndex) return;
-
-		using backup__ = std::vector<typename storage__::value_type>;
-
-		//backup values with occurences of indices > 'lastIndex'
-		backup__ backup;
-		for(auto it = vals_.begin(); it != vals_.end();) {
-
-			if( (it->first.first  >= firstIndex &&
-				 it->first.first  <= lastIndex) ||
-				(it->first.second >= firstIndex &&
-				 it->first.second <= lastIndex) )
-			{
-				it = vals_.erase(it);
-			}
-			else if( (it->first.first  > lastIndex) ||
-				     (it->first.second > lastIndex) )
-			{
-				backup.push_back(*it);
-				it = vals_.erase(it);
-			}
-			else {
-				++it;
-			}
-		}
-
-		const auto n = lastIndex - firstIndex + 1;
-
-		//insert values with decreased indices
-		for(const auto& x : backup) {
-			auto k = x.first;
-			if(k.first  > lastIndex) k.first  -= n;
-			if(k.second > lastIndex) k.second -= n;
-			vals_[k] = x.second;
-		}
-	}
-
-	//-----------------------------------------------------
-	void
-	swap_indices(size_type idx1, size_type idx2) {
-		using std::swap;
-
-		if(idx1 == idx2) return;
-
-		using backup__ = std::vector<typename storage__::value_type>;
-
-		//backup and erase values with occurences of idx1 or idx2
-		backup__ backup;
-		for(auto it = vals_.begin(); it != vals_.end();) {
-			if(	(it->first.first == idx1) || (it->first.second == idx1) ||
-				(it->first.first == idx2) || (it->first.second == idx2) )
-			{
-				backup.push_back(*it);
-				it = vals_.erase(it);
-			} else {
-				++it;
-			}
-		}
-
-		//insert values with reversed indices
-		for(const auto& x : backup) {
-			auto k = x.first;
-
-			if(k.first == idx1)
-				k.first = idx2;
-			else if(k.first == idx2)
-				k.first = idx1;
-
-			if(k.second == idx1)
-				k.second = idx2;
-			else if(k.second == idx2)
-				k.second = idx1;
-
-			operator()(k.first, k.second) = x.second;
-		}
-
-	}
+    //-----------------------------------------------------
+    bool
+    contains(size_type idx1, size_type idx2) const {
+        return ((idx1 < idx2)
+            ? (vals_.find({idx1,idx2}) != vals_.end())
+            : (vals_.find({idx2,idx1}) != vals_.end()) );
+    }
 
 
-	//---------------------------------------------------------------
-	memento
-	get_memento(size_type index) const {
-		return memento{*this,index};
-	}
+    //---------------------------------------------------------------
+    iterator
+    find(size_type idx1, size_type idx2) {
+        return ((idx1 < idx2)
+            ? iterator(vals_.find({idx1,idx2}))
+            : iterator(vals_.find({idx2,idx1})) );
+    }
+    //-----------------------------------------------------
+    const_iterator
+    find(size_type idx1, size_type idx2) const {
+        return ((idx1 < idx2)
+            ? const_iterator(vals_.find({idx1,idx2}))
+            : const_iterator(vals_.find({idx2,idx1})) );
+    }
 
 
-	//---------------------------------------------------------------
-	// ACCESSSORS
-	//---------------------------------------------------------------
-	iterator
-	begin() {
-		return iterator(vals_.begin());
-	}
-	const_iterator
-	begin() const {
-		return const_iterator(vals_.begin());
-	}
-	const_iterator
-	cbegin() const {
-		return const_iterator(vals_.begin());
-	}
+    //---------------------------------------------------------------
+    void
+    push_up(size_type firstIndex, size_type by = 1) {
+        if(by < 1) return;
 
-	//-----------------------------------------------------
-	iterator
-	end() {
-		return iterator(vals_.end());
-	}
-	const_iterator
-	end() const {
-		return const_iterator(vals_.end());
-	}
-	const_iterator
-	cend() const {
-		return const_iterator(vals_.end());
-	}
+        using backup_t_ = std::vector<typename storage_t_::value_type>;
 
-	//-----------------------------------------------------
-	index_iterator
-	begin(size_type index) {
-		return index_iterator(vals_.begin(), vals_.end(), index);
-	}
-	const_index_iterator
-	begin(size_type index) const {
-		return const_index_iterator(vals_.begin(), vals_.end(), index);
-	}
-	const_index_iterator
-	cbegin(size_type index) const {
-		return const_index_iterator(vals_.begin(), vals_.end(), index);
-	}
+        //backup values with occurences of indices >= 'index'
+        backup_t_ backup;
+        for(auto it = vals_.begin(); it != vals_.end();) {
+            if(    (it->first.first  >= firstIndex) ||
+                (it->first.second >= firstIndex) )
+            {
+                backup.push_back(*it);
+                it = vals_.erase(it);
+            } else {
+                ++it;
+            }
+        }
 
-	//-----------------------------------------------------
-	index_iterator
-	end(size_type) {
-		return index_iterator(vals_.end());
-	}
-	const_index_iterator
-	end(size_type) const {
-		return const_index_iterator(vals_.end());
-	}
-	const_index_iterator
-	cend(size_type) const {
-		return const_index_iterator(vals_.end());
-	}
+        //insert values with increased indices
+        for(const auto& x : backup) {
+            auto k = x.first;
+            if(k.first  >= firstIndex) k.first  += by;
+            if(k.second >= firstIndex) k.second += by;
+            vals_[k] = x.second;
+        }
+    }
 
 
-	//---------------------------------------------------------------
-	// SECTIONS
-	//---------------------------------------------------------------
-	section
-	subrange(size_type firstIncl, size_type lastIncl) {
-		return section(vals_.begin(), vals_.end(), firstIncl, lastIncl);
-	}
-	const_section
-	subrange(size_type firstIncl, size_type lastIncl) const {
-		return const_section(vals_.begin(), vals_.end(), firstIncl, lastIncl);
-	}
-	const_section
-	csubrange(size_type firstIncl, size_type lastIncl) const {
-		return const_section(vals_.begin(), vals_.end(), firstIncl, lastIncl);
-	}
+    //---------------------------------------------------------------
+    void
+    erase(size_type idx1, size_type idx2)
+    {
+        if(idx1 < idx2) {
+            auto it = vals_.find({idx1,idx2});
+            if(it != vals_.end()) vals_.erase(it);
+        } else {
+            auto it = vals_.find({idx2,idx1});
+            if(it != vals_.end()) vals_.erase(it);
+        }
+    }
+    //-----------------------------------------------------
+    void
+    erase_index(size_type index)
+    {
+        for(auto it = vals_.begin(); it != vals_.end();) {
+            if(it->first.first == index || it->first.second == index) {
+                it = vals_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+    //-----------------------------------------------------
+    void
+    erase_index_range(size_type firstIndex, size_type lastIndex)
+    {
+        if(firstIndex > lastIndex) return;
+
+        for(auto it = vals_.begin(); it != vals_.end();) {
+
+            if( (it->first.first  >= firstIndex &&
+                 it->first.first  <= lastIndex) ||
+                (it->first.second >= firstIndex &&
+                 it->first.second <= lastIndex) )
+            {
+                it = vals_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    //-----------------------------------------------------
+    void
+    pull_index(size_type index) {
+        using backup_t_ = std::vector<typename storage_t_::value_type>;
+
+        //backup values with occurences of indices > 'index'
+        backup_t_ backup;
+        for(auto it = vals_.begin(); it != vals_.end();) {
+            if( (it->first.first == index) || (it->first.second == index)) {
+                it = vals_.erase(it);
+            }
+            else if( (it->first.first > index) || (it->first.second > index)) {
+                backup.push_back(*it);
+                it = vals_.erase(it);
+            }
+            else {
+                ++it;
+            }
+        }
+
+        //insert values with decreased indices
+        for(const auto& x : backup) {
+            auto k = x.first;
+            if(k.first  > index) --k.first;
+            if(k.second > index) --k.second;
+            vals_[k] = x.second;
+        }
+    }
+    //-----------------------------------------------------
+    void
+    pull_index_range(size_type firstIndex, size_type lastIndex) {
+        if(firstIndex > lastIndex) return;
+
+        using backup_t_ = std::vector<typename storage_t_::value_type>;
+
+        //backup values with occurences of indices > 'lastIndex'
+        backup_t_ backup;
+        for(auto it = vals_.begin(); it != vals_.end();) {
+
+            if( (it->first.first  >= firstIndex &&
+                 it->first.first  <= lastIndex) ||
+                (it->first.second >= firstIndex &&
+                 it->first.second <= lastIndex) )
+            {
+                it = vals_.erase(it);
+            }
+            else if( (it->first.first  > lastIndex) ||
+                     (it->first.second > lastIndex) )
+            {
+                backup.push_back(*it);
+                it = vals_.erase(it);
+            }
+            else {
+                ++it;
+            }
+        }
+
+        const auto n = lastIndex - firstIndex + 1;
+
+        //insert values with decreased indices
+        for(const auto& x : backup) {
+            auto k = x.first;
+            if(k.first  > lastIndex) k.first  -= n;
+            if(k.second > lastIndex) k.second -= n;
+            vals_[k] = x.second;
+        }
+    }
+
+    //-----------------------------------------------------
+    void
+    swap_indices(size_type idx1, size_type idx2) {
+        using std::swap;
+
+        if(idx1 == idx2) return;
+
+        using backup_t_ = std::vector<typename storage_t_::value_type>;
+
+        //backup and erase values with occurences of idx1 or idx2
+        backup_t_ backup;
+        for(auto it = vals_.begin(); it != vals_.end();) {
+            if( (it->first.first == idx1) || (it->first.second == idx1) ||
+                (it->first.first == idx2) || (it->first.second == idx2) )
+            {
+                backup.push_back(*it);
+                it = vals_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+
+        //insert values with reversed indices
+        for(const auto& x : backup) {
+            auto k = x.first;
+
+            if(k.first == idx1)
+                k.first = idx2;
+            else if(k.first == idx2)
+                k.first = idx1;
+
+            if(k.second == idx1)
+                k.second = idx2;
+            else if(k.second == idx2)
+                k.second = idx1;
+
+            operator()(k.first, k.second) = x.second;
+        }
+
+    }
+
+
+    //---------------------------------------------------------------
+    memento
+    get_memento(size_type index) const {
+        return memento{*this,index};
+    }
+
+
+    //---------------------------------------------------------------
+    // ACCESSSORS
+    //---------------------------------------------------------------
+    iterator
+    begin() {
+        return iterator(vals_.begin());
+    }
+    const_iterator
+    begin() const {
+        return const_iterator(vals_.begin());
+    }
+    const_iterator
+    cbegin() const {
+        return const_iterator(vals_.begin());
+    }
+
+    //-----------------------------------------------------
+    iterator
+    end() {
+        return iterator(vals_.end());
+    }
+    const_iterator
+    end() const {
+        return const_iterator(vals_.end());
+    }
+    const_iterator
+    cend() const {
+        return const_iterator(vals_.end());
+    }
+
+    //-----------------------------------------------------
+    index_iterator
+    begin(size_type index) {
+        return index_iterator(vals_.begin(), vals_.end(), index);
+    }
+    const_index_iterator
+    begin(size_type index) const {
+        return const_index_iterator(vals_.begin(), vals_.end(), index);
+    }
+    const_index_iterator
+    cbegin(size_type index) const {
+        return const_index_iterator(vals_.begin(), vals_.end(), index);
+    }
+
+    //-----------------------------------------------------
+    index_iterator
+    end(size_type) {
+        return index_iterator(vals_.end());
+    }
+    const_index_iterator
+    end(size_type) const {
+        return const_index_iterator(vals_.end());
+    }
+    const_index_iterator
+    cend(size_type) const {
+        return const_index_iterator(vals_.end());
+    }
+
+
+    //---------------------------------------------------------------
+    // SECTIONS
+    //---------------------------------------------------------------
+    section
+    subrange(size_type firstIncl, size_type lastIncl) {
+        return section(vals_.begin(), vals_.end(), firstIncl, lastIncl);
+    }
+    const_section
+    subrange(size_type firstIncl, size_type lastIncl) const {
+        return const_section(vals_.begin(), vals_.end(), firstIncl, lastIncl);
+    }
+    const_section
+    csubrange(size_type firstIncl, size_type lastIncl) const {
+        return const_section(vals_.begin(), vals_.end(), firstIncl, lastIncl);
+    }
 
 
 private:
-	storage__ vals_;
+    storage_t_ vals_;
 };
 
 
@@ -786,7 +785,7 @@ template<class T>
 inline auto
 begin(sparse_pairmap<T>& m) -> decltype(m.begin())
 {
-	return m.begin();
+    return m.begin();
 }
 
 //---------------------------------------------------------
@@ -794,7 +793,7 @@ template<class T>
 inline auto
 begin(const sparse_pairmap<T>& m) -> decltype(m.begin())
 {
-	return m.begin();
+    return m.begin();
 }
 
 //---------------------------------------------------------
@@ -802,7 +801,7 @@ template<class T>
 inline auto
 cbegin(const sparse_pairmap<T>& m) -> decltype(m.cbegin())
 {
-	return m.cbegin();
+    return m.cbegin();
 }
 
 
@@ -812,7 +811,7 @@ template<class T>
 inline auto
 end(sparse_pairmap<T>& m) -> decltype(m.end())
 {
-	return m.end();
+    return m.end();
 }
 
 //---------------------------------------------------------
@@ -820,7 +819,7 @@ template<class T>
 inline auto
 end(const sparse_pairmap<T>& m) -> decltype(m.end())
 {
-	return m.end();
+    return m.end();
 }
 
 //---------------------------------------------------------
@@ -828,7 +827,7 @@ template<class T>
 inline auto
 cend(const sparse_pairmap<T>& m) -> decltype(m.cend())
 {
-	return m.cend();
+    return m.cend();
 }
 
 

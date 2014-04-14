@@ -14,5 +14,6 @@
 //-------------------------------------------------------------------
 int main()
 {
-	am::test::container_correctness();
+    am::test::container_correctness();
+
 }
