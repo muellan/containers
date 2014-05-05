@@ -40,27 +40,6 @@ void container_correctness()
         std::cerr << "FAIL\n" << "am::dynmatrix\n" << e.what() << std::endl;
     }
 
-    try {
-        pairmap_correctness();
-    }
-    catch(std::exception& e) {
-        std::cerr << "FAIL\n" << "am::pairmap\n" << e.what() << std::endl;
-    }
-
-    try {
-        dynpairmap_correctness();
-    }
-    catch(std::exception& e) {
-        std::cerr << "FAIL\n" << "am::dynpairmap\n" << e.what() << std::endl;
-    }
-
-    try {
-        sparse_pairmap_correctness();
-    }
-    catch(std::exception& e) {
-        std::cerr << "FAIL\n" << "am::sparse_pairmap\n" << e.what() << std::endl;
-    }
-
 }
 
 

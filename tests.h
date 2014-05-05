@@ -15,9 +15,6 @@
 
 #include "dynmatrix_test.h"
 #include "matrix_test.h"
-#include "pairmap_test.h"
-#include "dynpairmap_test.h"
-#include "sparse_pairmap_test.h"
 
 
 namespace am {
