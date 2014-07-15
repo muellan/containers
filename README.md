@@ -19,6 +19,13 @@ Generic Containers
 <p>
   2-dimensional dynamically sized array
 </p>
+- vector_map</br>
+<p>
+  key->value map 
+  stores (key,value) pairs in one contiguous chunk of memory  
+  operator[] differs from std::map: 
+  it allows indexed random access to key,value pairs
+</p>
 
 Prerequisites
   - requires C++11 conforming compiler
