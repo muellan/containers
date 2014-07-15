@@ -75,7 +75,7 @@ class dynmatrix
 
         //---------------------------------------------------------------
         explicit constexpr
-        stride_iter_t_():
+        stride_iter_t_() noexcept :
             base_t_{},
             p_(nullptr), stride_{0}
         {}
@@ -83,7 +83,7 @@ class dynmatrix
     private:
         //---------------------------------------------------------------
         explicit constexpr
-        stride_iter_t_(pointer p, std::size_t stride = 0):
+        stride_iter_t_(pointer p, std::size_t stride = 0) noexcept :
             base_t_{},
             p_(p), stride_{static_cast<difference_type>(stride)}
         {}
@@ -91,77 +91,89 @@ class dynmatrix
     public:
 
         //---------------------------------------------------------------
-        reference operator *() const {
+        reference
+        operator *() const noexcept {
             return (*p_);
         }
         //-----------------------------------------------------
-        pointer operator ->() const {
+        pointer
+        operator ->() const noexcept {
             return (p_);
         }
         //-----------------------------------------------------
-        explicit operator bool() const {
+        explicit
+        operator bool() const noexcept {
             return (p_);
         }
 
         //-----------------------------------------------------
-        value_type& operator [] (difference_type i) const {
+        value_type&
+        operator [] (difference_type i) const noexcept {
             return *(p_ + (stride_ * i));
         }
 
 
         //---------------------------------------------------------------
-        this_t_& operator ++ () {
+        this_t_&
+        operator ++ () noexcept {
             p_ += stride_;
             return *this;
         }
-        this_t_ operator ++ (int) {
+        this_t_
+        operator ++ (int) noexcept {
             this_t_ old{*this};
             ++*this;
             return old;
         }
-        this_t_& operator += (difference_type i) {
+        this_t_&
+        operator += (difference_type i) noexcept {
             p_ += (stride_ * i);
             return *this;
         }
-        this_t_ operator + (difference_type i) const {
+        this_t_
+        operator + (difference_type i) const noexcept {
             return this_t_{p_ + (stride_ * i), stride_};
         }
         //-----------------------------------------------------
-        this_t_& operator -- () {
+        this_t_&
+        operator -- () noexcept {
             p_ -= stride_;
             return *this;
         }
-        this_t_ operator -- (int) {
+        this_t_
+        operator -- (int) noexcept {
             this_t_ old{*this};
             --*this;
             return old;
         }
-        this_t_& operator -= (difference_type i) {
+        this_t_&
+        operator -= (difference_type i) noexcept {
             p_ -= (stride_ * i);
             return *this;
         }
-        this_t_ operator - (difference_type i) const {
+        this_t_
+        operator - (difference_type i) const noexcept {
             return this_t_{p_ - (stride_ * i), stride_};
         }
 
 
         //---------------------------------------------------------------
-        bool operator ==(const this_t_& other) {
+        bool operator ==(const this_t_& other) noexcept {
             return (p_ == other.p_);
         }
-        bool operator !=(const this_t_& other) {
+        bool operator !=(const this_t_& other) noexcept {
             return (p_ != other.p_);
         }
-        bool operator < (const this_t_& other) {
+        bool operator < (const this_t_& other) noexcept {
             return (p_ < other.p_);
         }
-        bool operator <=(const this_t_& other) {
+        bool operator <=(const this_t_& other) noexcept {
             return (p_ <= other.p_);
         }
-        bool operator > (const this_t_& other) {
+        bool operator > (const this_t_& other) noexcept {
             return (p_ > other.p_);
         }
-        bool operator >=(const this_t_& other) {
+        bool operator >=(const this_t_& other) noexcept {
             return (p_ >= other.p_);
         }
 
@@ -203,16 +215,19 @@ class dynmatrix
 
 
             //-----------------------------------------------------
-            reference operator *() const {
+            reference
+            operator *() const noexcept {
                 return (*p_);
             }
             //-----------------------------------------------------
-            pointer operator ->() const noexcept {
+            pointer
+            operator ->() const noexcept {
                 return (p_);
             }
 
             //-----------------------------------------------------
-            iterator& operator ++ () {
+            iterator&
+            operator ++ () noexcept {
                 ++p_;
                 ++count_;
                 if(count_ >= length_) {
@@ -222,17 +237,18 @@ class dynmatrix
                 return *this;
             }
             //-----------------------------------------------------
-            iterator operator ++ (int) {
+            iterator
+            operator ++ (int) noexcept {
                 auto old(*this);
                 ++*this;
                 return old;
             }
 
             //-----------------------------------------------------
-            bool operator ==(const iterator& other) {
+            bool operator ==(const iterator& other) noexcept {
                 return (p_ == other.p_);
             }
-            bool operator !=(const iterator& other) {
+            bool operator !=(const iterator& other) noexcept {
                 return (p_ != other.p_);
             }
 
@@ -378,7 +394,7 @@ public:
 
     //-----------------------------------------------------
     /// @brief move constructor
-    dynmatrix(dynmatrix&& o):
+    dynmatrix(dynmatrix&& o) noexcept :
         rows_{o.rows_}, cols_{o.cols_},
         first_{o.first_}, last_{o.last_}, memEnd_{o.memEnd_},
         alloc_{o.alloc_}
@@ -401,15 +417,18 @@ public:
     //---------------------------------------------------------------
     dynmatrix&
     operator = (const dynmatrix& source) {
-        if(this == &source) return *this;
-        this_t_ temp{source};
-        swap(*this,temp);
+        if(this != &source) {
+            this_t_ temp{source};
+            swap(*this,temp);
+        }
         return *this;
     }
     //-----------------------------------------------------
     dynmatrix&
-    operator = (dynmatrix&& source) {
-        swap(*this, source);
+    operator = (dynmatrix&& source) noexcept {
+        if(this != &source) {
+            swap(source, *this);
+        }
         return *this;
     }
 
@@ -696,30 +715,30 @@ public:
     // ACCESS
     //---------------------------------------------------------------
     reference
-    operator () (size_type row, size_type col) {
+    operator () (size_type row, size_type col) noexcept {
         return first_[row*cols_+col];
     }
     //-----------------------------------------------------
     const_reference
-    operator () (size_type row, size_type col) const {
+    operator () (size_type row, size_type col) const noexcept {
         return first_[row*cols_+col];
     }
 
     //-----------------------------------------------------
     size_type
-    row(const_iterator it) const {
+    row(const_iterator it) const noexcept {
         using std::distance;
         return static_cast<size_type>(distance(begin(), it) / cols_);
     }
     //-----------------------------------------------------
     size_type
-    col(const_iterator it) const {
+    col(const_iterator it) const noexcept {
         using std::distance;
         return static_cast<size_type>(distance(begin(), it) % cols_);
     }
     //---------------------------------------------------------------
     std::pair<size_type,size_type>
-    index(const_iterator i) const {
+    index(const_iterator i) const noexcept {
         using std::distance;
 
         const auto n = distance(begin(), i);
@@ -742,18 +761,18 @@ public:
     }
     //-----------------------------------------------------
     size_type
-    size() const {
+    size() const noexcept {
         using std::distance;
         return distance(first_, last_);
     }
     //-----------------------------------------------------
     size_type
-    max_size() const {
+    max_size() const noexcept {
         return alloc_traits::max_size(alloc_);
     }
     //-----------------------------------------------------
     size_type
-    capacity() const {
+    capacity() const noexcept {
         using std::distance;
         return distance(first_, memEnd_);
     }
@@ -773,70 +792,70 @@ public:
     // SEQUENTIAL ITERATORS
     //---------------------------------------------------------------
     iterator
-    begin() {
+    begin() noexcept {
         return first_;
     }
     const_iterator
-    begin() const {
+    begin() const noexcept {
         return first_;
     }
     const_iterator
-    cbegin() const {
+    cbegin() const noexcept {
         return first_;
     }
     //-----------------------------------------------------
     friend iterator
-    begin(this_t_& m) {
+    begin(this_t_& m) noexcept {
         return m.first_;
     }
     friend const_iterator
-    begin(const this_t_& m) {
+    begin(const this_t_& m) noexcept {
         return m.first_;
     }
     friend const_iterator
-    cbegin(const this_t_& m) {
+    cbegin(const this_t_& m) noexcept {
         return m.first_;
     }
     //-----------------------------------------------------
     iterator
-    begin(size_type row, size_type col) {
+    begin(size_type row, size_type col) noexcept {
         return ptr(row,col);
     }
     //-----------------------------------------------------
     const_iterator
-    begin(size_type row, size_type col) const {
+    begin(size_type row, size_type col) const noexcept {
         return ptr(row,col);
     }
     //-----------------------------------------------------
     const_iterator
-    cbegin(size_type row, size_type col) const {
+    cbegin(size_type row, size_type col) const noexcept {
         return ptr(row,col);
     }
 
     //-----------------------------------------------------
     iterator
-    end() {
+    end() noexcept {
         return last_;
     }
     const_iterator
-    end() const {
+    end() const noexcept {
         return last_;
     }
     const_iterator
-    cend() const {
+    cend() const noexcept {
         return last_;
     }
     //-----------------------------------------------------
     iterator
-    end(this_t_& m) {
+    end(this_t_& m) noexcept {
         return m.last_;
     }
     const_iterator
-    end(const this_t_& m) {
+    end(const this_t_& m) noexcept {
         return m.last_;
     }
     const_iterator
-    cend(const this_t_& m) {
+    cend(const this_t_& m) noexcept {
         return m.last_;
     }
 
@@ -845,55 +864,55 @@ public:
     // REVERSE SEQUENTIAL ITERATORS
     //---------------------------------------------------------------
     reverse_iterator
-    rbegin() {
+    rbegin() noexcept {
         return (last_);
     }
     const_reverse_iterator
-    rbegin() const {
+    rbegin() const noexcept {
         return (last_);
     }
     const_reverse_iterator
-    crbegin() const {
+    crbegin() const noexcept {
         return (last_);
     }
     //-----------------------------------------------------
     friend reverse_iterator
-    rbegin(this_t_& m) {
+    rbegin(this_t_& m) noexcept {
         return (m.last_);
     }
     friend const_reverse_iterator
-    rbegin(const this_t_& m) {
+    rbegin(const this_t_& m) noexcept {
         return (m.last_);
     }
     friend const_reverse_iterator
-    crbegin(const this_t_& m) {
+    crbegin(const this_t_& m) noexcept {
         return (m.last_);
     }
 
     //-----------------------------------------------------
     reverse_iterator
-    rend() {
+    rend() noexcept {
         return first_;
     }
     const_reverse_iterator
-    rend() const {
+    rend() const noexcept {
         return first_;
     }
     const_reverse_iterator
-    crend() const {
+    crend() const noexcept {
         return first_;
     }
     //-----------------------------------------------------
     friend reverse_iterator
-    rend(this_t_& m) {
+    rend(this_t_& m) noexcept {
         return m.first_;
     }
     friend const_reverse_iterator
-    rend(const this_t_& m) {
+    rend(const this_t_& m) noexcept {
         return m.first_;
     }
     friend const_reverse_iterator
-    crend(const this_t_& m) {
+    crend(const this_t_& m) noexcept {
         return m.first_;
     }
 
@@ -902,33 +921,33 @@ public:
     // ROW ITERATORS
     //---------------------------------------------------------------
     row_iterator
-    begin_row(size_type row) {
+    begin_row(size_type row) noexcept {
         return ptr(row,0);
     }
     //-----------------------------------------------------
     const_row_iterator
-    begin_row(size_type row) const {
+    begin_row(size_type row) const noexcept {
         return ptr(row,0);
     }
     //-----------------------------------------------------
     const_row_iterator
-    cbegin_row(size_type row) const {
+    cbegin_row(size_type row) const noexcept {
         return ptr(row,0);
     }
 
     //-----------------------------------------------------
     row_iterator
-    end_row(size_type row) {
+    end_row(size_type row) noexcept {
         return ptr(row+1,0);
     }
     //-----------------------------------------------------
     const_row_iterator
-    end_row(size_type row) const {
+    end_row(size_type row) const noexcept {
         return ptr(row+1,0);
     }
     //-----------------------------------------------------
     const_row_iterator
-    cend_row(size_type row) const {
+    cend_row(size_type row) const noexcept {
         return ptr(row+1,0);
     }
 
@@ -937,33 +956,33 @@ public:
     // COLUMN ITERATORS
     //---------------------------------------------------------------
     col_iterator
-    begin_col(size_type col) {
+    begin_col(size_type col) noexcept {
         return col_iterator{first_ + col, cols_};
     }
     //-----------------------------------------------------
     const_col_iterator
-    begin_col(size_type col) const {
+    begin_col(size_type col) const noexcept {
         return const_col_iterator{first_ + col, cols_};
     }
     //-----------------------------------------------------
     const_col_iterator
-    cbegin_col(size_type col) const {
+    cbegin_col(size_type col) const noexcept {
         return const_col_iterator{first_ + col, cols_};
     }
 
     //-----------------------------------------------------
     col_iterator
-    end_col(size_type col) {
+    end_col(size_type col) noexcept {
         return col_iterator{first_ + col + size()};
     }
     //-----------------------------------------------------
     const_col_iterator
-    end_col(size_type col) const {
+    end_col(size_type col) const noexcept {
         return const_col_iterator{first_ + col + size()};
     }
     //-----------------------------------------------------
     const_col_iterator
-    cend_col(size_type col) const {
+    cend_col(size_type col) const noexcept {
         return const_col_iterator{first_ + col + size()};
     }
 
@@ -974,7 +993,7 @@ public:
     section
     subrange(
         size_type firstRow, size_type firstCol,
-        size_type lastRow,  size_type lastCol)
+        size_type lastRow,  size_type lastCol) noexcept
     {
         const auto stride = difference_type(cols_ -  lastCol - 1 + firstCol);
 
@@ -988,7 +1007,7 @@ public:
     const_section
     subrange(
         size_type firstRow, size_type firstCol,
-        size_type lastRow,  size_type lastCol) const
+        size_type lastRow,  size_type lastCol) const noexcept
     {
         const auto stride = difference_type(cols_ -  lastCol - 1 + firstCol);
 
@@ -1002,7 +1021,7 @@ public:
     const_section
     csubrange(
         size_type firstRow, size_type firstCol,
-        size_type lastRow,  size_type lastCol) const
+        size_type lastRow,  size_type lastCol) const noexcept
     {
         const auto stride = difference_type(cols_ -  lastCol - 1 + firstCol);
 
@@ -1031,7 +1050,7 @@ public:
 
     //---------------------------------------------------------------
     const allocator_type&
-    get_allocator() const {
+    get_allocator() const noexcept {
         return alloc_;
     }
 
@@ -1286,7 +1305,7 @@ private:
 
     //---------------------------------------------------------------
     pointer
-    ptr(size_type row, size_type col) const
+    ptr(size_type row, size_type col) const noexcept
     {
         return (first_ + row*cols_ + col);
     }

@@ -57,13 +57,13 @@ class matrix
 
         //---------------------------------------------------------------
         explicit constexpr
-        stride_iter_t_(pointer p = nullptr):
+        stride_iter_t_(pointer p = nullptr) noexcept :
             base_t_{}, p_(p)
         {}
 
 
         //---------------------------------------------------------------
-        reference operator *() const {
+        reference operator *() const noexcept {
             return (*p_);
         }
         //-----------------------------------------------------
@@ -73,64 +73,73 @@ class matrix
 
 
         //-----------------------------------------------------
-        value_type& operator [] (difference_type i) const {
+        value_type&
+        operator [] (difference_type i) const noexcept {
             return *(p_ + (stride * i));
         }
 
 
         //---------------------------------------------------------------
-        this_t_& operator ++ () {
+        this_t_&
+        operator ++ () noexcept {
             p_ += stride;
             return *this;
         }
-        this_t_ operator ++ (int) {
+        this_t_
+        operator ++ (int) noexcept {
             this_t_ old(*this);
             ++*this;
             return old;
         }
-        this_t_& operator += (difference_type i) {
+        this_t_&
+        operator += (difference_type i) noexcept {
             p_ += (stride * i);
             return *this;
         }
-        this_t_ operator + (difference_type i) const {
+        this_t_
+        operator + (difference_type i) const noexcept {
             return this_t_{p_ + (stride * i)};
         }
         //-----------------------------------------------------
-        this_t_& operator -- () {
+        this_t_&
+        operator -- () noexcept {
             p_ -= stride;
             return *this;
         }
-        this_t_ operator -- (int) {
+        this_t_
+        operator -- (int) noexcept {
             this_t_ old(*this);
             --*this;
             return old;
         }
-        this_t_& operator -= (difference_type i) {
+        this_t_&
+        operator -= (difference_type i) noexcept {
             p_ -= (stride * i);
             return *this;
         }
-        this_t_ operator - (difference_type i) const {
+        this_t_
+        operator - (difference_type i) const noexcept {
             return this_t_{p_ - (stride * i)};
         }
 
 
         //---------------------------------------------------------------
-        bool operator ==(const this_t_& other) {
+        bool operator ==(const this_t_& other) noexcept {
             return (p_ == other.p_);
         }
-        bool operator !=(const this_t_& other) {
+        bool operator !=(const this_t_& other) noexcept {
             return (p_ != other.p_);
         }
-        bool operator < (const this_t_& other) {
+        bool operator < (const this_t_& other) noexcept {
             return (p_ < other.p_);
         }
-        bool operator <=(const this_t_& other) {
+        bool operator <=(const this_t_& other) noexcept {
             return (p_ <= other.p_);
         }
-        bool operator > (const this_t_& other) {
+        bool operator > (const this_t_& other) noexcept {
             return (p_ > other.p_);
         }
-        bool operator >=(const this_t_& other) {
+        bool operator >=(const this_t_& other) noexcept {
             return (p_ >= other.p_);
         }
 
@@ -171,16 +180,19 @@ class matrix
 
 
             //-----------------------------------------------------
-            reference operator *() const {
+            reference
+            operator *() const noexcept {
                 return (*p_);
             }
             //-----------------------------------------------------
-            pointer operator ->() const noexcept {
+            pointer
+            operator ->() const noexcept {
                 return (p_);
             }
 
             //-----------------------------------------------------
-            iterator& operator ++ () {
+            iterator&
+            operator ++ () noexcept {
                 ++p_;
                 ++count_;
                 if(count_ >= length_) {
@@ -190,17 +202,18 @@ class matrix
                 return *this;
             }
             //-----------------------------------------------------
-            iterator operator ++ (int) {
+            iterator
+            operator ++ (int) noexcept {
                 auto old(*this);
                 ++*this;
                 return old;
             }
 
             //-----------------------------------------------------
-            bool operator ==(const iterator& other) {
+            bool operator ==(const iterator& other) noexcept {
                 return (p_ == other.p_);
             }
-            bool operator !=(const iterator& other) {
+            bool operator !=(const iterator& other) noexcept {
                 return (p_ != other.p_);
             }
 
@@ -357,40 +370,40 @@ public:
     // ACCESS
     //---------------------------------------------------------------
     pointer
-    data() {
+    data() noexcept {
         return static_cast<pointer>(m_);
     }
     //-----------------------------------------------------
     const_pointer
-    data() const {
+    data() const noexcept {
         return static_cast<const value_type*>(m_);
     }
     //-----------------------------------------------------
     reference
-    operator () (size_type row, size_type col) {
+    operator () (size_type row, size_type col) noexcept {
         return m_[row][col];
     }
     //-----------------------------------------------------
     const_reference
-    operator () (size_type row, size_type col) const {
+    operator () (size_type row, size_type col) const noexcept {
         return m_[row][col];
     }
 
     //-----------------------------------------------------
     size_type
-    row(const_iterator it) const {
+    row(const_iterator it) const noexcept {
         using std::distance;
         return static_cast<size_type>(distance(begin(), it) / ncols);
     }
     //-----------------------------------------------------
     size_type
-    col(const_iterator it) const {
+    col(const_iterator it) const noexcept {
         using std::distance;
         return static_cast<size_type>(distance(begin(), it) % ncols);
     }
     //---------------------------------------------------------------
     std::pair<size_type,size_type>
-    index(const_iterator i) const {
+    index(const_iterator i) const noexcept {
         using std::distance;
 
         const auto n = distance(begin(), i);
@@ -459,17 +472,17 @@ public:
     }
     //-----------------------------------------------------
     iterator
-    begin(size_type row, size_type col) {
+    begin(size_type row, size_type col) noexcept {
         return m_[row][col];
     }
     //-----------------------------------------------------
     const_iterator
-    begin(size_type row, size_type col) const {
+    begin(size_type row, size_type col) const noexcept {
         return m_[row][col];
     }
     //-----------------------------------------------------
     const_iterator
-    cbegin(size_type row, size_type col) const {
+    cbegin(size_type row, size_type col) const noexcept {
         return m_[row][col];
     }
 
@@ -562,33 +575,33 @@ public:
     // ROW ITERATORS
     //---------------------------------------------------------------
     row_iterator
-    begin_row(size_type row) {
+    begin_row(size_type row) noexcept {
         return row_iterator{std::addressof(m_[row][0])};
     }
     //-----------------------------------------------------
     const_row_iterator
-    begin_row(size_type row) const {
+    begin_row(size_type row) const noexcept {
         return const_row_iterator{std::addressof(m_[row][0])};
     }
     //-----------------------------------------------------
     const_row_iterator
-    cbegin_row(size_type row) const {
+    cbegin_row(size_type row) const noexcept {
         return const_row_iterator{std::addressof(m_[row][0])};
     }
 
     //-----------------------------------------------------
     row_iterator
-    end_row(size_type row) {
+    end_row(size_type row) noexcept {
         return row_iterator{std::addressof(m_[row][ncols])};
     }
     //-----------------------------------------------------
     const_row_iterator
-    end_row(size_type row) const {
+    end_row(size_type row) const noexcept {
         return const_row_iterator{std::addressof(m_[row][ncols])};
     }
     //-----------------------------------------------------
     const_row_iterator
-    row_ccend(size_type row) const {
+    row_ccend(size_type row) const noexcept {
         return const_row_iterator{std::addressof(m_[row][ncols])};
     }
 
@@ -597,33 +610,33 @@ public:
     // COLUMN ITERATORS
     //---------------------------------------------------------------
     col_iterator
-    begin_col(size_type col) {
+    begin_col(size_type col) noexcept {
         return col_iterator{std::addressof(m_[0][col])};
     }
     //-----------------------------------------------------
     const_col_iterator
-    begin_col(size_type col) const {
+    begin_col(size_type col) const noexcept {
         return const_col_iterator{std::addressof(m_[0][col])};
     }
     //-----------------------------------------------------
     const_col_iterator
-    cbegin_col(size_type col) const {
+    cbegin_col(size_type col) const noexcept {
         return const_col_iterator{std::addressof(m_[0][col])};
     }
 
     //-----------------------------------------------------
     col_iterator
-    end_col(size_type col) {
+    end_col(size_type col) noexcept {
         return col_iterator{std::addressof(m_[nrows][col])};
     }
     //-----------------------------------------------------
     const_col_iterator
-    end_col(size_type col) const {
+    end_col(size_type col) const noexcept {
         return const_col_iterator{std::addressof(m_[nrows][col])};
     }
     //-----------------------------------------------------
     const_col_iterator
-    cend_col(size_type col) const {
+    cend_col(size_type col) const noexcept {
         return const_col_iterator{std::addressof(m_[nrows][col])};
     }
 
@@ -633,38 +646,38 @@ public:
     //---------------------------------------------------------------
     template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
     diag_iterator
-    begin_diag() {
+    begin_diag() noexcept {
         return diag_iterator{std::addressof(m_[0][0])};
     }
     //-----------------------------------------------------
     template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
     const_diag_iterator
-    begin_diag() const {
+    begin_diag() const noexcept {
         return const_diag_iterator{std::addressof(m_[0][0])};
     }
     //-----------------------------------------------------
     template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
     const_diag_iterator
-    begin_cdiag() const {
+    begin_cdiag() const noexcept {
         return const_diag_iterator{std::addressof(m_[0][0])};
     }
 
     //-----------------------------------------------------
     template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
     diag_iterator
-    end_diag() {
+    end_diag() noexcept {
         return diag_iterator{std::addressof(m_[nrows][ncols])};
     }
     //-----------------------------------------------------
     template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
     const_diag_iterator
-    end_diag() const {
+    end_diag() const noexcept {
         return const_diag_iterator{std::addressof(m_[nrows][ncols])};
     }
     //-----------------------------------------------------
     template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
     const_diag_iterator
-    end_cdiag() const {
+    end_cdiag() const noexcept {
         return const_diag_iterator{std::addressof(m_[nrows][ncols])};
     }
 
@@ -675,7 +688,7 @@ public:
     section
     subrange(
         size_type firstRow, size_type firstCol,
-        size_type lastRow,  size_type lastCol)
+        size_type lastRow,  size_type lastCol) noexcept
     {
         const auto stride = difference_type(ncols -  lastCol - 1 + firstCol);
 
@@ -689,7 +702,7 @@ public:
     const_section
     subrange(
         size_type firstRow, size_type firstCol,
-        size_type lastRow,  size_type lastCol) const
+        size_type lastRow,  size_type lastCol) const noexcept
     {
         const auto stride = difference_type(ncols -  lastCol - 1 + firstCol);
 
@@ -703,7 +716,7 @@ public:
     const_section
     csubrange(
         size_type firstRow, size_type firstCol,
-        size_type lastRow,  size_type lastCol) const
+        size_type lastRow,  size_type lastCol) const noexcept
     {
         const auto stride = difference_type(ncols -  lastCol - 1 + firstCol);
 
