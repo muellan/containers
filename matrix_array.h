@@ -42,23 +42,22 @@ class matrix_array
      *
      *************************************************************************/
     template<class T, std::size_t stride>
-    class stride_iter_t_ :
-        public std::iterator<std::random_access_iterator_tag,T>
+    class stride_iter_t_
     {
-        using base_t_ = std::iterator<std::random_access_iterator_tag,T> ;
         using this_t_ = stride_iter_t_<T,stride>;
 
     public:
         //---------------------------------------------------------------
-        using value_type = typename base_t_::value_type ;
-        using pointer = typename base_t_::pointer ;
-        using reference = typename base_t_::reference ;
-        using difference_type = typename base_t_::difference_type ;
+        using iterator_category = std::random_access_iterator_tag;
+        using value_type = typename std::remove_const<T>::type;
+        using pointer = T*;
+        using reference = T&;
+        using difference_type = std::ptrdiff_t;
 
         //---------------------------------------------------------------
         explicit constexpr
         stride_iter_t_(pointer p = nullptr) noexcept :
-            base_t_{}, p_(p)
+            p_(p)
         {}
 
 
@@ -152,7 +151,7 @@ class matrix_array
     struct section_t_
     {
         //-----------------------------------------------------
-        using value_type = T;
+        using value_type = typename std::remove_const<T>::type;
         using pointer = T*;
         using reference = T&;
         using difference_type = std::ptrdiff_t;
@@ -163,7 +162,7 @@ class matrix_array
         public:
             //-----------------------------------------------------
             using iterator_category = std::forward_iterator_tag;
-            using value_type = T;
+            using value_type = typename std::remove_const<T>::type;
             using pointer = T*;
             using reference = T&;
             using difference_type = std::ptrdiff_t;

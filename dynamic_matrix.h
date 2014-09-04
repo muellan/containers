@@ -58,25 +58,21 @@ class dynamic_matrix
      *
      *************************************************************************/
     template<class T>
-    class stride_iter_t_ :
-        public std::iterator<std::random_access_iterator_tag,T>
+    class stride_iter_t_
     {
         friend class dynamic_matrix;
-
-        using base_t_ = std::iterator<std::random_access_iterator_tag,T> ;
         using this_t_ = stride_iter_t_<T> ;
-
     public:
         //---------------------------------------------------------------
-        using value_type = typename base_t_::value_type ;
-        using pointer = typename base_t_::pointer ;
-        using reference = typename base_t_::reference ;
-        using difference_type = typename base_t_::difference_type ;
+        using iterator_category = std::random_access_iterator_tag;
+        using value_type = typename std::remove_const<T>::type;
+        using pointer = T*;
+        using reference = T&;
+        using difference_type = std::ptrdiff_t;
 
         //---------------------------------------------------------------
         explicit constexpr
         stride_iter_t_() noexcept :
-            base_t_{},
             p_(nullptr), stride_{0}
         {}
 
@@ -84,7 +80,6 @@ class dynamic_matrix
         //---------------------------------------------------------------
         explicit constexpr
         stride_iter_t_(pointer p, std::size_t stride = 0) noexcept :
-            base_t_{},
             p_(p), stride_{static_cast<difference_type>(stride)}
         {}
 
@@ -183,7 +178,7 @@ class dynamic_matrix
     struct section_t_
     {
         //-----------------------------------------------------
-        using value_type = T;
+        using value_type = typename std::remove_const<T>::type;
         using pointer = T*;
         using reference = T&;
         using difference_type = std::ptrdiff_t;
@@ -194,7 +189,7 @@ class dynamic_matrix
         public:
             //-----------------------------------------------------
             using iterator_category = std::forward_iterator_tag;
-            using value_type = T;
+            using value_type = typename std::remove_const<T>::type;
             using pointer = T*;
             using reference = T&;
             using difference_type = std::ptrdiff_t;
