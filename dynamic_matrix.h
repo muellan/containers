@@ -8,8 +8,8 @@
  *
  *****************************************************************************/
 
-#ifndef AM_CONTAINERS_DYNMATRIX_H_
-#define AM_CONTAINERS_DYNMATRIX_H_
+#ifndef AM_CONTAINERS_DYNAMIC_MATRIX_H_
+#define AM_CONTAINERS_DYNAMIC_MATRIX_H_
 
 #include <type_traits>
 #include <iterator>
@@ -26,7 +26,7 @@ namespace am {
  * EXCEPTIONS
  *
  *****************************************************************************/
-struct dynmatrix_init_incoherent_row_sizes :
+struct dynamic_matrix_init_incoherent_row_sizes :
     public std::exception
 {};
 
@@ -41,15 +41,15 @@ struct dynmatrix_init_incoherent_row_sizes :
  * @brief dynamically resizable 2-dimensional array
  *        has a similar growth policy as std::vector
  *
- * TODO am::dynmatrix relies on ValueType beeing CopyConstructible
+ * TODO am::dynamic_matrix relies on ValueType beeing CopyConstructible
  *
  *
  *
  *****************************************************************************/
 template<class ValueType, class Allocator = std::allocator<ValueType>>
-class dynmatrix
+class dynamic_matrix
 {
-    using this_t_ = dynmatrix<ValueType,Allocator>;
+    using this_t_ = dynamic_matrix<ValueType,Allocator>;
     using alloc_traits = std::allocator_traits<Allocator>;
 
 
@@ -61,7 +61,7 @@ class dynmatrix
     class stride_iter_t_ :
         public std::iterator<std::random_access_iterator_tag,T>
     {
-        friend class dynmatrix;
+        friend class dynamic_matrix;
 
         using base_t_ = std::iterator<std::random_access_iterator_tag,T> ;
         using this_t_ = stride_iter_t_<T> ;
@@ -98,11 +98,6 @@ class dynmatrix
         //-----------------------------------------------------
         pointer
         operator ->() const noexcept {
-            return (p_);
-        }
-        //-----------------------------------------------------
-        explicit
-        operator bool() const noexcept {
             return (p_);
         }
 
@@ -323,7 +318,7 @@ public:
     //---------------------------------------------------------------
     /// @brief default constructor
     explicit constexpr
-    dynmatrix():
+    dynamic_matrix():
         rows_{0}, cols_{0},
         first_{nullptr}, last_{nullptr}, memEnd_{nullptr},
         alloc_{}
@@ -331,7 +326,7 @@ public:
 
     //-----------------------------------------------------
     /// @brief initializer list constructor
-    dynmatrix(std::initializer_list<value_type> il):
+    dynamic_matrix(std::initializer_list<value_type> il):
         rows_{static_cast<size_type>(il.size() > 0 ? 1 : 0)},
         cols_{il.size()},
         first_{nullptr}, last_{nullptr}, memEnd_{nullptr},
@@ -354,7 +349,7 @@ public:
 
     //-----------------------------------------------------
     /// @brief initializer list constructor
-    dynmatrix(std::initializer_list<std::initializer_list<value_type>> il):
+    dynamic_matrix(std::initializer_list<std::initializer_list<value_type>> il):
         rows_{il.size()},
         cols_{rows_ > 0 ? (il.begin())->size() : size_type(0)},
         first_{nullptr}, last_{nullptr}, memEnd_{nullptr},
@@ -364,7 +359,7 @@ public:
         #ifdef AM_USE_EXCEPTIONS
         for(auto i = il.begin(), e = il.end(); i != e; ++i) {
             if(i->size() != cols_) {
-                throw dynmatrix_init_incoherent_row_sizes{};
+                throw dynamic_matrix_init_incoherent_row_sizes{};
             }
         }
         #endif
@@ -388,13 +383,13 @@ public:
     //-----------------------------------------------------
     /// @brief copy constructor
     /// @details delegates to special private constructor
-    dynmatrix(const dynmatrix& o):
-        dynmatrix(o, o.size())
+    dynamic_matrix(const dynamic_matrix& o):
+        dynamic_matrix(o, o.size())
     {}
 
     //-----------------------------------------------------
     /// @brief move constructor
-    dynmatrix(dynmatrix&& o) noexcept :
+    dynamic_matrix(dynamic_matrix&& o) noexcept :
         rows_{o.rows_}, cols_{o.cols_},
         first_{o.first_}, last_{o.last_}, memEnd_{o.memEnd_},
         alloc_{o.alloc_}
@@ -407,7 +402,7 @@ public:
     }
 
     //---------------------------------------------------------------
-    ~dynmatrix() {
+    ~dynamic_matrix() {
         mem_erase();
     }
 
@@ -415,8 +410,8 @@ public:
     //---------------------------------------------------------------
     // ASSIGNMENT
     //---------------------------------------------------------------
-    dynmatrix&
-    operator = (const dynmatrix& source) {
+    dynamic_matrix&
+    operator = (const dynamic_matrix& source) {
         if(this != &source) {
             this_t_ temp{source};
             swap(*this,temp);
@@ -424,8 +419,8 @@ public:
         return *this;
     }
     //-----------------------------------------------------
-    dynmatrix&
-    operator = (dynmatrix&& source) noexcept {
+    dynamic_matrix&
+    operator = (dynamic_matrix&& source) noexcept {
         if(this != &source) {
             swap(source, *this);
         }
@@ -527,7 +522,7 @@ public:
             clear();
         }
         else if((numRows == 1) || (numCols == 1)) {
-            dynmatrix temp(numRows,numCols);
+            dynamic_matrix temp(numRows,numCols);
             swap(*this,temp);
         }
         else {
@@ -544,7 +539,7 @@ public:
             clear();
         }
         else if((numRows == 1) || (numCols == 1)) {
-            dynmatrix temp(numRows,numCols,value);
+            dynamic_matrix temp(numRows,numCols,value);
             swap(*this,temp);
         }
         else {
@@ -1035,7 +1030,7 @@ public:
 
     //---------------------------------------------------------------
     friend void
-    swap(dynmatrix& a, dynmatrix& b) noexcept
+    swap(dynamic_matrix& a, dynamic_matrix& b) noexcept
     {
         using std::swap;
 
@@ -1079,7 +1074,7 @@ public:
 private:
     //---------------------------------------------------------------
     explicit
-    dynmatrix(const dynmatrix& o, size_type capacity):
+    dynamic_matrix(const dynamic_matrix& o, size_type capacity):
         rows_{o.rows_}, cols_{o.cols_},
         first_{nullptr}, last_{nullptr}, memEnd_{nullptr},
         alloc_{alloc_traits::select_on_container_copy_construction(o.alloc_)}
@@ -1096,7 +1091,7 @@ private:
     //-----------------------------------------------------
     template<class... Args>
     explicit
-    dynmatrix(size_type rows, size_type cols, Args&&... args):
+    dynamic_matrix(size_type rows, size_type cols, Args&&... args):
         rows_{rows}, cols_{cols},
         first_{nullptr}, last_{nullptr}, memEnd_{nullptr},
         alloc_{}

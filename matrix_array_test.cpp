@@ -13,8 +13,8 @@
 #include <algorithm>
 #include <stdexcept>
 
-#include "matrix.h"
-#include "matrix_test.h"
+#include "matrix_array.h"
+#include "matrix_array_test.h"
 
 
 namespace am {
@@ -22,16 +22,16 @@ namespace test {
 
 
 //-------------------------------------------------------------------
-void matrix_initialization_correctness()
+void matrix_array_initialization_correctness()
 {
-    matrix<int,4,3> m1 = {
+    matrix_array<int,4,3> m1 = {
         {11, 12, 13},
         {21, 22, 23},
         {31, 32, 33},
         {41, 42, 43}
     };
 
-    matrix<int,1,3> m2 = {{1,2,3}};
+    matrix_array<int,1,3> m2 = {{1,2,3}};
 
     if(!(
         (m1(0,0) == 11) && (m1(0,1) == 12) && (m1(0,2) == 13) &&
@@ -40,16 +40,16 @@ void matrix_initialization_correctness()
         (m1(3,0) == 41) && (m1(3,1) == 42) && (m1(3,2) == 43) &&
         (m2(0,0) == 1) && (m2(0,1) == 2) && (m2(0,2) == 3) ))
     {
-        throw std::logic_error("am::matrix initialization");
+        throw std::logic_error("am::matrix_array initialization");
     }
 }
 
 
 
 //-------------------------------------------------------------------
-void matrix_iterators_correctness()
+void matrix_array_iterators_correctness()
 {
-    matrix<int,7,10> m;
+    matrix_array<int,7,10> m;
     std::iota(begin(m), end(m), 11);
 
     long long int sum = 0;
@@ -91,24 +91,24 @@ void matrix_iterators_correctness()
 
     //diagonal iteration for square matrices
     {
-        matrix<int,10,10> md;
+        matrix_array<int,10,10> md;
         std::fill(begin(md), end(md), 0);
         std::fill(md.begin_diag(), md.end_diag(), 1);
         sum += std::accumulate(md.begin_diag(), md.end_diag(),0);
     }
 
     if(sum != 3217308650) {
-        throw std::logic_error("am::matrix iteration");
+        throw std::logic_error("am::matrix_array iteration");
     }
 }
 
 
 
 //-------------------------------------------------------------------
-void matrix_correctness()
+void matrix_array_array_correctness()
 {
-    matrix_initialization_correctness();
-    matrix_iterators_correctness();
+    matrix_array_initialization_correctness();
+    matrix_array_iterators_correctness();
 }
 
 

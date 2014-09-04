@@ -14,8 +14,8 @@
 #include <stdexcept>
 #include <iostream>
 
-#include "dynmatrix.h"
-#include "dynmatrix_test.h"
+#include "dynamic_matrix.h"
+#include "dynamic_matrix_test.h"
 
 
 namespace am {
@@ -52,24 +52,24 @@ int A::n = 0;
 
 
 //-------------------------------------------------------------------
-void dynmatrix_initialization_correctness()
+void dynamic_matrix_initialization_correctness()
 {
-    dynmatrix<int> m1 = {
+    dynamic_matrix<int> m1 = {
         {11, 12, 13},
         {21, 22, 23},
         {31, 32, 33},
         {41, 42, 43}
     };
 
-    dynmatrix<int> m2 = {1,2,3};
+    dynamic_matrix<int> m2 = {1,2,3};
 
     #ifdef AM_USE_EXCEPTIONS
         bool caught = false;
 
         try {
-            dynmatrix<int> m3 = {{1,2}, {1,2,3}, {1,2}};
+            dynamic_matrix<int> m3 = {{1,2}, {1,2,3}, {1,2}};
         }
-        catch(dynmatrix_init_incoherent_row_sizes&) {
+        catch(dynamic_matrix_init_incoherent_row_sizes&) {
             caught = true;
         }
     #else
@@ -84,17 +84,17 @@ void dynmatrix_initialization_correctness()
         (m1(3,0) == 41) && (m1(3,1) == 42) && (m1(3,2) == 43) &&
         (m2(0,0) == 1) && (m2(0,1) == 2) && (m2(0,2) == 3) ))
     {
-        throw std::logic_error("am::dynmatrix initialization");
+        throw std::logic_error("am::dynamic_matrix initialization");
     }
 }
 
 
 
 //-------------------------------------------------------------------
-void dynmatrix_memory_correctness()
+void dynamic_matrix_memory_correctness()
 {
     {
-        dynmatrix<A> m;
+        dynamic_matrix<A> m;
         m.resize(1,2, {0});
         m.resize(6,6, {1});
         m.resize(2,3, {1});
@@ -108,14 +108,14 @@ void dynmatrix_memory_correctness()
         m.resize(100,100, {1});
 
         if(A::n != int(m.size())) {
-            throw std::logic_error("am::dynmatrix memory alloc");
+            throw std::logic_error("am::dynamic_matrix memory alloc");
         }
 
         for(int i = 0; i < 100; ++i) {
             m.erase_col(0);
 
             if(A::n != int(m.size())) {
-                throw std::logic_error("am::dynmatrix memory content destruct");
+                throw std::logic_error("am::dynamic_matrix memory content destruct");
             }
         }
 
@@ -124,7 +124,7 @@ void dynmatrix_memory_correctness()
             m.erase_row(0);
 
             if(A::n != int(m.size())) {
-                throw std::logic_error("am::dynmatrix memory content destruct");
+                throw std::logic_error("am::dynamic_matrix memory content destruct");
             }
         }
 
@@ -132,7 +132,7 @@ void dynmatrix_memory_correctness()
     }
 
     {
-        dynmatrix<A> m;
+        dynamic_matrix<A> m;
 
         int n = 1;
         for(int i = 0; i < 50; ++i, ++n) {
@@ -140,13 +140,13 @@ void dynmatrix_memory_correctness()
             m.insert_cols(i,n, i+1);
 
             if(A::n != int(m.size())) {
-                throw std::logic_error("am::dynmatrix memory alloc");
+                throw std::logic_error("am::dynamic_matrix memory alloc");
             }
         }
     }
 
     {
-        dynmatrix<A> m;
+        dynamic_matrix<A> m;
         m.resize(210,210);
 
         int n = 1;
@@ -156,31 +156,31 @@ void dynmatrix_memory_correctness()
 
             if(A::n != int(m.size())) {
                 throw std::logic_error(
-                    "am::dynmatrix memory dealloc / content destruct");
+                    "am::dynamic_matrix memory dealloc / content destruct");
             }
         }
     }
 
 //    std::cout << "\n# " << A::n << '\n' << std::endl;
     if(A::n != 0) {
-        throw std::logic_error("am::dynmatrix memory dealloc / content destruct");
+        throw std::logic_error("am::dynamic_matrix memory dealloc / content destruct");
     }
 }
 
 
 
 //-------------------------------------------------------------------
-void dynmatrix_move_correctness()
+void dynamic_matrix_move_correctness()
 {
     int sum1 = 0, sum2 = 0, sum3 = 0;
     {
-        dynmatrix<int> m;
+        dynamic_matrix<int> m;
         m.resize(9,9,0);
         int x = 10;
         std::generate(begin(m), end(m), [&]{++x; return x;});
         for(auto i : m) sum1 += i;
 
-        dynmatrix<int> mm1 {std::move(m)};
+        dynamic_matrix<int> mm1 {std::move(m)};
         for(auto i : mm1) sum2 += i;
 
         m = std::move(mm1);
@@ -188,16 +188,16 @@ void dynmatrix_move_correctness()
     }
 
     if((A::n != 0) || (sum1 != 4131) || (sum2 != 4131) || (sum3 != 4131)) {
-        throw std::logic_error("am::dynmatrix move");
+        throw std::logic_error("am::dynamic_matrix move");
     }
 }
 
 
 
 //-------------------------------------------------------------------
-void dynmatrix_resizing_correctness()
+void dynamic_matrix_resizing_correctness()
 {
-    dynmatrix<int> m;
+    dynamic_matrix<int> m;
     m.rows(10, 3);
     m.cols(4, 3);
 
@@ -240,16 +240,16 @@ void dynmatrix_resizing_correctness()
         (m(2,0) == 3) && (m(2,1) == 3) &&
         (m(3,0) == 0) && (m(3,1) == 0) ) )
     {
-        throw std::logic_error("am::dynmatrix resizing");
+        throw std::logic_error("am::dynamic_matrix resizing");
     }
 }
 
 
 
 //-------------------------------------------------------------------
-void dynmatrix_iterators_correctness()
+void dynamic_matrix_iterators_correctness()
 {
-    dynmatrix<int> m;
+    dynamic_matrix<int> m;
     m.insert_cols(0,10);
     m.insert_rows(0,6);
 
@@ -293,20 +293,20 @@ void dynmatrix_iterators_correctness()
     }
 
     if(sum != 3217308640) {
-        throw std::logic_error("am::dynmatrix iteration");
+        throw std::logic_error("am::dynamic_matrix iteration");
     }
 }
 
 
 
 //-------------------------------------------------------------------
-void dynmatrix_correctness()
+void dynamic_matrix_correctness()
 {
-    dynmatrix_initialization_correctness();
-    dynmatrix_memory_correctness();
-    dynmatrix_move_correctness();
-    dynmatrix_resizing_correctness();
-    dynmatrix_iterators_correctness();
+    dynamic_matrix_initialization_correctness();
+    dynamic_matrix_memory_correctness();
+    dynamic_matrix_move_correctness();
+    dynamic_matrix_resizing_correctness();
+    dynamic_matrix_iterators_correctness();
 }
 
 

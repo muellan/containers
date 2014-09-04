@@ -13,8 +13,8 @@
 
 #ifdef AM_USE_TESTS
 
-#include "dynmatrix_test.h"
-#include "matrix_test.h"
+#include "dynamic_matrix_test.h"
+#include "matrix_array_test.h"
 
 
 namespace am {

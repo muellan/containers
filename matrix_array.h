@@ -8,8 +8,8 @@
  *
  *****************************************************************************/
 
-#ifndef AM_CONTAINERS_MATRIX_H_
-#define AM_CONTAINERS_MATRIX_H_
+#ifndef AM_CONTAINERS_MATRIX_ARRAY_H_
+#define AM_CONTAINERS_MATRIX_ARRAY_H_
 
 #include <type_traits>
 #include <iterator>
@@ -32,9 +32,9 @@ template<
     std::size_t nrows,
     std::size_t ncols = nrows
 >
-class matrix
+class matrix_array
 {
-    using this_t_ = matrix<ValueType,nrows,ncols>;
+    using this_t_ = matrix_array<ValueType,nrows,ncols>;
 
 
     /*************************************************************************
@@ -70,7 +70,6 @@ class matrix
         pointer operator ->() const noexcept {
             return (p_);
         }
-
 
         //-----------------------------------------------------
         value_type&
@@ -290,11 +289,11 @@ public:
     // CONSTRUCTION / DESTRUCTION
     //---------------------------------------------------------------
     /// @brief default constructor
-    constexpr matrix() = default;
+    constexpr matrix_array() = default;
 
     //-----------------------------------------------------
     /// @brief initializer list constructor
-    matrix(std::initializer_list<std::initializer_list<value_type>> il):
+    matrix_array(std::initializer_list<std::initializer_list<value_type>> il):
         m_{}
     {
         size_type totSize = std::min(il.size(),nrows) *
@@ -311,21 +310,21 @@ public:
 
     //-----------------------------------------------------
     /// @brief copy constructor
-    matrix(const matrix&) = default;
+    matrix_array(const matrix_array&) = default;
 
     //-----------------------------------------------------
     /// @brief move constructor
-    matrix(matrix&&) = default;
+    matrix_array(matrix_array&&) = default;
 
     //---------------------------------------------------------------
-    ~matrix() = default;
+    ~matrix_array() = default;
 
 
     //---------------------------------------------------------------
     // ASSIGNMENT
     //---------------------------------------------------------------
-    matrix& operator = (const matrix&) = default;
-    matrix& operator = (matrix&&) = default;
+    matrix_array& operator = (const matrix_array&) = default;
+    matrix_array& operator = (matrix_array&&) = default;
 
     //---------------------------------------------------------------
     void
@@ -754,7 +753,7 @@ private:
 //---------------------------------------------------------------
 template<class Ostream, class T, std::size_t r, std::size_t c>
 inline Ostream&
-operator << (Ostream& os, const matrix<T,r,c>& m)
+operator << (Ostream& os, const matrix_array<T,r,c>& m)
 {
     return print(os, m);
 }
@@ -762,7 +761,7 @@ operator << (Ostream& os, const matrix<T,r,c>& m)
 //-------------------------------------------------------------------
 template<class Ostream, class T, std::size_t nrows, std::size_t ncols>
 inline Ostream&
-print(Ostream& os, const matrix<T,nrows,ncols>& m)
+print(Ostream& os, const matrix_array<T,nrows,ncols>& m)
 {
     os << nrows <<' '<< ncols << '\n';
     if(nrows < 1 || ncols < 1) return os;

@@ -27,17 +27,17 @@ namespace test {
 void container_correctness()
 {
     try {
-        matrix_correctness();
+        matrix_array_correctness();
     }
     catch(std::exception& e) {
-        std::cerr << "FAIL\n" << "am::matrix\n" << e.what() << std::endl;
+        std::cerr << "FAIL\n" << "am::matrix_array\n" << e.what() << std::endl;
     }
 
     try {
-        dynmatrix_correctness();
+        dynamic_matrix_correctness();
     }
     catch(std::exception& e) {
-        std::cerr << "FAIL\n" << "am::dynmatrix\n" << e.what() << std::endl;
+        std::cerr << "FAIL\n" << "am::dynamic_matrix\n" << e.what() << std::endl;
     }
 
 }

@@ -8,9 +8,6 @@
  *
  *****************************************************************************/
 
-#ifndef AM_CONTAINERS_MATRIX_TEST_H_
-#define AM_CONTAINERS_MATRIX_TEST_H_
-
 #ifdef AM_USE_TESTS
 
 
@@ -18,17 +15,18 @@ namespace am {
 namespace test {
 
 
-void matrix_initialization_correctness();
-void matrix_iterators_correctness();
+void dynamic_matrix_initialization_correctness();
+void dynamic_matrix_memory_correctness();
+void dynamic_matrix_move_correctness();
+void dynamic_matrix_resizing_correctness();
+void dynamic_matrix_iterators_correctness();
 
-void matrix_correctness();
+void dynamic_matrix_correctness();
 
 
 
 }  // namespace test
 }  // namespace am
 
-
-#endif
 
 #endif

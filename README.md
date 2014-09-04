@@ -11,11 +11,11 @@ All components are header-only.
 
 
 Generic Containers
-- matrix</br>
+- matrix_array</br>
 <p>
   2-dimensional statically sized array
 </p>
-- dynmatrix</br>
+- dynamic_matrix</br>
 <p>
   2-dimensional dynamically sized array
 </p>
