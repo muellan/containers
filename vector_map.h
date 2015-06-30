@@ -1,15 +1,15 @@
 /*****************************************************************************
  *
- * AM numeric facilities
+ * AM containers
  *
  * released under MIT license
  *
- * 2008-2014 André Müller
+ * 2008-2015 André Müller
  *
  *****************************************************************************/
 
-#ifndef AM_VECTOR_MAP_H_
-#define AM_VECTOR_MAP_H_
+#ifndef AMLIB_VECTOR_MAP_H_
+#define AMLIB_VECTOR_MAP_H_
 
 
 #include <algorithm>
@@ -241,6 +241,13 @@ public:
     size_type
     max_size() const noexcept {
         return mem_.max_size();
+    }
+
+
+    //---------------------------------------------------------------
+    void
+    reserve(size_type size) {
+        mem_.reserve(size);
     }
 
 
