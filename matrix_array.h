@@ -4,12 +4,12 @@
  *
  * released under MIT license
  *
- * 2008-2014 André Müller
+ * 2008-2015 André Müller
  *
  *****************************************************************************/
 
-#ifndef AM_CONTAINERS_MATRIX_ARRAY_H_
-#define AM_CONTAINERS_MATRIX_ARRAY_H_
+#ifndef AMLIB_CONTAINERS_MATRIX_ARRAY_H_
+#define AMLIB_CONTAINERS_MATRIX_ARRAY_H_
 
 #include <type_traits>
 #include <iterator>
@@ -389,13 +389,13 @@ public:
 
     //-----------------------------------------------------
     size_type
-    row(const_iterator it) const noexcept {
+    row_index(const_iterator it) const noexcept {
         using std::distance;
         return static_cast<size_type>(distance(begin(), it) / ncols);
     }
     //-----------------------------------------------------
     size_type
-    col(const_iterator it) const noexcept {
+    col_index(const_iterator it) const noexcept {
         using std::distance;
         return static_cast<size_type>(distance(begin(), it) % ncols);
     }
