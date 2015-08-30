@@ -681,9 +681,6 @@ cend(const vector_map<K,T,C,A>& m) noexcept -> decltype(m.cend())
 }
 
 
-
-
-
 } //namespace am
 
 

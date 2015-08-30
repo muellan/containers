@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * 2008-2014 André Müller
+ * 2008-2015 André Müller
  *
  *****************************************************************************/
 
@@ -105,7 +105,7 @@ void matrix_array_iterators_correctness()
 
 
 //-------------------------------------------------------------------
-void matrix_array_array_correctness()
+void matrix_array_correctness()
 {
     matrix_array_initialization_correctness();
     matrix_array_iterators_correctness();
@@ -115,6 +115,5 @@ void matrix_array_array_correctness()
 
 }  // namespace test
 }  // namespace am
-
 
 #endif

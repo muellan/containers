@@ -4,50 +4,57 @@
  *
  * released under MIT license
  *
- * 2008-2014 André Müller
+ * 2008-2015 André Müller
  *
  *****************************************************************************/
 
 #ifdef AM_USE_TESTS
 
+#include "dynamic_matrix.h"
+
 #include <algorithm>
 #include <stdexcept>
 #include <iostream>
 
-#include "dynamic_matrix.h"
-#include "dynamic_matrix_test.h"
+using namespace am;
 
 
 namespace am {
 namespace test {
 
 
+namespace dynamic_matrix_test {
+
 //-------------------------------------------------------------------
-struct A {
-    A(int y = 0) : x{y} {
-        ++n;
-//        std::cout << "*";
-    }
-    A(const A& a) : x{a.x} {
-        ++n;
-//        std::cout << "*";
-    }
+struct value_t {
+    value_t(int y = -1) : x_ {y} { ++n_; }
+    value_t(const value_t& a) : x_ {a.x_} { ++n_; }
+    value_t(value_t&& a) : x_ {a.x_} { ++n_; }
 
-    ~A() {
-        --n;
-//        std::cout << "+";
+    value_t& operator = (const value_t&) = default;
+    value_t& operator = (value_t&&) = default;
+
+    ~value_t() { --n_; }
+
+    static int instances() {return n_; }
+    static void reset_instance_counter() { n_ = 0; }
+
+    operator int() const noexcept {return x_; };
+
+private:
+    int x_ = -1;
+    static int n_;
+
+    inline friend std::ostream&
+    operator << (std::ostream& os, const value_t& a) {
+        return (os << a.x_);
     }
-
-    int x = 0;
-    static int n;
-
-    inline friend std::ostream& operator << (std::ostream& os, const A& a) {
-        return (os << a.x);
-    }
-
 };
 
-int A::n = 0;
+int value_t::n_ = 0;
+
+} // namespace dynamic_matrix_test
+
 
 
 
@@ -93,28 +100,29 @@ void dynamic_matrix_initialization_correctness()
 //-------------------------------------------------------------------
 void dynamic_matrix_memory_correctness()
 {
+    using dynamic_matrix_test::value_t;
+
     {
-        dynamic_matrix<A> m;
+        dynamic_matrix<value_t> m;
         m.resize(1,2, {0});
         m.resize(6,6, {1});
         m.resize(2,3, {1});
         m.resize(10,10, {1});
         m.resize(2,2, {1});
-        m.shrink_to_fit();
         m.resize(4,4, {1});
         m.erase_col(1);
         m.erase_row(1);
         m.reserve(20,20);
         m.resize(100,100, {1});
 
-        if(A::n != int(m.size())) {
+        if(value_t::instances() != int(m.size())) {
             throw std::logic_error("am::dynamic_matrix memory alloc");
         }
 
         for(int i = 0; i < 100; ++i) {
             m.erase_col(0);
 
-            if(A::n != int(m.size())) {
+            if(value_t::instances() != int(m.size())) {
                 throw std::logic_error("am::dynamic_matrix memory content destruct");
             }
         }
@@ -123,7 +131,7 @@ void dynamic_matrix_memory_correctness()
         for(int i = 0; i < 100; ++i) {
             m.erase_row(0);
 
-            if(A::n != int(m.size())) {
+            if(value_t::instances() != int(m.size())) {
                 throw std::logic_error("am::dynamic_matrix memory content destruct");
             }
         }
@@ -132,21 +140,21 @@ void dynamic_matrix_memory_correctness()
     }
 
     {
-        dynamic_matrix<A> m;
+        dynamic_matrix<value_t> m;
 
         int n = 1;
         for(int i = 0; i < 50; ++i, ++n) {
             m.insert_rows(i,n, i+1);
             m.insert_cols(i,n, i+1);
 
-            if(A::n != int(m.size())) {
+            if(value_t::instances() != int(m.size())) {
                 throw std::logic_error("am::dynamic_matrix memory alloc");
             }
         }
     }
 
     {
-        dynamic_matrix<A> m;
+        dynamic_matrix<value_t> m;
         m.resize(210,210);
 
         int n = 1;
@@ -154,7 +162,7 @@ void dynamic_matrix_memory_correctness()
             m.erase_cols(i, 2*i);
             m.erase_rows(i, 2*i);
 
-            if(A::n != int(m.size())) {
+            if(value_t::instances() != int(m.size())) {
                 throw std::logic_error(
                     "am::dynamic_matrix memory dealloc / content destruct");
             }
@@ -162,7 +170,7 @@ void dynamic_matrix_memory_correctness()
     }
 
 //    std::cout << "\n# " << A::n << '\n' << std::endl;
-    if(A::n != 0) {
+    if(value_t::instances() != 0) {
         throw std::logic_error("am::dynamic_matrix memory dealloc / content destruct");
     }
 }
@@ -172,6 +180,8 @@ void dynamic_matrix_memory_correctness()
 //-------------------------------------------------------------------
 void dynamic_matrix_move_correctness()
 {
+    using dynamic_matrix_test::value_t;
+
     int sum1 = 0, sum2 = 0, sum3 = 0;
     {
         dynamic_matrix<int> m;
@@ -187,7 +197,7 @@ void dynamic_matrix_move_correctness()
         for(auto i : m) sum3 += i;
     }
 
-    if((A::n != 0) || (sum1 != 4131) || (sum2 != 4131) || (sum3 != 4131)) {
+    if((value_t::instances() != 0) || (sum1 != 4131) || (sum2 != 4131) || (sum3 != 4131)) {
         throw std::logic_error("am::dynamic_matrix move");
     }
 }
@@ -232,7 +242,6 @@ void dynamic_matrix_resizing_correctness()
     m.erase_row(3);
     m.erase_row(3);
     m.erase_row(4);
-    m.shrink_to_fit();
 
     if(! (
         (m(0,0) == 11) && (m(0,1) == 88) &&
@@ -310,8 +319,8 @@ void dynamic_matrix_correctness()
 }
 
 
-}  // namespace test
-}  // namespace am
-
+} // namespace test
+} // namespace am
 
 #endif
+

@@ -14,13 +14,7 @@ namespace am {
 namespace test {
 
 
-void dynamic_matrix_initialization_correctness();
-void dynamic_matrix_memory_correctness();
-void dynamic_matrix_move_correctness();
-void dynamic_matrix_resizing_correctness();
-void dynamic_matrix_iterators_correctness();
-
-void dynamic_matrix_correctness();
+void crs_matrix_correctness();
 
 
 }  // namespace test

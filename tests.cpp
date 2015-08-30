@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * 2008-2014 André Müller
+ * 2008-2015 André Müller
  *
  *****************************************************************************/
 
@@ -40,8 +40,21 @@ void container_correctness()
         std::cerr << "FAIL\n" << "am::dynamic_matrix\n" << e.what() << std::endl;
     }
 
-}
+    try {
+        triangle_matrix_correctness();
+    }
+    catch(std::exception& e) {
+        std::cerr << "FAIL\n" << "am::triangle_matrix\n" << e.what() << std::endl;
+    }
 
+    try {
+        crs_matrix_correctness();
+    }
+    catch(std::exception& e) {
+        std::cerr << "FAIL\n" << "am::crs_matrix\n" << e.what() << std::endl;
+    }
+
+}
 
 
 }  // namespace test

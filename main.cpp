@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * 2008-2014 André Müller
+ * 2008-2015 André Müller
  *
  *****************************************************************************/
 
@@ -15,5 +15,4 @@
 int main()
 {
     am::test::container_correctness();
-
 }

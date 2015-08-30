@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * 2008-2014 André Müller
+ * 2008-2015 André Müller
  *
  *****************************************************************************/
 
@@ -15,6 +15,8 @@
 
 #include "dynamic_matrix_test.h"
 #include "matrix_array_test.h"
+#include "triangle_matrix_test.h"
+#include "crs_matrix_test.h"
 
 
 namespace am {

@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * 2008-2014 André Müller
+ * 2008-2015 André Müller
  *
  *****************************************************************************/
 
@@ -12,7 +12,6 @@
 #define AM_CONTAINERS_MATRIX_TEST_H_
 
 #ifdef AM_USE_TESTS
-
 
 namespace am {
 namespace test {
@@ -28,7 +27,5 @@ void matrix_array_correctness();
 }  // namespace test
 }  // namespace am
 
-
 #endif
-
 #endif

@@ -49,7 +49,6 @@ struct dynamic_matrix_init_incoherent_row_sizes :
 template<class ValueType, class Allocator = std::allocator<ValueType>>
 class dynamic_matrix
 {
-    using this_t_ = dynamic_matrix<ValueType,Allocator>;
     using alloc_traits = std::allocator_traits<Allocator>;
 
 
@@ -61,7 +60,6 @@ class dynamic_matrix
     class stride_iter_t_
     {
         friend class dynamic_matrix;
-        using this_t_ = stride_iter_t_<T> ;
     public:
         //---------------------------------------------------------------
         using iterator_category = std::random_access_iterator_tag;
@@ -104,66 +102,66 @@ class dynamic_matrix
 
 
         //---------------------------------------------------------------
-        this_t_&
+        stride_iter_t_&
         operator ++ () noexcept {
             p_ += stride_;
             return *this;
         }
-        this_t_
+        stride_iter_t_
         operator ++ (int) noexcept {
-            this_t_ old{*this};
+            stride_iter_t_ old{*this};
             ++*this;
             return old;
         }
-        this_t_&
+        stride_iter_t_&
         operator += (difference_type i) noexcept {
             p_ += (stride_ * i);
             return *this;
         }
-        this_t_
+        stride_iter_t_
         operator + (difference_type i) const noexcept {
-            return this_t_{p_ + (stride_ * i), stride_};
+            return stride_iter_t_{p_ + (stride_ * i), stride_};
         }
         //-----------------------------------------------------
-        this_t_&
+        stride_iter_t_&
         operator -- () noexcept {
             p_ -= stride_;
             return *this;
         }
-        this_t_
+        stride_iter_t_
         operator -- (int) noexcept {
-            this_t_ old{*this};
+            stride_iter_t_ old{*this};
             --*this;
             return old;
         }
-        this_t_&
+        stride_iter_t_&
         operator -= (difference_type i) noexcept {
             p_ -= (stride_ * i);
             return *this;
         }
-        this_t_
+        stride_iter_t_
         operator - (difference_type i) const noexcept {
-            return this_t_{p_ - (stride_ * i), stride_};
+            return stride_iter_t_{p_ - (stride_ * i), stride_};
         }
 
 
         //---------------------------------------------------------------
-        bool operator ==(const this_t_& other) noexcept {
+        bool operator ==(const stride_iter_t_& other) noexcept {
             return (p_ == other.p_);
         }
-        bool operator !=(const this_t_& other) noexcept {
+        bool operator !=(const stride_iter_t_& other) noexcept {
             return (p_ != other.p_);
         }
-        bool operator < (const this_t_& other) noexcept {
+        bool operator < (const stride_iter_t_& other) noexcept {
             return (p_ < other.p_);
         }
-        bool operator <=(const this_t_& other) noexcept {
+        bool operator <=(const stride_iter_t_& other) noexcept {
             return (p_ <= other.p_);
         }
-        bool operator > (const this_t_& other) noexcept {
+        bool operator > (const stride_iter_t_& other) noexcept {
             return (p_ > other.p_);
         }
-        bool operator >=(const this_t_& other) noexcept {
+        bool operator >=(const stride_iter_t_& other) noexcept {
             return (p_ >= other.p_);
         }
 
@@ -408,7 +406,7 @@ public:
     dynamic_matrix&
     operator = (const dynamic_matrix& source) {
         if(this != &source) {
-            this_t_ temp{source};
+            dynamic_matrix temp{source};
             swap(*this,temp);
         }
         return *this;
@@ -677,14 +675,6 @@ public:
         cols_ = 0;
         mem_destroy_content();
     }
-    //-----------------------------------------------------
-    void
-    shrink_to_fit() {
-        if(!last_) return;
-        using std::distance;
-        alloc_traits::deallocate(alloc_, last_, distance(last_, memEnd_));
-        memEnd_ = last_;
-    }
 
 
     //---------------------------------------------------------------
@@ -795,15 +785,15 @@ public:
     }
     //-----------------------------------------------------
     friend iterator
-    begin(this_t_& m) noexcept {
+    begin(dynamic_matrix& m) noexcept {
         return m.first_;
     }
     friend const_iterator
-    begin(const this_t_& m) noexcept {
+    begin(const dynamic_matrix& m) noexcept {
         return m.first_;
     }
     friend const_iterator
-    cbegin(const this_t_& m) noexcept {
+    cbegin(const dynamic_matrix& m) noexcept {
         return m.first_;
     }
     //-----------------------------------------------------
@@ -837,15 +827,15 @@ public:
     }
     //-----------------------------------------------------
     iterator
-    end(this_t_& m) noexcept {
+    end(dynamic_matrix& m) noexcept {
         return m.last_;
     }
     const_iterator
-    end(const this_t_& m) noexcept {
+    end(const dynamic_matrix& m) noexcept {
         return m.last_;
     }
     const_iterator
-    cend(const this_t_& m) noexcept {
+    cend(const dynamic_matrix& m) noexcept {
         return m.last_;
     }
 
@@ -867,15 +857,15 @@ public:
     }
     //-----------------------------------------------------
     friend reverse_iterator
-    rbegin(this_t_& m) noexcept {
+    rbegin(dynamic_matrix& m) noexcept {
         return (m.last_);
     }
     friend const_reverse_iterator
-    rbegin(const this_t_& m) noexcept {
+    rbegin(const dynamic_matrix& m) noexcept {
         return (m.last_);
     }
     friend const_reverse_iterator
-    crbegin(const this_t_& m) noexcept {
+    crbegin(const dynamic_matrix& m) noexcept {
         return (m.last_);
     }
 
@@ -894,15 +884,15 @@ public:
     }
     //-----------------------------------------------------
     friend reverse_iterator
-    rend(this_t_& m) noexcept {
+    rend(dynamic_matrix& m) noexcept {
         return m.first_;
     }
     friend const_reverse_iterator
-    rend(const this_t_& m) noexcept {
+    rend(const dynamic_matrix& m) noexcept {
         return m.first_;
     }
     friend const_reverse_iterator
-    crend(const this_t_& m) noexcept {
+    crend(const dynamic_matrix& m) noexcept {
         return m.first_;
     }
 
@@ -1050,7 +1040,7 @@ public:
     //---------------------------------------------------------------
     template<class Ostream>
     inline friend Ostream&
-    operator << (Ostream& os, const this_t_& o)
+    operator << (Ostream& os, const dynamic_matrix& o)
     {
         os << o.rows_ <<' '<< o.cols_ << '\n';
         if(o.rows_ < 1 || o.cols_ < 1) return os;
@@ -1121,7 +1111,7 @@ private:
     {
         //grow capacity if needed (copies old values to new memory)
         if(newSize > capacity()) {
-            auto temp = this_t_(*this, newSize);
+            auto temp = dynamic_matrix(*this, newSize);
             swap(*this, temp);
         }
     }
@@ -1131,7 +1121,7 @@ private:
     mem_reserve_least(size_type newSize, Args&&... args)
     {
         if(newSize > capacity()) {
-            auto temp = this_t_(*this, 1.5 * newSize);
+            auto temp = dynamic_matrix(*this, 1.5 * newSize);
             swap(*this, temp);
         }
         //construct new elements if neccessary
@@ -1202,14 +1192,14 @@ private:
             for(size_type r = 0; r < rows_-1; ++r) {
                 src += quantity;
                 for(size_type c = 0; c < cols_-quantity; ++c) {
-                    *tgt = *src;
+                    *tgt = std::move(*src);
                     ++tgt;
                     ++src;
                 }
             }
             src += quantity;
             for(size_type c = first; c < cols_-quantity; ++c) {
-                *tgt = *src;
+                *tgt = std::move(*src);
                 ++tgt;
                 ++src;
             }
@@ -1237,7 +1227,7 @@ private:
             const_pointer src = first_ + (first+quantity)*cols_;
 
             for(size_type i = 0; i < (rows_-first-quantity)*cols_; ++i) {
-                *tgt = *src;
+                *tgt = std::move(*src);
                 ++tgt;
                 ++src;
             }
@@ -1263,13 +1253,13 @@ private:
         const_pointer src = first_ + oldSize - 1;
         pointer tgt = last_ - 1;
         for(size_type i = 0; i < cols_-index; ++i, --tgt, --src) {
-            *tgt = *src;
+            *tgt = std::move(*src);
         }
 
         for(size_type r = 0; r < rows_-1; ++r) {
             tgt -= quantity;
             for(size_type c = 0; c < cols_; ++c,--tgt, --src) {
-                *tgt = *src;
+                *tgt = std::move(*src);
             }
         }
 
@@ -1287,7 +1277,7 @@ private:
         const_pointer src = first_ + oldSize - 1;
         const_pointer pidx = first_ + (index * cols_);
         for(pointer tgt = last_-1; src >= pidx; --tgt, --src) {
-            *tgt = *src;
+            *tgt = std::move(*src);
         }
 
         rows_ += quantity;
