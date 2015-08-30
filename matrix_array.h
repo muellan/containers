@@ -249,6 +249,46 @@ class matrix_array
     };
 
 
+    //---------------------------------------------------------------
+    /**
+     * @brief range definition helper
+     */
+    template<class Iterator, class SizeT>
+    class range_t
+    {
+    public:
+        using iterator = Iterator;
+        using value_type = typename
+            std::decay<decltype(*std::declval<iterator>())>::type;
+
+        using size_type = SizeT;
+
+        range_t() = default;
+
+        constexpr explicit
+        range_t(iterator it) noexcept : beg_{it}, end_{it} {}
+
+        constexpr explicit
+        range_t(iterator beg, iterator end) noexcept : beg_{beg}, end_{end} {}
+
+        constexpr iterator begin() const noexcept { return beg_; }
+        constexpr iterator end()   const noexcept { return end_; }
+
+        //---------------------------------------------------------------
+        bool empty() const noexcept { return (beg_ == end_); }
+        explicit operator bool() const noexcept { return !empty(); }
+
+        size_type size() const noexcept {
+            using std::distance;
+            return distance(beg_, end_);
+        }
+
+    private:
+        iterator beg_;
+        iterator end_;
+    };
+
+
 public:
     //---------------------------------------------------------------
     // TYPES
@@ -281,7 +321,21 @@ public:
     //-----------------------------------------------------
     using size_type       = std::size_t;
     using difference_type = std::ptrdiff_t;
-
+    //-----------------------------------------------------
+    using range        = range_t<iterator,size_type>;
+    using const_range  = range_t<const_iterator,size_type>;
+    //-----------------------------------------------------
+    using reverse_range       = range_t<reverse_iterator,size_type>;
+    using const_reverse_range = range_t<const_reverse_iterator,size_type>;
+    //-----------------------------------------------------
+    using row_range        = range_t<row_iterator,size_type>;
+    using const_row_range  = range_t<const_row_iterator,size_type>;
+    //-----------------------------------------------------
+    using col_range        = range_t<col_iterator,size_type>;
+    using const_col_range  = range_t<const_col_iterator,size_type>;
+    //-----------------------------------------------------
+    using diag_range        = range_t<diag_iterator,size_type>;
+    using const_diag_range  = range_t<const_diag_iterator,size_type>;
 
 
     //---------------------------------------------------------------
@@ -388,6 +442,20 @@ public:
     }
 
     //-----------------------------------------------------
+    row_range
+    operator [] (size_type index) noexcept {
+        return range{begin_row(index), end_row(index)};
+    }
+    //-----------------------------------------------------
+    const_row_range
+    operator [] (size_type index) const noexcept {
+        return const_row_range{begin_row(index), end_row(index)};
+    }
+
+
+    //---------------------------------------------------------------
+    // INDEX QUERIES
+    //---------------------------------------------------------------
     size_type
     row_index(const_iterator it) const noexcept {
         using std::distance;
@@ -485,7 +553,7 @@ public:
     }
 
     //-----------------------------------------------------
-     iterator
+    iterator
     end() noexcept {
         return iterator{std::addressof(m_[nrows-1][ncols])};
     }
@@ -509,6 +577,22 @@ public:
     inline friend const_iterator
     cend(const this_t_& i) noexcept {
         return i.cend();
+    }
+
+    //-----------------------------------------------------
+    range
+    values() noexcept {
+        return range{begin(), end()};
+    }
+    //-----------------------------------------------------
+    const_range
+    values() const noexcept {
+        return const_range{begin(), end()};
+    }
+    //-----------------------------------------------------
+    const_range
+    cvalues() const noexcept {
+        return const_range{begin(), end()};
     }
 
 
@@ -568,6 +652,22 @@ public:
         return i.crend();
     }
 
+    //-----------------------------------------------------
+    reverse_range
+    rvalues() noexcept {
+        return reverse_range{rbegin(), rend()};
+    }
+    //-----------------------------------------------------
+    const_reverse_range
+    rvalues() const noexcept {
+        return const_reverse_range{rbegin(), rend()};
+    }
+    //-----------------------------------------------------
+    const_reverse_range
+    crvalues() const noexcept {
+        return const_reverse_range{rbegin(), rend()};
+    }
+
 
     //---------------------------------------------------------------
     // ROW ITERATORS
@@ -599,8 +699,24 @@ public:
     }
     //-----------------------------------------------------
     const_row_iterator
-    row_ccend(size_type row) const noexcept {
+    cend_row(size_type row) const noexcept {
         return const_row_iterator{std::addressof(m_[row][ncols])};
+    }
+
+    //-----------------------------------------------------
+    row_range
+    row(size_type index) noexcept {
+        return row_range{begin_row(index), end_row(index)};
+    }
+    //-----------------------------------------------------
+    const_row_range
+    row(size_type index) const noexcept {
+        return const_row_range{begin_row(index), end_row(index)};
+    }
+    //-----------------------------------------------------
+    const_row_range
+    crow(size_type index) const noexcept {
+        return const_row_range{begin_row(index), end_row(index)};
     }
 
 
@@ -636,6 +752,22 @@ public:
     const_col_iterator
     cend_col(size_type col) const noexcept {
         return const_col_iterator{std::addressof(m_[nrows][col])};
+    }
+
+    //-----------------------------------------------------
+    col_range
+    col(size_type index) noexcept {
+        return col_range{begin_col(index), end_col(index)};
+    }
+    //-----------------------------------------------------
+    const_col_range
+    col(size_type index) const noexcept {
+        return const_col_range{begin_col(index), end_col(index)};
+    }
+    //-----------------------------------------------------
+    const_col_range
+    ccol(size_type index) const noexcept {
+        return const_col_range{begin_col(index), end_col(index)};
     }
 
 
@@ -677,6 +809,25 @@ public:
     const_diag_iterator
     end_cdiag() const noexcept {
         return const_diag_iterator{std::addressof(m_[nrows][ncols])};
+    }
+
+    //-----------------------------------------------------
+    template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
+    diag_range
+    diag() noexcept {
+        return diag_range{begin_diag(), end_diag()};
+    }
+    //-----------------------------------------------------
+    template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
+    const_diag_range
+    diag() const noexcept {
+        return const_diag_range{begin_diag(), end_diag()};
+    }
+    //-----------------------------------------------------
+    template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
+    const_diag_range
+    cdiag() const noexcept {
+        return const_diag_range{begin_diag(), end_diag()};
     }
 
 
