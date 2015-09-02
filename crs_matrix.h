@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * 2008-2015 André Müller
+ * 2015 André Müller
  *
  *****************************************************************************/
 
@@ -78,6 +78,13 @@ class crs_matrix
         //---------------------------------------------------------------
         bool empty() const noexcept { return (beg_ == end_); }
         explicit operator bool() const noexcept { return !empty(); }
+
+        bool operator == (const range_t& other) const noexcept {
+            return (beg_ == other.beg_) && (end_ == other.end_);
+        }
+        bool operator != (const range_t& other) const noexcept {
+            return !(*this == other);
+        }
 
         size_type size() const noexcept {
             using std::distance;

@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <utility>
 
+#include <iostream>
+
 
 namespace am {
 
@@ -133,22 +135,22 @@ class triangle_matrix
 
 
         //---------------------------------------------------------------
-        bool operator ==(const col_iter_t_& other) noexcept {
+        bool operator ==(const col_iter_t_& other) const noexcept {
             return (p_ == other.p_);
         }
-        bool operator !=(const col_iter_t_& other) noexcept {
+        bool operator !=(const col_iter_t_& other) const noexcept {
             return (p_ != other.p_);
         }
-        bool operator < (const col_iter_t_& other) noexcept {
+        bool operator < (const col_iter_t_& other) const noexcept {
             return (p_ < other.p_);
         }
-        bool operator <=(const col_iter_t_& other) noexcept {
+        bool operator <=(const col_iter_t_& other) const noexcept {
             return (p_ <= other.p_);
         }
-        bool operator > (const col_iter_t_& other) noexcept {
+        bool operator > (const col_iter_t_& other) const noexcept {
             return (p_ > other.p_);
         }
-        bool operator >=(const col_iter_t_& other) noexcept {
+        bool operator >=(const col_iter_t_& other) const noexcept {
             return (p_ >= other.p_);
         }
 
@@ -228,22 +230,22 @@ class triangle_matrix
         }
 
         //---------------------------------------------------------------
-        bool operator ==(const index_iter_t_& other) noexcept {
+        bool operator ==(const index_iter_t_& other) const noexcept {
             return (p_ == other.p_);
         }
-        bool operator !=(const index_iter_t_& other) noexcept {
+        bool operator !=(const index_iter_t_& other) const noexcept {
             return (p_ != other.p_);
         }
-        bool operator < (const index_iter_t_& other) noexcept {
+        bool operator < (const index_iter_t_& other) const noexcept {
             return (p_ < other.p_);
         }
-        bool operator <=(const index_iter_t_& other) noexcept {
+        bool operator <=(const index_iter_t_& other) const noexcept {
             return (p_ <= other.p_);
         }
-        bool operator > (const index_iter_t_& other) noexcept {
+        bool operator > (const index_iter_t_& other) const noexcept {
             return (p_ > other.p_);
         }
-        bool operator >=(const index_iter_t_& other) noexcept {
+        bool operator >=(const index_iter_t_& other) const noexcept {
             return (p_ >= other.p_);
         }
 
@@ -251,6 +253,149 @@ class triangle_matrix
         pointer p_;
         pointer px_;
         difference_type stride_;
+    };
+
+
+
+    /*************************************************************************
+     *
+     *
+     *************************************************************************/
+    template<class Pointer>
+    struct section_t_
+    {
+        friend class triangle_matrix;
+
+        //-----------------------------------------------------
+        struct iterator
+        {
+            using size_type = std::size_t;
+            using traits_t_ = std::iterator_traits<Pointer>;
+
+            friend class section_t_;
+            friend class triangle_matrix;
+
+        public:
+            //-------------------------------------------
+            using iterator_category = std::forward_iterator_tag;
+            using value_type = typename traits_t_::value_type;
+            using pointer = typename traits_t_::pointer;
+            using reference = typename traits_t_::reference;
+            using difference_type = typename traits_t_::difference_type;
+
+            //-------------------------------------------
+            explicit constexpr
+            iterator(Pointer p) noexcept :
+                p_{p}, mark_{p}, stride_(0), n_(0)
+            {}
+
+        private:
+            //-------------------------------------------
+            explicit constexpr
+            iterator(Pointer p, size_type fidx, size_type lidx) noexcept :
+                p_{p},
+                mark_{p_ + (lidx > 1
+                        ? (((lidx*(lidx+1)/2) - ((fidx*(fidx-1)/2))) - 1)
+                        : 0) },
+                stride_(lidx > 0 ? -fidx-1 : 1), n_(lidx-fidx)
+            {}
+
+        public:
+            //-------------------------------------------
+            iterator&
+            operator ++ () noexcept {
+                if(p_ < mark_) {
+                    ++p_;
+                }
+                else {
+                    if(stride_ < 0) {
+                       stride_ = -stride_;
+                       p_ += stride_;
+                       mark_ += stride_ + n_;
+                    }
+                    else {
+                        p_ += stride_;
+                        mark_ += stride_ + n_;
+                        ++stride_;
+                    }
+                }
+                return *this;
+            }
+            //-------------------------------------------
+            iterator
+            operator ++ (int) noexcept {
+                iterator old(*this);
+                ++*this;
+                return old;
+            }
+
+            //-------------------------------------------
+            auto
+            operator * () const noexcept
+                -> decltype(*std::declval<Pointer>())
+            {
+                return *p_;
+            }
+            //-------------------------------------------
+            auto
+            operator -> () const noexcept
+                -> decltype(std::addressof(*std::declval<Pointer>()))
+            {
+                return std::addressof(*p_);
+            }
+
+            //-------------------------------------------
+            bool operator == (const iterator& other) const noexcept {
+                return (p_ == other.p_);
+            }
+            bool operator != (const iterator& other) const noexcept {
+                return (p_ != other.p_);
+            }
+
+        private:
+            Pointer p_;
+            Pointer mark_;
+            difference_type stride_;
+            difference_type n_;
+        };
+
+
+        //-----------------------------------------------------
+        using difference_type = typename iterator::difference_type;
+        using size_type = typename iterator::size_type;
+
+
+        //-----------------------------------------------------
+        constexpr
+        section_t_():
+            fst_(nullptr), lst_(nullptr), fidx_(0), lidx_(0)
+        {}
+
+    private:
+        //-----------------------------------------------------
+        explicit constexpr
+        section_t_(Pointer beg, Pointer lst,
+                   size_type fidx, size_type lidx) :
+            fst_{beg}, lst_{lst}, fidx_{fidx}, lidx_{lidx}
+        {}
+
+    public:
+
+        //-----------------------------------------------------
+        constexpr iterator
+        begin() const {
+            return iterator(fst_, fidx_, lidx_);
+        }
+        //-----------------------------------------------------
+        constexpr iterator
+        end() const {
+            return iterator(lst_);
+        }
+
+
+    private:
+        Pointer fst_, lst_;
+        size_type fidx_, lidx_;
     };
 
 
@@ -283,6 +428,13 @@ class triangle_matrix
         bool empty() const noexcept { return (beg_ == end_); }
         explicit operator bool() const noexcept { return !empty(); }
 
+        bool operator == (const range_t& other) const noexcept {
+            return (beg_ == other.beg_) && (end_ == other.end_);
+        }
+        bool operator != (const range_t& other) const noexcept {
+            return !(*this == other);
+        }
+
         size_type size() const noexcept {
             using std::distance;
             return distance(beg_, end_);
@@ -307,6 +459,9 @@ public:
     using pointer         = ValueType*;
     using const_pointer   = const ValueType*;
     //-----------------------------------------------------
+    using size_type       = std::size_t;
+    using difference_type = std::ptrdiff_t;
+    //-----------------------------------------------------
     using iterator        = pointer;
     using const_iterator  = const_pointer;
     //-----------------------------------------------------
@@ -322,8 +477,8 @@ public:
     using index_iterator       = index_iter_t_<value_type>;
     using const_index_iterator = index_iter_t_<const value_type>;
     //-----------------------------------------------------
-    using size_type       = std::size_t;
-    using difference_type = std::ptrdiff_t;
+    using section       = section_t_<pointer>;
+    using const_section = section_t_<const_pointer>;
     //-----------------------------------------------------
     using range        = range_t<iterator,size_type>;
     using const_range  = range_t<const_iterator,size_type>;
@@ -462,8 +617,13 @@ public:
     // REMOVE
     //---------------------------------------------------------------
     void
-    erase_at(size_type idx, size_type quantity = size_type(1)) {
-        mem_erase_at(idx, quantity);
+    erase_at(size_type index) {
+        mem_erase_at(index, size_type(1));
+    }
+    //-----------------------------------------------------
+    void
+    erase_at(size_type firstIndexIncl, size_type lastIndexIncl) {
+        mem_erase_at(firstIndexIncl, lastIndexIncl - firstIndexIncl + 1);
     }
     //-----------------------------------------------------
     void
@@ -855,6 +1015,32 @@ public:
     const_index_range
     cindex(size_type i) const noexcept {
         return const_index_range{begin_index(i), end_index(i)};
+    }
+
+
+    //---------------------------------------------------------------
+    section
+    subrange(size_type firstIndex, size_type lastIndex) noexcept
+    {
+        return section{ptr(firstIndex < 1 ? 1 : firstIndex,0),
+                       ptr(rows_+1,firstIndex),
+                       firstIndex, lastIndex};
+    }
+    //-----------------------------------------------------
+    const_section
+    subrange(size_type firstIndex, size_type lastIndex) const noexcept
+    {
+        return const_section{ptr(firstIndex < 1 ? 1 : firstIndex,0),
+                             ptr(rows_+1,firstIndex),
+                             firstIndex, lastIndex};
+    }
+    //-----------------------------------------------------
+    const_section
+    csubrange(size_type firstIndex, size_type lastIndex) const noexcept
+    {
+        return const_section{ptr(firstIndex < 1 ? 1 : firstIndex,0),
+                             ptr(rows_+1,firstIndex),
+                             firstIndex, lastIndex};
     }
 
 

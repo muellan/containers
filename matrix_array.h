@@ -122,22 +122,22 @@ class matrix_array
 
 
         //---------------------------------------------------------------
-        bool operator ==(const this_t_& other) noexcept {
+        bool operator ==(const this_t_& other) const noexcept {
             return (p_ == other.p_);
         }
-        bool operator !=(const this_t_& other) noexcept {
+        bool operator !=(const this_t_& other) const noexcept {
             return (p_ != other.p_);
         }
-        bool operator < (const this_t_& other) noexcept {
+        bool operator < (const this_t_& other) const noexcept {
             return (p_ < other.p_);
         }
-        bool operator <=(const this_t_& other) noexcept {
+        bool operator <=(const this_t_& other) const noexcept {
             return (p_ <= other.p_);
         }
-        bool operator > (const this_t_& other) noexcept {
+        bool operator > (const this_t_& other) const noexcept {
             return (p_ > other.p_);
         }
-        bool operator >=(const this_t_& other) noexcept {
+        bool operator >=(const this_t_& other) const noexcept {
             return (p_ >= other.p_);
         }
 
@@ -208,10 +208,10 @@ class matrix_array
             }
 
             //-----------------------------------------------------
-            bool operator ==(const iterator& other) noexcept {
+            bool operator ==(const iterator& other) const noexcept {
                 return (p_ == other.p_);
             }
-            bool operator !=(const iterator& other) noexcept {
+            bool operator !=(const iterator& other) const noexcept {
                 return (p_ != other.p_);
             }
 
@@ -277,6 +277,13 @@ class matrix_array
         //---------------------------------------------------------------
         bool empty() const noexcept { return (beg_ == end_); }
         explicit operator bool() const noexcept { return !empty(); }
+
+        bool operator == (const range_t& other) const noexcept {
+            return (beg_ == other.beg_) && (end_ == other.end_);
+        }
+        bool operator != (const range_t& other) const noexcept {
+            return !(*this == other);
+        }
 
         size_type size() const noexcept {
             using std::distance;
