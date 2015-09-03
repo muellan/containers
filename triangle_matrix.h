@@ -589,6 +589,12 @@ public:
     {
         std::fill(begin_col(index), end_col(index), value);
     }
+    //-----------------------------------------------------
+    void
+    fill_at(size_type index, const value_type& value)
+    {
+        std::fill(begin_at(index), end_at(index), value);
+    }
 
 
     //---------------------------------------------------------------
@@ -623,7 +629,13 @@ public:
     //---------------------------------------------------------------
     // INSERT
     //---------------------------------------------------------------
-    /// @brief returns valid iterator to the first of the newly inserted cols
+    void
+    insert_at(size_type index, const value_type& value)
+    {
+        mem_insert_at(index, size_type(1), value);
+    }
+
+    //-----------------------------------------------------
     void
     insert_at(size_type index, size_type quantity, const value_type& value)
     {
@@ -983,21 +995,21 @@ public:
     // INDEX ITERATORS
     //---------------------------------------------------------------
     index_iterator
-    begin_index(size_type index) noexcept {
+    begin_at(size_type index) noexcept {
         using d_t = typename index_iterator::difference_type;
         auto p = ptr(index < 1 ? 1 : index, 0);
         return index_iterator{p, p + index - 1, d_t(index < 1 ? 1 : -index-1)};
     }
     //-----------------------------------------------------
     const_index_iterator
-    begin_index(size_type index) const noexcept {
+    begin_at(size_type index) const noexcept {
         using d_t = typename const_index_iterator::difference_type;
         auto p = ptr(index < 1 ? 1 : index, 0);
         return const_index_iterator{p, p + index - 1, d_t(index < 1 ? 1 : -index-1)};
     }
     //-----------------------------------------------------
     const_index_iterator
-    cbegin_index(size_type index) const noexcept {
+    cbegin_at(size_type index) const noexcept {
         using d_t = typename const_index_iterator::difference_type;
         auto p = ptr(index < 1 ? 1 : index, 0);
         return const_index_iterator{p, p + index - 1, d_t(index < 1 ? 1 : -index-1)};
@@ -1005,34 +1017,34 @@ public:
 
     //-----------------------------------------------------
     index_iterator
-    end_index(size_type index) noexcept {
+    end_at(size_type index) noexcept {
         return index_iterator{ptr(rows_ + 1, index)};
     }
     //-----------------------------------------------------
     const_index_iterator
-    end_index(size_type index) const noexcept {
+    end_at(size_type index) const noexcept {
         return const_index_iterator{ptr(rows_ + 1, index)};
     }
     //-----------------------------------------------------
     const_index_iterator
-    cend_index(size_type index) const noexcept {
+    cend_at(size_type index) const noexcept {
         return const_index_iterator{ptr(rows_ + 1, index)};
     }
 
     //-----------------------------------------------------
     index_range
     index(size_type i) noexcept {
-        return index_range{begin_index(i), end_index(i)};
+        return index_range{begin_at(i), end_at(i)};
     }
     //-----------------------------------------------------
     const_index_range
     index(size_type i) const noexcept {
-        return const_index_range{begin_index(i), end_index(i)};
+        return const_index_range{begin_at(i), end_at(i)};
     }
     //-----------------------------------------------------
     const_index_range
     cindex(size_type i) const noexcept {
-        return const_index_range{begin_index(i), end_index(i)};
+        return const_index_range{begin_at(i), end_at(i)};
     }
 
 
