@@ -206,7 +206,7 @@ void triangle_matrix_construction_and_iterators_correctness()
             size_type c = 0;
             bool l = false;
 
-            for(auto i = m.begin_index(k), e = m.end_index(k); i != e; ++i) {
+            for(auto i = m.begin_at(k), e = m.end_at(k); i != e; ++i) {
                 auto v = *i;
 
                 if(r > m.rows() || c >= m.cols() || v != value_t(10*r + c)) {
@@ -230,9 +230,9 @@ void triangle_matrix_construction_and_iterators_correctness()
             r = k < 1 ? 1 : k;
             c = 0;
             l = false;
-            for(const auto& v : m.index(k)) {
+            for(const auto& v : m.subrange(k)) {
                 if(r > m.rows() || c >= m.cols() || v != value_t(10*r + c)) {
-                      throw std::logic_error {"triangle_matrix: index range"};
+                      throw std::logic_error {"triangle_matrix: index subrange"};
                 }
                 if(k < 1) {
                     ++r;
