@@ -495,9 +495,6 @@ public:
     using index_iterator       = index_iter_t_<value_type>;
     using const_index_iterator = index_iter_t_<const value_type>;
     //-----------------------------------------------------
-    using section       = section_t_<pointer>;
-    using const_section = section_t_<const_pointer>;
-    //-----------------------------------------------------
     using range        = range_t<iterator,size_type>;
     using const_range  = range_t<const_iterator,size_type>;
     //-----------------------------------------------------
@@ -510,8 +507,11 @@ public:
     using col_range        = range_t<col_iterator,size_type>;
     using const_col_range  = range_t<const_col_iterator,size_type>;
     //-----------------------------------------------------
-    using index_range        = range_t<index_iterator,size_type>;
-    using const_index_range  = range_t<const_index_iterator,size_type>;
+    using index_section       = range_t<index_iterator,size_type>;
+    using const_index_section = range_t<const_index_iterator,size_type>;
+    //-----------------------------------------------------
+    using section       = section_t_<pointer>;
+    using const_section = section_t_<const_pointer>;
 
 
     //---------------------------------------------------------------
@@ -1032,19 +1032,19 @@ public:
     }
 
     //-----------------------------------------------------
-    index_range
-    index(size_type i) noexcept {
-        return index_range{begin_at(i), end_at(i)};
+    index_section
+    subrange(size_type i) noexcept {
+        return index_section{begin_at(i), end_at(i)};
     }
     //-----------------------------------------------------
-    const_index_range
-    index(size_type i) const noexcept {
-        return const_index_range{begin_at(i), end_at(i)};
+    const_index_section
+    subrange(size_type i) const noexcept {
+        return const_index_section{begin_at(i), end_at(i)};
     }
     //-----------------------------------------------------
-    const_index_range
-    cindex(size_type i) const noexcept {
-        return const_index_range{begin_at(i), end_at(i)};
+    const_index_section
+    csubrange(size_type i) const noexcept {
+        return const_index_section{begin_at(i), end_at(i)};
     }
 
 
