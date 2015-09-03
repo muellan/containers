@@ -135,6 +135,12 @@ class triangle_matrix
 
 
         //---------------------------------------------------------------
+        explicit
+        operator pointer () const noexcept {
+            return p_;
+        }
+
+        //---------------------------------------------------------------
         bool operator ==(const col_iter_t_& other) const noexcept {
             return (p_ == other.p_);
         }
@@ -227,6 +233,12 @@ class triangle_matrix
             index_iter_t_ old{*this};
             ++*this;
             return old;
+        }
+
+        //---------------------------------------------------------------
+        explicit
+        operator pointer () const noexcept {
+            return p_;
         }
 
         //---------------------------------------------------------------
@@ -342,6 +354,12 @@ class triangle_matrix
                 -> decltype(std::addressof(*std::declval<Pointer>()))
             {
                 return std::addressof(*p_);
+            }
+
+            //---------------------------------------------------------------
+            explicit
+            operator pointer () const noexcept {
+                return p_;
             }
 
             //-------------------------------------------

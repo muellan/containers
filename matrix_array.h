@@ -120,6 +120,11 @@ class matrix_array
             return this_t_{p_ - (stride * i)};
         }
 
+        //---------------------------------------------------------------
+        explicit
+        operator pointer () const noexcept {
+            return p_;
+        }
 
         //---------------------------------------------------------------
         bool operator ==(const this_t_& other) const noexcept {
@@ -205,6 +210,12 @@ class matrix_array
                 auto old(*this);
                 ++*this;
                 return old;
+            }
+
+            //---------------------------------------------------------------
+            explicit
+            operator pointer () const noexcept {
+                return p_;
             }
 
             //-----------------------------------------------------
@@ -466,21 +477,21 @@ public:
     size_type
     row_index(const_iterator it) const noexcept {
         using std::distance;
-        return static_cast<size_type>(distance(begin(), it) / ncols);
+        return static_cast<size_type>(distance(begin(), it)) / ncols;
     }
     //-----------------------------------------------------
     size_type
     col_index(const_iterator it) const noexcept {
         using std::distance;
-        return static_cast<size_type>(distance(begin(), it) % ncols);
+        return static_cast<size_type>(distance(begin(), it)) % ncols;
     }
     //---------------------------------------------------------------
     std::pair<size_type,size_type>
     index(const_iterator i) const noexcept {
         using std::distance;
 
-        const auto n = distance(begin(), i);
-        const auto r = static_cast<size_type>(n / nrows);
+        const auto n = static_cast<size_type>(distance(begin(), i));
+        const auto r = static_cast<size_type>(n / ncols);
 
         return {r, static_cast<size_type>(n-(r*ncols))};
     }

@@ -144,6 +144,11 @@ class dynamic_matrix
             return stride_iter_t_{p_ - (stride_ * i), stride_};
         }
 
+        //---------------------------------------------------------------
+        explicit
+        operator pointer () const noexcept {
+            return p_;
+        }
 
         //---------------------------------------------------------------
         bool operator ==(const stride_iter_t_& other) const noexcept {
@@ -230,6 +235,12 @@ class dynamic_matrix
                 auto old(*this);
                 ++*this;
                 return old;
+            }
+
+            //---------------------------------------------------------------
+            explicit
+            operator pointer () const noexcept {
+                return p_;
             }
 
             //-----------------------------------------------------
@@ -781,21 +792,22 @@ public:
     size_type
     row_index(const_iterator it) const noexcept {
         using std::distance;
-        return static_cast<size_type>(distance(begin(), it) / cols_);
+        return static_cast<size_type>(distance(begin(), it)) / cols_;
     }
     //-----------------------------------------------------
     size_type
     col_index(const_iterator it) const noexcept {
         using std::distance;
-        return static_cast<size_type>(distance(begin(), it) % cols_);
+        return static_cast<size_type>(distance(begin(), it)) % cols_;
     }
+
     //---------------------------------------------------------------
     std::pair<size_type,size_type>
     index(const_iterator i) const noexcept {
         using std::distance;
 
-        const auto n = distance(begin(), i);
-        const auto r = static_cast<size_type>(n / rows_);
+        const auto n = static_cast<size_type>(distance(begin(), i));
+        const auto r = static_cast<size_type>(n / cols_);
 
         return {r, static_cast<size_type>(n-(r*cols_))};
     }
