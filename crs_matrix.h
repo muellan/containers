@@ -405,21 +405,36 @@ public:
     bool
     erase_row(size_type row)
     {
-        if(!row_in_range(row)) return false;
+        return erase_rows(row,row);
+    }
 
-        const auto n = rowbeg_[row+1] - rowbeg_[row];
+    //-----------------------------------------------------
+    /**
+     * @brief   erase mutliple rows
+     * @return  true if one or more elements were erased, false otherwise
+     */
+    bool
+    erase_rows(size_type first, size_type last)
+    {
+        if(first > last) return false;
+
+        if(!row_in_range(first)) return false;
+        if(!row_in_range(last))  return false;
+
+        ++last;
+        const auto n = rowbeg_[last] - rowbeg_[first];
 
         if(n < 1) return false;
 
-        values_.erase(values_.begin() + rowbeg_[row],
-                      values_.begin() + rowbeg_[row+1]);
+        values_.erase(values_.begin() + rowbeg_[first],
+                      values_.begin() + rowbeg_[last]);
 
-        colidx_.erase(colidx_.begin() + rowbeg_[row],
-                      colidx_.begin() + rowbeg_[row+1]);
+        colidx_.erase(colidx_.begin() + rowbeg_[first],
+                      colidx_.begin() + rowbeg_[last]);
 
-        rowbeg_.erase(rowbeg_.begin() + row);
+        rowbeg_.erase(rowbeg_.begin() + first, rowbeg_.begin() + last);
 
-        for(size_type i = row; i < rowbeg_.size(); ++i) {
+        for(size_type i = first; i < rowbeg_.size(); ++i) {
             rowbeg_[i] -= n;
         }
 
@@ -674,6 +689,16 @@ public:
     index_iterator
     end_col_indices() const noexcept {
         return colidx_.end();
+    }
+    //-----------------------------------------------------
+    index_iterator
+    begin_col_indices(size_type row) const noexcept {
+        return colidx_.begin() + rowbeg_[row];
+    }
+    //-----------------------------------------------------
+    index_iterator
+    end_col_indices(size_type row) const noexcept {
+        return colidx_.begin() + rowbeg_[row+1];
     }
     //-----------------------------------------------------
     /** @return iterator range to column index storage
