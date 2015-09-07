@@ -730,6 +730,29 @@ public:
 
 
     //---------------------------------------------------------------
+    // INDEX QUERIES
+    //---------------------------------------------------------------
+    std::pair<size_type,size_type>
+    index(const_iterator it) const noexcept
+    {
+        if(it == first_) return {size_type(1), size_type(0)};
+
+        auto p = first_ + 1;
+        size_type r = 2;
+
+        for(; r <= rows_; ++r) {
+            if(it >= p && it < (p + r))
+                return {r, size_type(it - p)};
+
+            p += r;
+        }
+
+        //invalid index
+        return {size_type(0), size_type(0)};
+    }
+
+
+    //---------------------------------------------------------------
     // SEQUENTIAL ITERATORS
     //---------------------------------------------------------------
     iterator
