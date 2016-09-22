@@ -4,10 +4,12 @@
  *
  * released under MIT license
  *
- * 2008-2015 André Müller
+ * 2008-2016 André Müller
  *
  *****************************************************************************/
+
 #ifdef AM_USE_TESTS
+
 
 #include "triangle_matrix.h"
 
@@ -18,9 +20,9 @@
 #include <iostream>
 #include <random>
 
-
-namespace am {
 namespace test {
+
+using namespace am;
 
 
 namespace triangle_matrix_test {
@@ -241,9 +243,9 @@ void triangle_matrix_index_iterator_correctness(
         r = k < 1 ? 1 : k;
         c = 0;
         l = false;
-        for(const auto& v : m.subrange(k)) {
+        for(const auto& v : m.index_interval(k)) {
             if(r > m.rows() || c >= m.cols() || v != value_t(10*r + c)) {
-                throw std::logic_error {"triangle_matrix: index subrange"};
+                throw std::logic_error {"triangle_matrix: index index_range"};
             }
             if(k < 1) {
                 ++r;
@@ -265,7 +267,7 @@ void triangle_matrix_index_iterator_correctness(
 
 
 //-------------------------------------------------------------------
-void triangle_matrix_index_subrange_correctness(
+void triangle_matrix_index_range_correctness(
     const triangle_matrix<triangle_matrix_test::value_t>& m)
 {
     using triangle_matrix_test::value_t;
@@ -278,11 +280,11 @@ void triangle_matrix_index_subrange_correctness(
             size_type r = i < 1 ? 1 : i;
             size_type c = 0;
 
-            for(const auto& v : m.subrange(i,j)) {
+            for(const auto& v : m.index_interval(i,j)) {
 //                std::cout << "  (" << r << "," << c << ") = " << v << std::endl;
 
                 if(r > m.rows() || c >= m.cols() || v != value_t(10*r + c)) {
-                    throw std::logic_error {"triangle_matrix: subrange"};
+                    throw std::logic_error {"triangle_matrix: index_range"};
                 }
 
                 ++c;
@@ -314,13 +316,13 @@ void triangle_matrix_index_query_correctness(
     for(size_type r = 1; r <= m.rows(); ++r) {
         for(size_type c = 0; c < r; ++c) {
 
-            auto idx = m.index(it);
+            auto idx = m.index_of(it);
 
             if(idx.first != r || idx.second != c) {
 //                std::cerr << "(" << r << "," << c << ") != ("
 //                          << idx.first << "," << idx.second << ")" << std::endl;
 
-                throw std::logic_error {"triangle_matrix::index(const_iterator)"};
+                throw std::logic_error {"triangle_matrix::index_of(const_iterator)"};
             }
             ++it;
         }
@@ -349,7 +351,7 @@ void triangle_matrix_construction_and_iterators_correctness()
 
         triangle_matrix_index_iterator_correctness(m);
 
-        triangle_matrix_index_subrange_correctness(m);
+        triangle_matrix_index_range_correctness(m);
 
         triangle_matrix_index_query_correctness(m);
     }
@@ -525,9 +527,9 @@ void triangle_matrix_correctness()
 
 }
 
-
 } //namespace test
-} //namespace am
+
+
 
 
 #endif

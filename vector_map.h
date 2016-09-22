@@ -4,12 +4,12 @@
  *
  * released under MIT license
  *
- * 2008-2015 André Müller
+ * 2008-2016 André Müller
  *
  *****************************************************************************/
 
-#ifndef AMLIB_VECTOR_MAP_H_
-#define AMLIB_VECTOR_MAP_H_
+#ifndef AMLIB_CONTIGUOUS_MAP_H_
+#define AMLIB_CONTIGUOUS_MAP_H_
 
 
 #include <algorithm>
@@ -41,7 +41,7 @@ template<
     class KeyCompare = std::less<KeyT>,
     class Allocator = std::allocator<std::pair<const KeyT,MappedT> >
 >
-class vector_map
+class contiguous_map
 {
     using mem_t_ =
         std::vector<typename std::pair<const KeyT, MappedT>, Allocator>;
@@ -74,7 +74,7 @@ public:
     //-----------------------------------------------------
     struct value_compare
     {
-        friend class vector_map;
+        friend class contiguous_map;
 
         using result_type = bool;
         using first_argument_type = value_type;
@@ -96,7 +96,7 @@ public:
     // CONSTRUCTION / DESTRUCTION
     //---------------------------------------------------------------
     explicit
-    vector_map(
+    contiguous_map(
         const key_compare& comp = key_compare(),
         const allocator_type& alloc = allocator_type())
     :
@@ -104,14 +104,14 @@ public:
     {}
     //-----------------------------------------------------
     explicit
-    vector_map(
+    contiguous_map(
         const allocator_type& alloc)
     :
         comp_(key_compare()), mem_(alloc)
     {}
     //-----------------------------------------------------
     explicit
-    vector_map(
+    contiguous_map(
         std::initializer_list<value_type> il,
         const key_compare& comp = key_compare(),
         const allocator_type& alloc = allocator_type())
@@ -122,7 +122,7 @@ public:
     }
     //-----------------------------------------------------
     template <class InputIterator>
-    vector_map(
+    contiguous_map(
         InputIterator first, InputIterator last,
         const key_compare& comp = key_compare(),
         const allocator_type& alloc = allocator_type())
@@ -136,21 +136,19 @@ public:
     //---------------------------------------------------------------
     // COPY / MOVE CONSTRUCTION
     //---------------------------------------------------------------
-    vector_map(const vector_map& source):
+    contiguous_map(const contiguous_map& source):
         comp_(source.comp_), mem_(source.mem_)
     {}
     //-----------------------------------------------------
-    vector_map(
-        const vector_map& source, const allocator_type& alloc)
-    :
+    contiguous_map(const contiguous_map& source, const allocator_type& alloc):
         comp_(source.comp_), mem_(source.mem_,alloc)
     {}
     //-----------------------------------------------------
-    vector_map(vector_map&& source) noexcept :
+    contiguous_map(contiguous_map&& source) noexcept :
         comp_(std::move(source.comp_)), mem_(std::move(source.mem_))
     {}
     //-----------------------------------------------------
-    vector_map(vector_map&& source, const allocator_type& alloc) noexcept :
+    contiguous_map(contiguous_map&& source, const allocator_type& alloc) noexcept :
         comp_(std::move(source.comp_)), mem_(std::move(source.mem_), alloc)
     {}
 
@@ -158,11 +156,11 @@ public:
     //---------------------------------------------------------------
     // aASSIGNMENT
     //---------------------------------------------------------------
-    vector_map&
-    operator = (const vector_map&) = default;
+    contiguous_map&
+    operator = (const contiguous_map&) = default;
     //-----------------------------------------------------
-    vector_map&
-    operator = (const vector_map&& source) noexcept {
+    contiguous_map&
+    operator = (const contiguous_map&& source) noexcept {
         comp_ = std::move(source.comp_);
         mem_ = std::move(source.mem_);
         return *this;
@@ -441,7 +439,7 @@ public:
 
     //---------------------------------------------------------------
     void
-    swap(vector_map& other) noexcept {
+    swap(contiguous_map& other) noexcept {
         using std::swap;
 
         swap(comp_, other.comp_);
@@ -546,7 +544,7 @@ private:
 //-------------------------------------------------------------------
 template<class K, class T, class C, class A>
 inline void
-swap(vector_map<K,T,C,A>& a, vector_map<K,T,C,A>& b) noexcept
+swap(contiguous_map<K,T,C,A>& a, contiguous_map<K,T,C,A>& b) noexcept
 {
     a.swap(b);
 }
@@ -567,7 +565,7 @@ swap(vector_map<K,T,C,A>& a, vector_map<K,T,C,A>& b) noexcept
 //-------------------------------------------------------------------
 template<class K, class T, class C, class A>
 inline bool
-operator == (const vector_map<K,T,C,A>& a, const vector_map<K,T,C,A>& b) noexcept
+operator == (const contiguous_map<K,T,C,A>& a, const contiguous_map<K,T,C,A>& b) noexcept
 {
     return std::equal(a.begin(), a.end(), b.begin());
 }
@@ -575,7 +573,7 @@ operator == (const vector_map<K,T,C,A>& a, const vector_map<K,T,C,A>& b) noexcep
 //---------------------------------------------------------
 template<class K, class T, class C, class A>
 inline bool
-operator != (const vector_map<K,T,C,A>& a, const vector_map<K,T,C,A>& b) noexcept
+operator != (const contiguous_map<K,T,C,A>& a, const contiguous_map<K,T,C,A>& b) noexcept
 {
     return !operator==(a,b);
 }
@@ -585,7 +583,7 @@ operator != (const vector_map<K,T,C,A>& a, const vector_map<K,T,C,A>& b) noexcep
 //-------------------------------------------------------------------
 template<class K, class T, class C, class A>
 inline bool
-operator < (const vector_map<K,T,C,A>& a, const vector_map<K,T,C,A>& b) noexcept
+operator < (const contiguous_map<K,T,C,A>& a, const contiguous_map<K,T,C,A>& b) noexcept
 {
     return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end());
 }
@@ -593,7 +591,7 @@ operator < (const vector_map<K,T,C,A>& a, const vector_map<K,T,C,A>& b) noexcept
 //-------------------------------------------------------------------
 template<class K, class T, class C, class A>
 inline bool
-operator <= (const vector_map<K,T,C,A>& a, const vector_map<K,T,C,A>& b) noexcept
+operator <= (const contiguous_map<K,T,C,A>& a, const contiguous_map<K,T,C,A>& b) noexcept
 {
 
     return operator==(a,b) || operator<(a,b);
@@ -602,7 +600,7 @@ operator <= (const vector_map<K,T,C,A>& a, const vector_map<K,T,C,A>& b) noexcep
 //-------------------------------------------------------------------
 template<class K, class T, class C, class A>
 inline bool
-operator > (const vector_map<K,T,C,A>& a, const vector_map<K,T,C,A>& b) noexcept
+operator > (const contiguous_map<K,T,C,A>& a, const contiguous_map<K,T,C,A>& b) noexcept
 {
 
     return !operator<(a,b);
@@ -611,7 +609,7 @@ operator > (const vector_map<K,T,C,A>& a, const vector_map<K,T,C,A>& b) noexcept
 //-------------------------------------------------------------------
 template<class K, class T, class C, class A>
 inline bool
-operator >= (const vector_map<K,T,C,A>& a, const vector_map<K,T,C,A>& b) noexcept
+operator >= (const contiguous_map<K,T,C,A>& a, const contiguous_map<K,T,C,A>& b) noexcept
 {
 
     return operator==(a,b) || operator>(a,b);
@@ -633,7 +631,7 @@ operator >= (const vector_map<K,T,C,A>& a, const vector_map<K,T,C,A>& b) noexcep
 //-------------------------------------------------------------------
 template<class K, class T, class C, class A>
 inline auto
-begin(vector_map<K,T,C,A>& m) noexcept -> decltype(m.begin())
+begin(contiguous_map<K,T,C,A>& m) noexcept -> decltype(m.begin())
 {
     return m.begin();
 }
@@ -641,7 +639,7 @@ begin(vector_map<K,T,C,A>& m) noexcept -> decltype(m.begin())
 //---------------------------------------------------------
 template<class K, class T, class C, class A>
 inline auto
-begin(const vector_map<K,T,C,A>& m) noexcept -> decltype(m.begin())
+begin(const contiguous_map<K,T,C,A>& m) noexcept -> decltype(m.begin())
 {
     return m.begin();
 }
@@ -649,7 +647,7 @@ begin(const vector_map<K,T,C,A>& m) noexcept -> decltype(m.begin())
 //---------------------------------------------------------
 template<class K, class T, class C, class A>
 inline auto
-cbegin(const vector_map<K,T,C,A>& m) noexcept -> decltype(m.cbegin())
+cbegin(const contiguous_map<K,T,C,A>& m) noexcept -> decltype(m.cbegin())
 {
     return m.cbegin();
 }
@@ -659,7 +657,7 @@ cbegin(const vector_map<K,T,C,A>& m) noexcept -> decltype(m.cbegin())
 //-------------------------------------------------------------------
 template<class K, class T, class C, class A>
 inline auto
-end(vector_map<K,T,C,A>& m) noexcept -> decltype(m.end())
+end(contiguous_map<K,T,C,A>& m) noexcept -> decltype(m.end())
 {
     return m.end();
 }
@@ -667,7 +665,7 @@ end(vector_map<K,T,C,A>& m) noexcept -> decltype(m.end())
 //---------------------------------------------------------
 template<class K, class T, class C, class A>
 inline auto
-end(const vector_map<K,T,C,A>& m) noexcept -> decltype(m.end())
+end(const contiguous_map<K,T,C,A>& m) noexcept -> decltype(m.end())
 {
     return m.end();
 }
@@ -675,10 +673,13 @@ end(const vector_map<K,T,C,A>& m) noexcept -> decltype(m.end())
 //---------------------------------------------------------
 template<class K, class T, class C, class A>
 inline auto
-cend(const vector_map<K,T,C,A>& m) noexcept -> decltype(m.cend())
+cend(const contiguous_map<K,T,C,A>& m) noexcept -> decltype(m.cend())
 {
     return m.cend();
 }
+
+
+
 
 
 } //namespace am

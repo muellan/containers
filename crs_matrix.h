@@ -55,7 +55,7 @@ class crs_matrix
      * @brief range definition helper
      */
     template<class Iterator, class SizeT>
-    class range_t
+    class iter_range_t_
     {
     public:
         using iterator = Iterator;
@@ -64,13 +64,13 @@ class crs_matrix
 
         using size_type = SizeT;
 
-        range_t() = default;
+        iter_range_t_() = default;
 
         constexpr explicit
-        range_t(iterator it) noexcept : beg_{it}, end_{it} {}
+        iter_range_t_(iterator it) noexcept : beg_{it}, end_{it} {}
 
         constexpr explicit
-        range_t(iterator beg, iterator end) noexcept : beg_{beg}, end_{end} {}
+        iter_range_t_(iterator beg, iterator end) noexcept : beg_{beg}, end_{end} {}
 
         constexpr iterator begin() const noexcept { return beg_; }
         constexpr iterator end()   const noexcept { return end_; }
@@ -79,10 +79,10 @@ class crs_matrix
         bool empty() const noexcept { return (beg_ == end_); }
         explicit operator bool() const noexcept { return !empty(); }
 
-        bool operator == (const range_t& other) const noexcept {
+        bool operator == (const iter_range_t_& other) const noexcept {
             return (beg_ == other.beg_) && (end_ == other.end_);
         }
-        bool operator != (const range_t& other) const noexcept {
+        bool operator != (const iter_range_t_& other) const noexcept {
             return !(*this == other);
         }
 
@@ -118,9 +118,9 @@ public:
     //-----------------------------------------------------
     using index_iterator  = typename index_vector::const_iterator;
     //-----------------------------------------------------
-    using range        = range_t<iterator,size_type>;
-    using const_range  = range_t<const_iterator,size_type>;
-    using index_range  = range_t<index_iterator,typename index_vector::size_type>;
+    using row_range       = iter_range_t_<iterator,size_type>;
+    using const_row_range = iter_range_t_<const_iterator,size_type>;
+    using index_range     = iter_range_t_<index_iterator,typename index_vector::size_type>;
 
 
     //---------------------------------------------------------------
@@ -734,13 +734,13 @@ public:
     // INDEX QUERIES
     //---------------------------------------------------------------
     size_type
-    col_index(const_iterator it) const noexcept {
+    col_index_of(const_iterator it) const noexcept {
         using std::distance;
         return colidx_[distance(values_.begin(), it)];
     }
     //-----------------------------------------------------
     size_type
-    row_index(const_iterator it) const noexcept {
+    row_index_of(const_iterator it) const noexcept {
         using std::distance;
         const auto c = size_type(distance(values_.begin(), it));
         const auto p = std::upper_bound(rowbeg_.begin(), rowbeg_.end(), c);
@@ -749,7 +749,7 @@ public:
     }
     //---------------------------------------------------------------
     std::pair<size_type,size_type>
-    index(const_iterator it) const noexcept {
+    index_of(const_iterator it) const noexcept {
         using std::distance;
         const auto c = size_type(distance(values_.begin(), it));
         const auto p = std::upper_bound(rowbeg_.begin(), rowbeg_.end(), c);
@@ -869,28 +869,6 @@ public:
         return m.end();
     }
 
-    //-----------------------------------------------------
-    /** @return iterator range to value storage
-     */
-    range
-    values() noexcept {
-        return range{values_.begin(), values_.end()};
-    }
-    //-----------------------------------------------------
-    /** @return iterator range to value storage
-     */
-    const_range
-    values() const noexcept {
-        return const_range{values_.begin(), values_.end()};
-    }
-    //-----------------------------------------------------
-    /** @return iterator range to value storage
-     */
-    const_range
-    cvalues() const noexcept {
-        return const_range{values_.begin(), values_.end()};
-    }
-
 
     //---------------------------------------------------------------
     iterator
@@ -925,19 +903,19 @@ public:
     }
 
     //-----------------------------------------------------
-    range
+    row_range
     row(size_type row) noexcept {
-        return range{begin_row(row), end_row(row)};
+        return row_range{begin_row(row), end_row(row)};
     }
     //-----------------------------------------------------
-    const_range
+    const_row_range
     row(size_type row) const noexcept {
-        return const_range{begin_row(row), end_row(row)};
+        return const_row_range{begin_row(row), end_row(row)};
     }
     //-----------------------------------------------------
-    const_range
+    const_row_range
     crow(size_type row) const noexcept {
-        return const_range{begin_row(row), end_row(row)};
+        return const_row_range{begin_row(row), end_row(row)};
     }
 
 
@@ -966,7 +944,7 @@ public:
     {
         os << m.rows() << ' ' << m.cols() << ' ' << m.size() << '\n';
 
-        for(const auto& x : m.values()) os << x << ' ';
+        for(const auto& x : m) os << x << ' ';
         os << '\n';
         for(const auto& x : m.col_indices()) os << x << ' ';
         os << '\n';

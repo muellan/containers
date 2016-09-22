@@ -1,16 +1,6 @@
-/*****************************************************************************
- *
- * AM utilities
- *
- * released under MIT license
- *
- * 2008-2015 André Müller
- *
- *****************************************************************************/
-
-
 #ifndef AMLIB_CONTAINERS_SPECIAL_VALUES_H_
 #define AMLIB_CONTAINERS_SPECIAL_VALUES_H_
+
 
 
 namespace am {

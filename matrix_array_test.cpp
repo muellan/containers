@@ -4,21 +4,22 @@
  *
  * released under MIT license
  *
- * 2008-2015 André Müller
+ * 2008-2016 André Müller
  *
  *****************************************************************************/
 
 #ifdef AM_USE_TESTS
 
+
+#include "matrix_array.h"
+
 #include <algorithm>
 #include <stdexcept>
 
-#include "matrix_array.h"
-#include "matrix_array_test.h"
 
-
-namespace am {
 namespace test {
+
+using namespace am;
 
 
 //-------------------------------------------------------------------
@@ -40,7 +41,7 @@ void matrix_array_initialization_correctness()
         (m1(3,0) == 41) && (m1(3,1) == 42) && (m1(3,2) == 43) &&
         (m2(0,0) == 1) && (m2(0,1) == 2) && (m2(0,2) == 3) ))
     {
-        throw std::logic_error("am::matrix_array initialization");
+        throw std::logic_error("am::matrix initialization");
     }
 }
 
@@ -68,14 +69,14 @@ void matrix_array_iterators_correctness()
     }
     sum *= 100;
 
-    for(auto x : m.subrange(0,0, m.rows()-1, m.cols()-1)) {
+    for(auto x : m.rectangle(0,0, m.rows()-1, m.cols()-1)) {
         sum += x;
     }
     sum *= 100;
 
     for(std::size_t r = 0; r < m.rows(); ++r) {
         for(std::size_t c = 0; c < m.cols(); ++c) {
-            for(auto x : m.subrange(0,0, r,c)) {
+            for(auto x : m.rectangle(0,0, r,c)) {
                 sum += x;
             }
         }
@@ -83,7 +84,7 @@ void matrix_array_iterators_correctness()
 
     for(int r =  m.rows()-1; r >= 0; --r) {
         for(int c = m.cols()-1; c >= 0; --c) {
-            for(auto x : m.subrange(r,c, m.rows()-1, m.cols()-1)) {
+            for(auto x : m.rectangle(r,c, m.rows()-1, m.cols()-1)) {
                 sum += x;
             }
         }
@@ -98,7 +99,7 @@ void matrix_array_iterators_correctness()
     }
 
     if(sum != 3217308650) {
-        throw std::logic_error("am::matrix_array iteration");
+        throw std::logic_error("am::matrix iteration");
     }
 }
 
@@ -112,8 +113,6 @@ void matrix_array_correctness()
 }
 
 
-
-}  // namespace test
-}  // namespace am
+} //namespace test
 
 #endif

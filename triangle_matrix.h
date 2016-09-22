@@ -274,7 +274,7 @@ class triangle_matrix
      *
      *************************************************************************/
     template<class Pointer>
-    struct section_t_
+    struct range_t_
     {
         friend class triangle_matrix;
 
@@ -284,7 +284,7 @@ class triangle_matrix
             using size_type = std::size_t;
             using traits_t_ = std::iterator_traits<Pointer>;
 
-            friend class section_t_;
+            friend class range_t_;
             friend class triangle_matrix;
 
         public:
@@ -385,14 +385,14 @@ class triangle_matrix
 
         //-----------------------------------------------------
         constexpr
-        section_t_():
+        range_t_():
             fst_(nullptr), lst_(nullptr), fidx_(0), lidx_(0)
         {}
 
     private:
         //-----------------------------------------------------
         explicit constexpr
-        section_t_(Pointer beg, Pointer lst,
+        range_t_(Pointer beg, Pointer lst,
                    size_type fidx, size_type lidx) :
             fst_{beg}, lst_{lst}, fidx_{fidx}, lidx_{lidx}
         {}
@@ -422,7 +422,7 @@ class triangle_matrix
      * @brief range definition helper
      */
     template<class Iterator, class SizeT>
-    class range_t
+    class iter_range_t_
     {
     public:
         using iterator = Iterator;
@@ -431,13 +431,13 @@ class triangle_matrix
 
         using size_type = SizeT;
 
-        range_t() = default;
+        iter_range_t_() = default;
 
         constexpr explicit
-        range_t(iterator it) noexcept : beg_{it}, end_{it} {}
+        iter_range_t_(iterator it) noexcept : beg_{it}, end_{it} {}
 
         constexpr explicit
-        range_t(iterator beg, iterator end) noexcept : beg_{beg}, end_{end} {}
+        iter_range_t_(iterator beg, iterator end) noexcept : beg_{beg}, end_{end} {}
 
         constexpr iterator begin() const noexcept { return beg_; }
         constexpr iterator end()   const noexcept { return end_; }
@@ -446,10 +446,10 @@ class triangle_matrix
         bool empty() const noexcept { return (beg_ == end_); }
         explicit operator bool() const noexcept { return !empty(); }
 
-        bool operator == (const range_t& other) const noexcept {
+        bool operator == (const iter_range_t_& other) const noexcept {
             return (beg_ == other.beg_) && (end_ == other.end_);
         }
-        bool operator != (const range_t& other) const noexcept {
+        bool operator != (const iter_range_t_& other) const noexcept {
             return !(*this == other);
         }
 
@@ -495,23 +495,17 @@ public:
     using index_iterator       = index_iter_t_<value_type>;
     using const_index_iterator = index_iter_t_<const value_type>;
     //-----------------------------------------------------
-    using range        = range_t<iterator,size_type>;
-    using const_range  = range_t<const_iterator,size_type>;
+    using row_range        = iter_range_t_<row_iterator,size_type>;
+    using const_row_range  = iter_range_t_<const_row_iterator,size_type>;
     //-----------------------------------------------------
-    using reverse_range       = range_t<reverse_iterator,size_type>;
-    using const_reverse_range = range_t<const_reverse_iterator,size_type>;
+    using col_range        = iter_range_t_<col_iterator,size_type>;
+    using const_col_range  = iter_range_t_<const_col_iterator,size_type>;
     //-----------------------------------------------------
-    using row_range        = range_t<row_iterator,size_type>;
-    using const_row_range  = range_t<const_row_iterator,size_type>;
+    using index_range       = iter_range_t_<index_iterator,size_type>;
+    using const_index_range = iter_range_t_<const_index_iterator,size_type>;
     //-----------------------------------------------------
-    using col_range        = range_t<col_iterator,size_type>;
-    using const_col_range  = range_t<const_col_iterator,size_type>;
-    //-----------------------------------------------------
-    using index_section       = range_t<index_iterator,size_type>;
-    using const_index_section = range_t<const_index_iterator,size_type>;
-    //-----------------------------------------------------
-    using section       = section_t_<pointer>;
-    using const_section = section_t_<const_pointer>;
+    using range       = range_t_<pointer>;
+    using const_range = range_t_<const_pointer>;
 
 
     //---------------------------------------------------------------
@@ -685,7 +679,7 @@ public:
     //-----------------------------------------------------
     row_range
     operator [] (size_type index) noexcept {
-        return range{begin_row(index), end_row(index)};
+        return row_range{begin_row(index), end_row(index)};
     }
     //-----------------------------------------------------
     const_row_range
@@ -733,7 +727,7 @@ public:
     // INDEX QUERIES
     //---------------------------------------------------------------
     std::pair<size_type,size_type>
-    index(const_iterator it) const noexcept
+    index_of(const_iterator it) const noexcept
     {
         if(it == first_) return {size_type(1), size_type(0)};
 
@@ -823,22 +817,6 @@ public:
         return m.last_;
     }
 
-    //-----------------------------------------------------
-    range
-    values() noexcept {
-        return range{begin(), end()};
-    }
-    //-----------------------------------------------------
-    const_range
-    values() const noexcept {
-        return const_range{begin(), end()};
-    }
-    //-----------------------------------------------------
-    const_range
-    cvalues() const noexcept {
-        return const_range{begin(), end()};
-    }
-
 
     //---------------------------------------------------------------
     // REVERSE SEQUENTIAL ITERATORS
@@ -894,22 +872,6 @@ public:
     friend const_reverse_iterator
     crend(const triangle_matrix& m) noexcept {
         return m.first_;
-    }
-
-    //-----------------------------------------------------
-    reverse_range
-    rvalues() noexcept {
-        return reverse_range{rbegin(), rend()};
-    }
-    //-----------------------------------------------------
-    const_reverse_range
-    rvalues() const noexcept {
-        return const_reverse_range{rbegin(), rend()};
-    }
-    //-----------------------------------------------------
-    const_reverse_range
-    crvalues() const noexcept {
-        return const_reverse_range{rbegin(), rend()};
     }
 
 
@@ -1055,43 +1017,43 @@ public:
     }
 
     //-----------------------------------------------------
-    index_section
-    subrange(size_type i) noexcept {
-        return index_section{begin_at(i), end_at(i)};
+    index_range
+    index_interval(size_type i) noexcept {
+        return index_range{begin_at(i), end_at(i)};
     }
     //-----------------------------------------------------
-    const_index_section
-    subrange(size_type i) const noexcept {
-        return const_index_section{begin_at(i), end_at(i)};
+    const_index_range
+    index_interval(size_type i) const noexcept {
+        return const_index_range{begin_at(i), end_at(i)};
     }
     //-----------------------------------------------------
-    const_index_section
-    csubrange(size_type i) const noexcept {
-        return const_index_section{begin_at(i), end_at(i)};
+    const_index_range
+    cindex_interval(size_type i) const noexcept {
+        return const_index_range{begin_at(i), end_at(i)};
     }
 
 
     //---------------------------------------------------------------
-    section
-    subrange(size_type firstIndex, size_type lastIndex) noexcept
+    range
+    index_interval(size_type firstIndex, size_type lastIndex) noexcept
     {
-        return section{ptr(firstIndex < 1 ? 1 : firstIndex,0),
+        return range{ptr(firstIndex < 1 ? 1 : firstIndex,0),
                        ptr(rows_+1,firstIndex),
                        firstIndex, lastIndex};
     }
     //-----------------------------------------------------
-    const_section
-    subrange(size_type firstIndex, size_type lastIndex) const noexcept
+    const_range
+    index_interval(size_type firstIndex, size_type lastIndex) const noexcept
     {
-        return const_section{ptr(firstIndex < 1 ? 1 : firstIndex,0),
+        return const_range{ptr(firstIndex < 1 ? 1 : firstIndex,0),
                              ptr(rows_+1,firstIndex),
                              firstIndex, lastIndex};
     }
     //-----------------------------------------------------
-    const_section
-    csubrange(size_type firstIndex, size_type lastIndex) const noexcept
+    const_range
+    cindex_interval(size_type firstIndex, size_type lastIndex) const noexcept
     {
-        return const_section{ptr(firstIndex < 1 ? 1 : firstIndex,0),
+        return const_range{ptr(firstIndex < 1 ? 1 : firstIndex,0),
                              ptr(rows_+1,firstIndex),
                              firstIndex, lastIndex};
     }

@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * 2008-2015 André Müller
+ * 2008-2016 André Müller
  *
  *****************************************************************************/
 
@@ -153,7 +153,7 @@ class matrix_array
 
     //---------------------------------------------------------------
     template<class T>
-    struct section_t_
+    struct rectangular_range_t_
     {
         //-----------------------------------------------------
         using value_type = typename std::remove_const<T>::type;
@@ -234,7 +234,7 @@ class matrix_array
 
         //---------------------------------------------------------------
         explicit constexpr
-        section_t_(
+        rectangular_range_t_(
             pointer pbeg = nullptr, pointer pend = nullptr,
             difference_type length = 0, difference_type stride = 0) noexcept
         :
@@ -265,7 +265,7 @@ class matrix_array
      * @brief range definition helper
      */
     template<class Iterator, class SizeT>
-    class range_t
+    class iter_range_t_
     {
     public:
         using iterator = Iterator;
@@ -274,13 +274,13 @@ class matrix_array
 
         using size_type = SizeT;
 
-        range_t() = default;
+        iter_range_t_() = default;
 
         constexpr explicit
-        range_t(iterator it) noexcept : beg_{it}, end_{it} {}
+        iter_range_t_(iterator it) noexcept : beg_{it}, end_{it} {}
 
         constexpr explicit
-        range_t(iterator beg, iterator end) noexcept : beg_{beg}, end_{end} {}
+        iter_range_t_(iterator beg, iterator end) noexcept : beg_{beg}, end_{end} {}
 
         constexpr iterator begin() const noexcept { return beg_; }
         constexpr iterator end()   const noexcept { return end_; }
@@ -289,10 +289,10 @@ class matrix_array
         bool empty() const noexcept { return (beg_ == end_); }
         explicit operator bool() const noexcept { return !empty(); }
 
-        bool operator == (const range_t& other) const noexcept {
+        bool operator == (const iter_range_t_& other) const noexcept {
             return (beg_ == other.beg_) && (end_ == other.end_);
         }
-        bool operator != (const range_t& other) const noexcept {
+        bool operator != (const iter_range_t_& other) const noexcept {
             return !(*this == other);
         }
 
@@ -334,26 +334,20 @@ public:
     using diag_iterator        = stride_iter_t_<value_type,ncols+1>;
     using const_diag_iterator  = stride_iter_t_<const value_type,ncols+1>;
     //-----------------------------------------------------
-    using section              = section_t_<value_type>;
-    using const_section        = section_t_<const value_type>;
+    using rectangular_range       = rectangular_range_t_<value_type>;
+    using const_rectangular_range = rectangular_range_t_<const value_type>;
     //-----------------------------------------------------
     using size_type       = std::size_t;
     using difference_type = std::ptrdiff_t;
     //-----------------------------------------------------
-    using range        = range_t<iterator,size_type>;
-    using const_range  = range_t<const_iterator,size_type>;
+    using row_range        = iter_range_t_<row_iterator,size_type>;
+    using const_row_range  = iter_range_t_<const_row_iterator,size_type>;
     //-----------------------------------------------------
-    using reverse_range       = range_t<reverse_iterator,size_type>;
-    using const_reverse_range = range_t<const_reverse_iterator,size_type>;
+    using col_range        = iter_range_t_<col_iterator,size_type>;
+    using const_col_range  = iter_range_t_<const_col_iterator,size_type>;
     //-----------------------------------------------------
-    using row_range        = range_t<row_iterator,size_type>;
-    using const_row_range  = range_t<const_row_iterator,size_type>;
-    //-----------------------------------------------------
-    using col_range        = range_t<col_iterator,size_type>;
-    using const_col_range  = range_t<const_col_iterator,size_type>;
-    //-----------------------------------------------------
-    using diag_range        = range_t<diag_iterator,size_type>;
-    using const_diag_range  = range_t<const_diag_iterator,size_type>;
+    using diag_range        = iter_range_t_<diag_iterator,size_type>;
+    using const_diag_range  = iter_range_t_<const_diag_iterator,size_type>;
 
 
     //---------------------------------------------------------------
@@ -462,7 +456,7 @@ public:
     //-----------------------------------------------------
     row_range
     operator [] (size_type index) noexcept {
-        return range{begin_row(index), end_row(index)};
+        return row_range{begin_row(index), end_row(index)};
     }
     //-----------------------------------------------------
     const_row_range
@@ -475,19 +469,19 @@ public:
     // INDEX QUERIES
     //---------------------------------------------------------------
     size_type
-    row_index(const_iterator it) const noexcept {
+    row_index_of(const_iterator it) const noexcept {
         using std::distance;
         return static_cast<size_type>(distance(begin(), it)) / ncols;
     }
     //-----------------------------------------------------
     size_type
-    col_index(const_iterator it) const noexcept {
+    col_index_of(const_iterator it) const noexcept {
         using std::distance;
         return static_cast<size_type>(distance(begin(), it)) % ncols;
     }
     //---------------------------------------------------------------
     std::pair<size_type,size_type>
-    index(const_iterator i) const noexcept {
+    index_of(const_iterator i) const noexcept {
         using std::distance;
 
         const auto n = static_cast<size_type>(distance(begin(), i));
@@ -597,22 +591,6 @@ public:
         return i.cend();
     }
 
-    //-----------------------------------------------------
-    range
-    values() noexcept {
-        return range{begin(), end()};
-    }
-    //-----------------------------------------------------
-    const_range
-    values() const noexcept {
-        return const_range{begin(), end()};
-    }
-    //-----------------------------------------------------
-    const_range
-    cvalues() const noexcept {
-        return const_range{begin(), end()};
-    }
-
 
     //---------------------------------------------------------------
     // REVERSE SEQUENTIAL ITERATORS
@@ -668,22 +646,6 @@ public:
     inline friend const_reverse_iterator
     crend(const this_t_& i) noexcept {
         return i.crend();
-    }
-
-    //-----------------------------------------------------
-    reverse_range
-    rvalues() noexcept {
-        return reverse_range{rbegin(), rend()};
-    }
-    //-----------------------------------------------------
-    const_reverse_range
-    rvalues() const noexcept {
-        return const_reverse_range{rbegin(), rend()};
-    }
-    //-----------------------------------------------------
-    const_reverse_range
-    crvalues() const noexcept {
-        return const_reverse_range{rbegin(), rend()};
     }
 
 
@@ -852,42 +814,42 @@ public:
     //---------------------------------------------------------------
     // SECTIONS
     //---------------------------------------------------------------
-    section
-    subrange(
+    rectangular_range
+    rectangle(
         size_type firstRow, size_type firstCol,
         size_type lastRow,  size_type lastCol) noexcept
     {
         const auto stride = difference_type(ncols -  lastCol - 1 + firstCol);
 
-        return section{
+        return rectangular_range{
             std::addressof(m_[firstRow][firstCol]),
             std::addressof(m_[lastRow][lastCol]) + stride + 1,
             difference_type(lastCol - firstCol + 1),
             stride };
     }
     //-----------------------------------------------------
-    const_section
-    subrange(
+    const_rectangular_range
+    rectangle(
         size_type firstRow, size_type firstCol,
         size_type lastRow,  size_type lastCol) const noexcept
     {
         const auto stride = difference_type(ncols -  lastCol - 1 + firstCol);
 
-        return const_section{
+        return const_rectangular_range{
             std::addressof(m_[firstRow][firstCol]),
             std::addressof(m_[lastRow][lastCol]) + stride + 1,
             difference_type(lastCol - firstCol + 1),
             stride };
     }
     //-----------------------------------------------------
-    const_section
-    csubrange(
+    const_rectangular_range
+    crectangle(
         size_type firstRow, size_type firstCol,
         size_type lastRow,  size_type lastCol) const noexcept
     {
         const auto stride = difference_type(ncols -  lastCol - 1 + firstCol);
 
-        return const_section{
+        return const_rectangular_range{
             std::addressof(m_[firstRow][firstCol]),
             std::addressof(m_[lastRow][lastCol]) + stride + 1,
             difference_type(lastCol - firstCol + 1),

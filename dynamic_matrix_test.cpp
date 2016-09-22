@@ -1,13 +1,3 @@
-/*****************************************************************************
- *
- * AM utilities
- *
- * released under MIT license
- *
- * 2008-2015 André Müller
- *
- *****************************************************************************/
-
 #ifdef AM_USE_TESTS
 
 #include "dynamic_matrix.h"
@@ -16,11 +6,9 @@
 #include <stdexcept>
 #include <iostream>
 
-using namespace am;
-
-
-namespace am {
 namespace test {
+
+using namespace am;
 
 
 namespace dynamic_matrix_test {
@@ -82,6 +70,7 @@ void dynamic_matrix_initialization_correctness()
     #else
         bool caught = true;
     #endif
+    
 
     if(!(
         caught &&
@@ -280,14 +269,14 @@ void dynamic_matrix_iterators_correctness()
     }
     sum *= 100;
 
-    for(auto x : m.subrange(0,0, m.rows()-1, m.cols()-1)) {
+    for(auto x : m.rectangle(0,0, m.rows()-1, m.cols()-1)) {
         sum += x;
     }
     sum *= 100;
 
     for(std::size_t r = 0; r < m.rows(); ++r) {
         for(std::size_t c = 0; c < m.cols(); ++c) {
-            for(auto x : m.subrange(0,0, r,c)) {
+            for(auto x : m.rectangle(0,0, r,c)) {
                 sum += x;
             }
         }
@@ -295,7 +284,7 @@ void dynamic_matrix_iterators_correctness()
 
     for(int r =  m.rows()-1; r >= 0; --r) {
         for(int c = m.cols()-1; c >= 0; --c) {
-            for(auto x : m.subrange(r,c, m.rows()-1, m.cols()-1)) {
+            for(auto x : m.rectangle(r,c, m.rows()-1, m.cols()-1)) {
                 sum += x;
             }
         }
@@ -319,8 +308,6 @@ void dynamic_matrix_correctness()
 }
 
 
-} // namespace test
-} // namespace am
+} //namespace test
 
 #endif
-

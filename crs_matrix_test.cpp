@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * 2008-2015 André Müller
+ * 2008-2016 André Müller
  *
  *****************************************************************************/
 
@@ -19,9 +19,9 @@
 #include <iostream>
 #include <random>
 
-
-namespace am {
 namespace test {
+
+using namespace am;
 
 
 namespace crs_matrix_test {
@@ -33,15 +33,15 @@ class fixture_type
 public:
     using value_type   = T;
     using matrix_type  = crs_matrix<value_type,NA>;
-    using index_type   = typename matrix_type::size_type;
+    using index   = typename matrix_type::size_type;
 
     struct triple_type {
-        triple_type(index_type r, index_type c, value_type v):
+        triple_type(index r, index c, value_type v):
             row(r), col(c), val(std::move(v))
         {}
 
-        index_type row;
-        index_type col;
+        index row;
+        index col;
         value_type val;
     };
 
@@ -68,8 +68,8 @@ public:
         vals_(std::move(v)), set_{}
     { make_set(); }
 
-    const value_vector& original_values() const noexcept { return vals_; }
-    const value_set&    expected_values() const noexcept { return set_; }
+    const value_vector& original_items() const noexcept { return vals_; }
+    const value_set&    expected_items() const noexcept { return set_; }
 
 private:
     void make_set() {
@@ -88,14 +88,14 @@ template<class T, class NA>
 void check_raw_values_column_indices(const fixture_type<T,NA>& fix,
                                      const crs_matrix<T,NA>& m)
 {
-    if(fix.expected_values().empty()) return;
+    if(fix.expected_items().empty()) return;
 
-    if(m.size() != fix.expected_values().size()) {
+    if(m.size() != fix.expected_items().size()) {
         throw std::logic_error{"crs_matrix, value storage: wrong size"};
     }
 
     int i = 0;
-    for(const auto& x : fix.expected_values()) {
+    for(const auto& x : fix.expected_items()) {
         if(m[i] != x.val)
             throw std::logic_error{"crs_matrix, value storage"};
 
@@ -112,12 +112,12 @@ template<class T, class NA>
 void check_indexed_access(const fixture_type<T,NA>& fix,
                           const crs_matrix<T,NA>& m)
 {
-    using idx_t    = typename fixture_type<T,NA>::index_type;
+    using idx_t    = typename fixture_type<T,NA>::index;
 
-    if(fix.expected_values().empty()) return;
+    if(fix.expected_items().empty()) return;
 
     //check indexed access of stored elements
-    for(const auto& x : fix.expected_values()) {
+    for(const auto& x : fix.expected_items()) {
         if(m(x.row, x.col) != x.val)
             throw std::logic_error{"crs_matrix, indexed access of stored values"};
     }
@@ -127,7 +127,7 @@ void check_indexed_access(const fixture_type<T,NA>& fix,
         for(idx_t c = 0, cols = m.cols(); c < cols; ++c) {
             bool stored = false;
 
-            for(const auto& x : fix.expected_values()) {
+            for(const auto& x : fix.expected_items()) {
                 if(x.row == r && x.col == c) {
                     stored = true;
                     break;
@@ -152,32 +152,32 @@ void check_find_and_index_queries(const fixture_type<T,NA>& fix,
 {
     using idx_t = typename crs_matrix<T,NA>::size_type;
 
-    if(fix.expected_values().empty()) return;
+    if(fix.expected_items().empty()) return;
 
     //check indexed access of stored elements
-    for(const auto& x : fix.expected_values()) {
+    for(const auto& x : fix.expected_items()) {
         auto it = m.find(x.row, x.col);
         if(it == m.end() || *it != x.val)
             throw std::logic_error{"crs_matrix, find(row,col) of stored values"};
 
-        if(m.col_index(it) != x.col) {
-            std::cout << x.row << ", " << x.col << " != " << m.col_index(it) << std::endl;
-            throw std::logic_error{"crs_matrix, col_index(iterator)"};
+        if(m.col_index_of(it) != x.col) {
+            std::cout << x.row << ", " << x.col << " != " << m.col_index_of(it) << std::endl;
+            throw std::logic_error{"crs_matrix, col_index_of(iterator)"};
         }
 
-        if(m.row_index(it) != x.row)
-            throw std::logic_error{"crs_matrix, row_index(iterator)"};
+        if(m.row_index_of(it) != x.row)
+            throw std::logic_error{"crs_matrix, row_index_of(iterator)"};
 
-        auto idx = m.index(it);
+        auto idx = m.index_of(it);
         if(idx.first != x.row || idx.second != x.col)
-            throw std::logic_error{"crs_matrix, index(iterator)"};
+            throw std::logic_error{"crs_matrix, index_of(iterator)"};
     }
 
     //check indexed access of non-stored elements
     for(idx_t r = 0; r < m.rows(); ++r) {
         for(idx_t c = 0, cols = m.cols(); c < cols; ++c) {
             bool stored = false;
-            for(const auto& x : fix.expected_values()) {
+            for(const auto& x : fix.expected_items()) {
                 if(x.row == r && x.col == c) {
                     stored = true;
                     break;
@@ -198,13 +198,13 @@ void run_tests(const fixture_type<T,NA>& fix)
     using mat_t = typename fixture_type<T,NA>::matrix_type;
     auto m = mat_t{};
 
-    for(const auto& x : fix.original_values()) {
+    for(const auto& x : fix.original_items()) {
         m.insert(x.row, x.col, x.val);
     }
 
 //    std::cout << "--------------------------\n" << m << std::endl;
 
-    if(fix.expected_values().empty() != m.empty())
+    if(fix.expected_items().empty() != m.empty())
         throw std::logic_error{"crs_matrix, emptiness"};
 
     check_raw_values_column_indices(fix, m);
@@ -226,7 +226,7 @@ void crs_matrix_correctness()
 
     using val_t = int;
     using fix_t = fixture_type<val_t>;
-    using idx_t = fix_t::index_type;
+    using idx_t = fix_t::index;
     using t     = fix_t::triple_type;
 
 
@@ -342,9 +342,7 @@ void crs_matrix_correctness()
 //        throw std::logic_error{"crs_matrix, pure diagonal, indexed access"};
 }
 
-} // namespace test
-} // namespace an
+
+} //namespace test
 
 #endif
-
-
