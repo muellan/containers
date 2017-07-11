@@ -33,6 +33,14 @@ Header-only library of generic containers for C++ 11/14.
   multiset-like class that stores only one representative (of an equivalence class) per key instead of multiple equivalent values per key
 
 
+#### [uniform\_histogram](#uniform-histogram)
+   vector of counters; each counter can be accessed via a uniform bin mapping
+
+
+#### [non\_uniform\_histogram](#non-uniform-histogram)
+   vector of counters; each counter can be accessed via a non-uniform bin mapping
+
+
 
 
 ## Interfaces
@@ -419,7 +427,6 @@ public:
 A compressed row storage (crs) sparse matrix.
 
 ```cpp
-
 ```
 
 
@@ -429,7 +436,6 @@ A key-\>value map that stores (key,value) pairs in one contiguous chunk of memor
 The operator[] differs from std::map: it allows indexed random access to (key,value) pairs
 
 ```cpp
-
 ```
 
 
@@ -438,7 +444,20 @@ The operator[] differs from std::map: it allows indexed random access to (key,va
 A multiset-like class that stores only one representative (of an equivalence class) per key instead of multiple equivalent values per key.
 
 ```cpp
+```
 
+
+
+### uniform histogram
+
+```cpp
+```
+
+
+
+### non-uniform histogram
+
+```cpp
 ```
 
 

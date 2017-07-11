@@ -1,3 +1,13 @@
+/*****************************************************************************
+ *
+ * AM utilities
+ *
+ * released under MIT license
+ *
+ * 2008-2017 André Müller
+ *
+ *****************************************************************************/
+
 #ifndef AMLIB_CONTAINERS_TRIANGLE_MATRIX_H_
 #define AMLIB_CONTAINERS_TRIANGLE_MATRIX_H_
 

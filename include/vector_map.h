@@ -8,8 +8,8 @@
  *
  *****************************************************************************/
 
-#ifndef AMLIB_CONTIGUOUS_MAP_H_
-#define AMLIB_CONTIGUOUS_MAP_H_
+#ifndef AMLIB_VECTOR_MAP_H_
+#define AMLIB_VECTOR_MAP_H_
 
 
 #include <algorithm>

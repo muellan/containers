@@ -1,3 +1,13 @@
+/*****************************************************************************
+ *
+ * AM utilities
+ *
+ * released under MIT license
+ *
+ * 2012-2017 André Müller
+ *
+ *****************************************************************************/
+
 #ifndef AMLIB_CONTAINERS_COMPRESSED_MULTISET_H_
 #define AMLIB_CONTAINERS_COMPRESSED_MULTISET_H_
 

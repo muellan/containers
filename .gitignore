@@ -3,26 +3,20 @@
 /Debug
 /Profile
 /Coverage
-/build_release
-/build_release_gui
-/build_debug
-/build_profile
-/build_coverage
+/build_*
+/dev
 .project
 .cproject
 .settings
 
-# Compiled Object files
 *.slo
 *.lo
 *.o
-
-# Compiled Dynamic libraries
 *.so
 *.dylib
-
-# Compiled Static libraries
 *.lai
 *.la
 *.a
 
+main.cpp
+design.txt
