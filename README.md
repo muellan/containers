@@ -33,15 +33,6 @@ Header-only library of generic containers for C++ 11/14.
   multiset-like class that stores only one representative (of an equivalence class) per key instead of multiple equivalent values per key
 
 
-#### [uniform\_histogram](#uniform-histogram)
-   vector of counters; each counter can be accessed via a uniform bin mapping
-
-
-#### [non\_uniform\_histogram](#non-uniform-histogram)
-   vector of counters; each counter can be accessed via a non-uniform bin mapping
-
-
-
 
 ## Interfaces
 
@@ -445,21 +436,6 @@ A multiset-like class that stores only one representative (of an equivalence cla
 
 ```cpp
 ```
-
-
-
-### uniform histogram
-
-```cpp
-```
-
-
-
-### non-uniform histogram
-
-```cpp
-```
-
 
 
 
