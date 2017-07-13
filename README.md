@@ -1,7 +1,7 @@
 AM containers
 ==========
 
-Header-only library of generic containers for C++ 11/14.
+Header-only C++11/14 library of generic containers.
 
 - [Interfaces](#interfaces)
 - [Requirements](#requirements)
