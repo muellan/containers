@@ -9,7 +9,7 @@
  *****************************************************************************/
 
 
-#include "../include/triangle_matrix.h"
+#include "triangle_matrix.h"
 
 #include <vector>
 #include <set>

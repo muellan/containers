@@ -24,11 +24,6 @@ Header-only C++11/14 library of generic containers.
 #### [crs\_matrix](#crs-sparse-matrix)
   compressed row storage (crs) sparse matrix
 
-#### [vector\_map](#vector-like-map)
-  key-\>value map that
-  stores (key,value) pairs in one contiguous chunk of memory  
-  operator[] differs from std::map: it allows indexed random access to key,value pairs
-
 #### [compressed\_multiset](#compressed-multiset)
   multiset-like class that stores only one representative (of an equivalence class) per key instead of multiple equivalent values per key
 
@@ -416,15 +411,6 @@ public:
 
 ### crs sparse matrix
 A compressed row storage (crs) sparse matrix.
-
-```cpp
-```
-
-
-
-### vector-like map
-A key-\>value map that stores (key,value) pairs in one contiguous chunk of memory.
-The operator[] differs from std::map: it allows indexed random access to (key,value) pairs
 
 ```cpp
 ```

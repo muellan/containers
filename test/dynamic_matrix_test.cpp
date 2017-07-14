@@ -8,7 +8,7 @@
  *
  *****************************************************************************/
 
-#include "../include/dynamic_matrix.h"
+#include "dynamic_matrix.h"
 
 #include <algorithm>
 #include <stdexcept>

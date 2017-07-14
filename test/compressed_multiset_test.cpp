@@ -8,7 +8,7 @@
  *
  *****************************************************************************/
 
-#include "../include/compressed_multiset.h"
+#include "compressed_multiset.h"
 
 #include <stdexcept>
 #include <iostream>

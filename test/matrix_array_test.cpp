@@ -9,7 +9,7 @@
  *****************************************************************************/
 
 
-#include "../include/matrix_array.h"
+#include "matrix_array.h"
 
 #include <algorithm>
 #include <numeric>

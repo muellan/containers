@@ -8,7 +8,7 @@
  *
  *****************************************************************************/
 
-#include "../include/crs_matrix.h"
+#include "crs_matrix.h"
 
 #include <vector>
 #include <set>
