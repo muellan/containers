@@ -121,7 +121,8 @@ public:
         insert(il);
     }
     //-----------------------------------------------------
-    template <class InputIterator>
+    template<class InputIterator, class = typename
+        std::enable_if<!std::is_same<value_type,InputIterator>::value>::type>
     vector_map(
         InputIterator first, InputIterator last,
         const key_compare& comp = key_compare(),
