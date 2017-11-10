@@ -1,4 +1,4 @@
-/*****************************************************************************
+/******************************************************************************
  *
  * AM utilities
  *
@@ -23,30 +23,19 @@
 namespace am {
 
 
-/*****************************************************************************
+/*************************************************************************//***
  *
  * @brief wrapper for a compile time value
  *
  *****************************************************************************/
 template<class T, int val>
-struct static_value {
+struct crs_matrix_static_value {
     static constexpr T value() { return T(val); }
 };
 
 
-/*****************************************************************************
- *
- * @brief
- *
- *****************************************************************************/
-template<class T>
-struct default_value {
-    static T value() { return T(); }
-};
 
-
-
-/*****************************************************************************
+/*************************************************************************//***
  *
  * @brief compressed row storage sparse matrix
  *
@@ -63,7 +52,7 @@ struct default_value {
  *****************************************************************************/
 template<
     class ValueType,
-    class NAvalue = static_value<ValueType,0>,
+    class NAvalue = crs_matrix_static_value<ValueType,0>,
     class Allocator = std::allocator<ValueType>
 >
 class crs_matrix

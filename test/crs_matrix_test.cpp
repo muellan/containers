@@ -21,7 +21,7 @@ using namespace am;
 
 
 //-------------------------------------------------------------------
-template<class T, class NA = static_value<T,-1>>
+template<class T, class NA = crs_matrix_static_value<T,-1>>
 class fixture
 {
 public:
