@@ -23,7 +23,8 @@ using namespace am;
 
 //-------------------------------------------------------------------
 struct value_t {
-    value_t(int y = -1) : x_ {y} { ++n_; }
+    value_t(int y = -1) : x_{y} { ++n_; }
+    value_t(std::size_t y) : x_{static_cast<int>(y)} { ++ n_; };
     value_t(const value_t& a) : x_ {a.x_} { ++n_; }
     value_t(value_t&& a) : x_ {a.x_} { ++n_; }
 
@@ -447,7 +448,7 @@ void triangle_matrix_erasure_correctness()
 
             m.erase_at(i, j);
 
-            const auto q = size_type(j - i + 1);
+            const size_type q = j - i + 1;
 
             //verify result
             const auto rows = m.rows();

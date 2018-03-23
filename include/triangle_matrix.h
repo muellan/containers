@@ -284,8 +284,9 @@ class triangle_matrix
      *
      *************************************************************************/
     template<class Pointer>
-    struct range_t_
+    class range_t_
     {
+    public:
         friend class triangle_matrix;
 
         //-----------------------------------------------------

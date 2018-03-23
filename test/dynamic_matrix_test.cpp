@@ -265,23 +265,23 @@ void test_iterators()
     }
     sum *= 100;
 
-    for(auto x : m.rectangle(0,0, m.rows()-1, m.cols()-1)) {
-        sum += x;
+    for(auto y : m.rectangle(0,0, m.rows()-1, m.cols()-1)) {
+        sum += y;
     }
     sum *= 100;
 
     for(std::size_t r = 0; r < m.rows(); ++r) {
         for(std::size_t c = 0; c < m.cols(); ++c) {
-            for(auto x : m.rectangle(0,0, r,c)) {
-                sum += x;
+            for(auto y : m.rectangle(0,0, r,c)) {
+                sum += y;
             }
         }
     }
 
-    for(int r =  m.rows()-1; r >= 0; --r) {
-        for(int c = m.cols()-1; c >= 0; --c) {
-            for(auto x : m.rectangle(r,c, m.rows()-1, m.cols()-1)) {
-                sum += x;
+    for(int r =  int(m.rows())-1; r >= 0; --r) {
+        for(int c = int(m.cols())-1; c >= 0; --c) {
+            for(auto y : m.rectangle(r,c, m.rows()-1, m.cols()-1)) {
+                sum += y;
             }
         }
     }

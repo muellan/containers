@@ -84,18 +84,18 @@ class dynamic_matrix
     public:
 
         //---------------------------------------------------------------
-        reference
+        decltype(auto)
         operator *() const noexcept {
             return (*p_);
         }
         //-----------------------------------------------------
-        pointer
+        decltype(auto)
         operator ->() const noexcept {
             return (p_);
         }
 
         //-----------------------------------------------------
-        value_type&
+        decltype(auto)
         operator [] (difference_type i) const noexcept {
             return *(p_ + (stride_ * i));
         }
@@ -208,12 +208,12 @@ class dynamic_matrix
 
 
             //-----------------------------------------------------
-            reference
+            decltype(auto)
             operator *() const noexcept {
                 return (*p_);
             }
             //-----------------------------------------------------
-            pointer
+            decltype(auto)
             operator ->() const noexcept {
                 return (p_);
             }
@@ -309,6 +309,10 @@ class dynamic_matrix
 
         constexpr iterator begin() const noexcept { return beg_; }
         constexpr iterator end()   const noexcept { return end_; }
+
+        //---------------------------------------------------------------
+        decltype(auto) operator [] (size_type i) noexcept { return beg_[i]; }
+        decltype(auto) operator [] (size_type i) const noexcept { return beg_[i]; }
 
         //---------------------------------------------------------------
         bool empty() const noexcept { return (beg_ == end_); }
@@ -546,8 +550,6 @@ public:
         }
         else {
             if(rows_ < 1) rows_ = 1;
-
-            size_type oldCols = cols_;
             mem_insert_cols(cols_, numCols - cols_);
         }
     }
@@ -566,8 +568,9 @@ public:
             auto oldCols = cols_;
             mem_insert_cols(cols_, numCols - cols_);
 
-            for(size_type i = oldCols; i < numCols; ++i)
+            for(size_type i = oldCols; i < numCols; ++i) {
                 fill_col(i, value);
+            }
         }
     }
 
@@ -1232,7 +1235,7 @@ private:
     mem_reserve_least(size_type newSize, Args&&... args)
     {
         if(newSize > capacity()) {
-            auto temp = dynamic_matrix(*this, 1.5 * newSize);
+            auto temp = dynamic_matrix(*this, size_type(1.5 * double(newSize)));
             swap(*this, temp);
         }
         //construct new elements if neccessary

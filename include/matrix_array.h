@@ -55,16 +55,18 @@ class matrix_array
 
 
         //---------------------------------------------------------------
-        reference operator *() const noexcept {
+        decltype(auto)
+        operator *() const noexcept {
             return (*p_);
         }
         //-----------------------------------------------------
-        pointer operator ->() const noexcept {
+        decltype(auto)
+        operator ->() const noexcept {
             return (p_);
         }
 
         //-----------------------------------------------------
-        value_type&
+        decltype(auto)
         operator [] (difference_type i) const noexcept {
             return *(p_ + (stride * i));
         }
@@ -176,12 +178,12 @@ class matrix_array
 
 
             //-----------------------------------------------------
-            reference
+            decltype(auto)
             operator *() const noexcept {
                 return (*p_);
             }
             //-----------------------------------------------------
-            pointer
+            decltype(auto)
             operator ->() const noexcept {
                 return (p_);
             }
@@ -278,7 +280,9 @@ class matrix_array
         constexpr iterator begin() const noexcept { return beg_; }
         constexpr iterator end()   const noexcept { return end_; }
 
-        //---------------------------------------------------------------
+        decltype(auto)
+        operator [] (size_type n) const noexcept { return beg_[n]; }
+
         bool empty() const noexcept { return (beg_ == end_); }
         explicit operator bool() const noexcept { return !empty(); }
 
@@ -573,15 +577,15 @@ public:
     //-----------------------------------------------------
     iterator
     end() noexcept {
-        return iterator{std::addressof(m_[nrows-1][ncols])};
+        return iterator{std::addressof(m_[nrows-1][ncols-1])+1};
     }
     const_iterator
     end() const noexcept    {
-        return const_iterator{std::addressof(m_[nrows-1][ncols])};
+        return const_iterator{std::addressof(m_[nrows-1][ncols-1]+1)};
     }
     const_iterator
     cend() const noexcept {
-        return const_iterator{std::addressof(m_[nrows-1][ncols])};
+        return const_iterator{std::addressof(m_[nrows-1][ncols-1]+1)};
     }
     //-----------------------------------------------------
     inline friend iterator
@@ -676,17 +680,17 @@ public:
     //-----------------------------------------------------
     row_iterator
     end_row(size_type index) noexcept {
-        return row_iterator{std::addressof(m_[index][ncols])};
+        return row_iterator{std::addressof(m_[index][ncols-1])+1};
     }
     //-----------------------------------------------------
     const_row_iterator
     end_row(size_type index) const noexcept {
-        return const_row_iterator{std::addressof(m_[index][ncols])};
+        return const_row_iterator{std::addressof(m_[index][ncols-1])+1};
     }
     //-----------------------------------------------------
     const_row_iterator
     cend_row(size_type index) const noexcept {
-        return const_row_iterator{std::addressof(m_[index][ncols])};
+        return const_row_iterator{std::addressof(m_[index][ncols-1])+1};
     }
 
     //-----------------------------------------------------
@@ -782,19 +786,19 @@ public:
     template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
     diag_iterator
     end_diag() noexcept {
-        return diag_iterator{std::addressof(m_[nrows][ncols])};
+        return diag_iterator{std::addressof(m_[nrows][ncols-1])+1};
     }
     //-----------------------------------------------------
     template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
     const_diag_iterator
     end_diag() const noexcept {
-        return const_diag_iterator{std::addressof(m_[nrows][ncols])};
+        return const_diag_iterator{std::addressof(m_[nrows][ncols-1])+1};
     }
     //-----------------------------------------------------
     template<class T = int, class = typename std::enable_if<ncols==nrows,T>::type>
     const_diag_iterator
     end_cdiag() const noexcept {
-        return const_diag_iterator{std::addressof(m_[nrows][ncols])};
+        return const_diag_iterator{std::addressof(m_[nrows][ncols-1])+1};
     }
 
     //-----------------------------------------------------

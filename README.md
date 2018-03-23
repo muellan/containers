@@ -91,5 +91,5 @@ This is especially useful if the matrix cells represent values of a pairwise sym
 
 ## Requirements
   - requires C++14 conforming compiler
-  - tested with g++ 6.1.0
+  - tested with g++ 6.1.0, 7.2 and clang++ 5.0.1
 
